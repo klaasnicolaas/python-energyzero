@@ -51,4 +51,4 @@ jobs:
       - name: 🏗 Install dependencies
         run: poetry install --no-interaction
       - name: 🚀 Run mypy
-        run: poetry run mypy examples energyzero tests
+        run: poetry run mypy energyzero tests
