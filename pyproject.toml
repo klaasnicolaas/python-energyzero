@@ -1,0 +1,166 @@
+[tool.poetry]
+name = "energyzero"
+version = "0.0.0"
+description = "Asynchronous Python client providing energy/gas prices from EnergyZero"
+authors = ["Klaas Schoute <hello@student-techlife.com>"]
+maintainers = ["Klaas Schoute <hello@student-techlife.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/klaasnicolaas/python-energyzero"
+repository = "https://github.com/klaasnicolaas/python-energyzero"
+documentation = "https://github.com/klaasnicolaas/python-energyzero"
+keywords = ["energy", "energyzero", "gas", "prices", "api", "async", "client"]
+classifiers = [
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+packages = [
+    { include = "energyzero" }
+]
+
+[tool.poetry.dependencies]
+aiohttp = ">=3.0.0"
+python = "^3.9"
+yarl = ">=1.6.0"
+pytz = "^2022.6"
+
+[tool.poetry.group.dev.dependencies]
+aresponses = "^2.1.6"
+bandit = "^1.7.4"
+black = "^22.10"
+blacken-docs = "^1.12.1"
+codespell = "^2.2.2"
+coverage = {version = "^6.5", extras = ["toml"]}
+darglint = "^1.8.1"
+flake8 = "^4.0.1"
+flake8-bandit = "^3.0.0"
+flake8-bugbear = "^22.10.27"
+flake8-builtins = "^2.0.1"
+flake8-comprehensions = "^3.10.1"
+flake8-docstrings = "^1.5.0"
+flake8-eradicate = "^1.4.0"
+flake8-markdown = "^0.3.0"
+flake8-simplify = "^0.19.3"
+isort = "^5.10.1"
+mypy = "^0.991"
+pre-commit = "^2.20.0"
+pre-commit-hooks = "^4.4.0"
+pylint = "^2.15.6"
+pytest = "^7.2.0"
+pytest-asyncio = "^0.20.2"
+pytest-cov = "^4.0.0"
+pyupgrade = "^3.2.2"
+safety = "^2.3.2"
+vulture = "^2.6"
+yamllint = "^1.28.0"
+types-cachetools = "^5.2.1"
+types-pytz = "^2022.6.0.1"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/klaasnicolaas/python-energyzero/issues"
+Changelog = "https://github.com/klaasnicolaas/python-energyzero/releases"
+
+[tool.black]
+target-version = ['py39']
+
+[tool.coverage.paths]
+source = ["energyzero"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+
+[tool.coverage.run]
+branch = true
+source = ["energyzero"]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+# Specify the target platform details in config, so your developers are
+# free to run mypy on Windows, Linux, or macOS and get consistent
+# results.
+platform = "linux"
+python_version = 3.9
+
+# flake8-mypy expects the two following for sensible formatting
+show_column_numbers = true
+
+# show error messages from unrelated files
+follow_imports = "normal"
+
+# suppress errors about unsatisfied imports
+ignore_missing_imports = true
+
+# be strict
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_untyped_decorators = false # thanks backoff :(
+no_implicit_optional = true
+no_implicit_reexport = true
+strict_optional = true
+warn_incomplete_stub = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+# No incremental mode
+cache_dir = "/dev/null"
+
+[tool.pylint.BASIC]
+good-names = [
+    "_",
+    "ex",
+    "fp",
+    "i",
+    "id",
+    "j",
+    "k",
+    "on",
+    "Run",
+    "T",
+]
+
+[tool.pylint."MESSAGES CONTROL"]
+disable= [
+    "too-few-public-methods",
+    "duplicate-code",
+    "format",
+    "unsubscriptable-object",
+]
+
+[tool.pylint.SIMILARITIES]
+ignore-imports = true
+
+[tool.pylint.FORMAT]
+max-line-length=88
+
+[tool.pylint.DESIGN]
+max-attributes=20
+
+[tool.pytest.ini_options]
+addopts = "--cov"
+asyncio_mode = "auto"
+
+[tool.vulture]
+min_confidence = 80
+paths = ["energyzero"]
+verbose = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
