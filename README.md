@@ -1,4 +1,5 @@
-## Python - EnergyZero Client
+<!-- Header -->
+![alt Header of the EnergyZero package](https://raw.githubusercontent.com/klaasnicolaas/python-energyzero/main/assets/header_energyzero-min.png)
 
 <!-- PROJECT SHIELDS -->
 [![GitHub Release][releases-shield]][releases]
