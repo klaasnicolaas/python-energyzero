@@ -122,7 +122,7 @@ class EnergyZero:
                 "tillDate": end_date_utc.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 3,
-                "inclBtw": self.incl_btw,
+                "inclBtw": self.incl_btw.lower(),
             },
         )
 
@@ -155,7 +155,7 @@ class EnergyZero:
                 "tillDate": end_date_utc.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 1,
-                "inclBtw": self.incl_btw,
+                "inclBtw": self.incl_btw.lower(),
             },
         )
 
