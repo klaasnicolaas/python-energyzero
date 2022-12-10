@@ -12,8 +12,8 @@ async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
     async with EnergyZero() as client:
         local = pytz.timezone("Europe/Amsterdam")
-        today = datetime.strptime("2022-12-07", "%Y-%m-%d")
-        tomorrow = datetime.strptime("2022-12-08", "%Y-%m-%d")
+        today = datetime.strptime("2022-12-09", "%Y-%m-%d")
+        tomorrow = datetime.strptime("2022-12-10", "%Y-%m-%d")
 
         # Select your test readings
         energy_reading: bool = True
@@ -34,9 +34,11 @@ async def main() -> None:
             print(f"Average price: {energy_today.average_price}")
             print()
             print(
-                f"Highest price time: {energy_today.max_price_time.astimezone(local)}"
+                f"High price time: {energy_today.highest_price_time.astimezone(local)}"
             )
-            print(f"Lowest price time: {energy_today.min_price_time.astimezone(local)}")
+            print(
+                f"Lowest price time: {energy_today.lowest_price_time.astimezone(local)}"
+            )
             print()
             print(f"Current hourprice: {energy_today.current_hourprice}")
             print(f"Next hourprice: {energy_today.next_hourprice}")
@@ -47,9 +49,9 @@ async def main() -> None:
             print(f"Min price: {energy_tomorrow.min_price}")
             print(f"Average price: {energy_tomorrow.average_price}")
             print()
-            time_high = energy_tomorrow.max_price_time.astimezone(local)
+            time_high = energy_tomorrow.highest_price_time.astimezone(local)
             print(f"Highest price time: {time_high}")
-            time_low = energy_tomorrow.min_price_time.astimezone(local)
+            time_low = energy_tomorrow.lowest_price_time.astimezone(local)
             print(f"Lowest price time: {time_low}")
 
         if gas_reading:
