@@ -15,11 +15,11 @@
 [![Issues][issues-shield]][issues-url]
 
 [![Code Quality][code-quality-shield]][code-quality]
-[![Maintainability][maintainability-shield]][maintainability-url]
-[![Code Coverage][codecov-shield]][codecov-url]
-
 [![Build Status][build-shield]][build-url]
 [![Typing Status][typing-shield]][typing-url]
+
+[![Maintainability][maintainability-shield]][maintainability-url]
+[![Code Coverage][codecov-shield]][codecov-url]
 
 Asynchronous Python client for the EnergyZero API.
 
@@ -42,7 +42,7 @@ pip install energyzero
 
 You can read the following datasets with this package:
 
-**note**: Currently only tested for day prices
+**note**: Currently only tested for day/tomorrow prices
 
 ### Electricity prices
 
@@ -72,7 +72,7 @@ from energyzero import EnergyZero
 
 async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
-    async with EnergyZero() as client:
+    async with EnergyZero(incl_btw="true") as client:
         start_date = datetime.strptime("2022-12-07", "%Y-%m-%d")
         end_date = datetime.strptime("2022-12-07", "%Y-%m-%d")
 
@@ -84,13 +84,19 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-### Parameters
+### Class Parameters
+
+| Parameter | value Type | Description |
+| :-------- | :--------- | :---------- |
+| `incl_btw` | str (default = **true**) | Include or exclude BTW |
+
+### Function Parameters
 
 | Parameter | value Type | Description |
 | :-------- | :--------- | :---------- |
 | `start_date` | datetime | The start date of the selected period |
 | `end_date` | datetime | The end date of the selected period |
-| `interval` | integer (default = 4) | The interval of data return (**day**, **week**, **month**, **year**) |
+| `interval` | integer (default = **4**) | The interval of data return (**day**, **week**, **month**, **year**) |
 
 **Interval**
 4: Dag
@@ -183,11 +189,11 @@ SOFTWARE.
 <!-- MARKDOWN LINKS & IMAGES -->
 [build-shield]: https://github.com/klaasnicolaas/python-energyzero/actions/workflows/tests.yaml/badge.svg
 [build-url]: https://github.com/klaasnicolaas/python-energyzero/actions/workflows/tests.yaml
-[code-quality-shield]: https://img.shields.io/lgtm/grade/python/g/klaasnicolaas/python-energyzero.svg?logo=lgtm&logoWidth=18
-[code-quality]: https://lgtm.com/projects/g/klaasnicolaas/python-energyzero/context:python
+[code-quality-shield]: https://github.com/klaasnicolaas/python-energyzero/actions/workflows/codeql.yaml/badge.svg
+[code-quality]: https://github.com/klaasnicolaas/python-energyzero/actions/workflows/codeql.yaml
 [commits-shield]: https://img.shields.io/github/commit-activity/y/klaasnicolaas/python-energyzero.svg
 [commits-url]: https://github.com/klaasnicolaas/python-energyzero/commits/main
-[codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-energyzero/branch/main/graph/badge.svg?token=4AMI23ZT7C
+[codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-energyzero/branch/main/graph/badge.svg?token=29Y5JL4356
 [codecov-url]: https://codecov.io/gh/klaasnicolaas/python-energyzero
 [downloads-shield]: https://img.shields.io/pypi/dm/energyzero
 [downloads-url]: https://pypistats.org/packages/energyzero
@@ -196,7 +202,7 @@ SOFTWARE.
 [license-shield]: https://img.shields.io/github/license/klaasnicolaas/python-energyzero.svg
 [last-commit-shield]: https://img.shields.io/github/last-commit/klaasnicolaas/python-energyzero.svg
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2022.svg
-[maintainability-shield]: https://api.codeclimate.com/v1/badges/c577da6bb1b3bb6553bd/maintainability
+[maintainability-shield]: https://api.codeclimate.com/v1/badges/615e7a78f1a6191d4731/maintainability
 [maintainability-url]: https://codeclimate.com/github/klaasnicolaas/python-energyzero/maintainability
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-experimental-yellow.svg
 [pypi]: https://pypi.org/project/energyzero/
