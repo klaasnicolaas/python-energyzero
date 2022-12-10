@@ -741,7 +741,7 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 name = "pytz"
 version = "2022.6"
 description = "World timezone definitions, modern and historical"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -998,7 +998,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "7fad964295e7e949ea1c0a396f4966f350d7e754df141cb3d3d743667a55becd"
+content-hash = "d409b281b7f34e37141236577d4b73c92e7aab45515cb66a9670b9fd0cc69ef7"
 
 [metadata.files]
 aiohttp = [

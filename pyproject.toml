@@ -17,6 +17,7 @@ classifiers = [
     "Natural Language :: English",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -28,7 +29,6 @@ packages = [
 aiohttp = ">=3.0.0"
 python = "^3.9"
 yarl = ">=1.6.0"
-pytz = "^2022.6"
 
 [tool.poetry.group.dev.dependencies]
 aresponses = "^2.1.6"
@@ -61,6 +61,7 @@ vulture = "^2.6"
 yamllint = "^1.28.0"
 types-cachetools = "^5.2.1"
 types-pytz = "^2022.6.0.1"
+pytz = "^2022.6"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/klaasnicolaas/python-energyzero/issues"

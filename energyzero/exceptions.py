@@ -6,4 +6,8 @@ class EnergyZeroError(Exception):
 
 
 class EnergyZeroConnectionError(EnergyZeroError):
-    """EnergyZero connection exception."""
+    """EnergyZero - connection exception."""
+
+
+class EnergyZeroNoDataError(EnergyZeroError):
+    """EnergyZero - no data exception."""

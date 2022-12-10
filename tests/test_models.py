@@ -42,12 +42,13 @@ async def test_electricity_model(aresponses: ResponsesMockServer) -> None:
         assert energy.average_price == 0.37
         assert energy.current_hourprice == 0.44
         assert energy.next_hourprice == 0.48
-        assert energy.min_price_time == datetime.strptime(
+        assert energy.lowest_price_time == datetime.strptime(
             "2022-12-07 02:00", "%Y-%m-%d %H:%M"
         ).replace(tzinfo=timezone.utc)
-        assert energy.max_price_time == datetime.strptime(
+        assert energy.highest_price_time == datetime.strptime(
             "2022-12-07 16:00", "%Y-%m-%d %H:%M"
         ).replace(tzinfo=timezone.utc)
+        assert isinstance(energy.timestamp_prices, list)
 
 
 @pytest.mark.asyncio

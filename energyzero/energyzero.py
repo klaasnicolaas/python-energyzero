@@ -13,7 +13,11 @@ import async_timeout
 from aiohttp import hdrs
 from yarl import URL
 
-from .exceptions import EnergyZeroConnectionError, EnergyZeroError
+from .exceptions import (
+    EnergyZeroConnectionError,
+    EnergyZeroError,
+    EnergyZeroNoDataError,
+)
 from .models import Electricity, Gas
 
 
@@ -107,7 +111,7 @@ class EnergyZero:
             A Python dictionary with the response from EnergyZero.
 
         Raises:
-            EnergyZeroError: No gas prices found for this period.
+            EnergyZeroNoDataError: No gas prices found for this period.
         """
         start_date_utc: datetime = start_date - timedelta(hours=1)
         end_date_utc: datetime = end_date.replace(hour=22, minute=59, second=59)
@@ -123,7 +127,7 @@ class EnergyZero:
         )
 
         if data["Prices"] == []:
-            raise EnergyZeroError("No gas prices found for this period.")
+            raise EnergyZeroNoDataError("No gas prices found for this period.")
         return Gas.from_dict(data)
 
     async def energy_prices(
@@ -140,7 +144,7 @@ class EnergyZero:
             A Python dictionary with the response from EnergyZero.
 
         Raises:
-            EnergyZeroError: No energy prices found for this period.
+            EnergyZeroNoDataError: No energy prices found for this period.
         """
         start_date_utc = start_date - timedelta(hours=1)
         end_date_utc = end_date.replace(hour=22, minute=59, second=59)
@@ -156,7 +160,7 @@ class EnergyZero:
         )
 
         if data["Prices"] == []:
-            raise EnergyZeroError("No energy prices found for this period.")
+            raise EnergyZeroNoDataError("No energy prices found for this period.")
         return Electricity.from_dict(data)
 
     async def close(self) -> None:

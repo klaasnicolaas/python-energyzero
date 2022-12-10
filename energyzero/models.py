@@ -88,7 +88,7 @@ class Electricity:
         return round(sum(self.hourprices.values()) / len(self.hourprices.values()), 2)
 
     @property
-    def max_price_time(self) -> datetime:
+    def highest_price_time(self) -> datetime:
         """Return the time of the maximum price.
 
         Returns:
@@ -97,13 +97,26 @@ class Electricity:
         return _get_pricetime(self.hourprices, max)
 
     @property
-    def min_price_time(self) -> datetime:
+    def lowest_price_time(self) -> datetime:
         """Return the time of the minimum price.
 
         Returns:
             The time of the minimum price.
         """
         return _get_pricetime(self.hourprices, min)
+
+    @property
+    def timestamp_prices(self) -> list[Any]:
+        """Return a list of prices with timestamp.
+
+        Returns:
+            list of prices with timestamp
+        """
+        timestamp_prices: list[Any] = []
+        for hour, price in self.hourprices.items():
+            str_hour = str(hour)
+            timestamp_prices.append({"time": str_hour, "value": price})
+        return timestamp_prices
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Electricity:
