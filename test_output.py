@@ -12,8 +12,8 @@ async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
     async with EnergyZero() as client:
         local = pytz.timezone("Europe/Amsterdam")
-        today = datetime.strptime("2022-12-09", "%Y-%m-%d")
-        tomorrow = datetime.strptime("2022-12-10", "%Y-%m-%d")
+        today = datetime.strptime("2022-12-12", "%Y-%m-%d")
+        tomorrow = datetime.strptime("2022-12-13", "%Y-%m-%d")
 
         # Select your test readings
         energy_reading: bool = True
@@ -32,6 +32,7 @@ async def main() -> None:
             print(f"Max price: {energy_today.max_price}")
             print(f"Min price: {energy_today.min_price}")
             print(f"Average price: {energy_today.average_price}")
+            print(f"Percentage: {energy_today.percentage_of_max_price}")
             print()
             print(
                 f"High price time: {energy_today.highest_price_time.astimezone(local)}"
