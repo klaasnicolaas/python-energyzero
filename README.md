@@ -46,23 +46,23 @@ You can read the following datasets with this package:
 
 ### Electricity prices
 
-- Current electricity market price
-- Next hour electricity market price
-- Lowest energy price
-- Highest energy price
-- Average electricity price
-- Time of highest price
-- Time of lowest price
+- Current electricity market price (float)
+- Next hour electricity market price (float)
+- Lowest energy price (float)
+- Highest energy price (float)
+- Average electricity price (float)
+- Time of highest price (datetime)
+- Time of lowest price (datetime)
 
 ### Gas prices
 
-- Current gas market price
-- Next hour gas market price
-- Lowest gas price
-- Highest gas price
-- Average gas price
+- Current gas market price (float)
+- Next hour gas market price (float)
+- Lowest gas price (float)
+- Highest gas price (float)
+- Average gas price (float)
 
-### Example
+## Example
 
 ```python
 import asyncio
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
 | Parameter | value Type | Description |
 | :-------- | :--------- | :---------- |
-| `incl_btw` | str (default = **true**) | Include or exclude BTW |
+| `incl_btw` | str (default: **true**) | Include or exclude BTW |
 
 ### Function Parameters
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 | :-------- | :--------- | :---------- |
 | `start_date` | datetime | The start date of the selected period |
 | `end_date` | datetime | The end date of the selected period |
-| `interval` | integer (default = **4**) | The interval of data return (**day**, **week**, **month**, **year**) |
+| `interval` | integer (default: **4**) | The interval of data return (**day**, **week**, **month**, **year**) |
 
 **Interval**
 4: Dag
