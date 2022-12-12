@@ -118,6 +118,16 @@ class Electricity:
             timestamp_prices.append({"time": str_hour, "value": price})
         return timestamp_prices
 
+    @property
+    def percentage_of_max_price(self) -> float:
+        """Return the percentage of the maximum price.
+
+        Returns:
+            The percentage of the maximum price.
+        """
+        current: float = self.current_hourprice or 0
+        return round((current / self.max_price) * 100, 2)
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Electricity:
         """Create an Electricity object from a dictionary.
