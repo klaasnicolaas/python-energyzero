@@ -46,21 +46,20 @@ You can read the following datasets with this package:
 
 ### Electricity prices
 
-- Current electricity market price (float)
-- Next hour electricity market price (float)
+- Current/Next electricity market price (float)
+- Average electricity price (float)
 - Lowest energy price (float)
 - Highest energy price (float)
-- Average electricity price (float)
 - Time of highest price (datetime)
 - Time of lowest price (datetime)
+- Percentage of the current price compared to the maximum price
 
 ### Gas prices
 
-- Current gas market price (float)
-- Next hour gas market price (float)
+- Current/Next gas market price (float)
+- Average gas price (float)
 - Lowest gas price (float)
 - Highest gas price (float)
-- Average gas price (float)
 
 ## Example
 
