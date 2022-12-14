@@ -6,77 +6,61 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
 
 
-def _now() -> datetime:
-    """Return the current time.
+def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | None:
+    """Return a function that returns a value at a specific time.
+
+    Args:
+        moment: The time to get the value for.
+        prices: A dictionary with the prices.
 
     Returns:
-        The current time.
+        The value at the time.
     """
-    return datetime.now(timezone.utc)
+    value = None
+    for timestamp, price in prices.items():
+        if timestamp <= moment < timestamp + timedelta(hours=1):
+            value = price
+    return value
 
 
 def _get_pricetime(
-    hourprices: dict[datetime, float], func: Callable[[dict[datetime, float]], datetime]
+    prices: dict[datetime, float], func: Callable[[dict[datetime, float]], datetime]
 ) -> datetime:
     """Return the time of the price.
 
     Args:
-        hourprices: A dictionary with the hourprices.
+        prices: A dictionary with the hourprices.
         func: A function to get the time.
 
     Returns:
         The time of the price.
     """
-    return func(hourprices, key=hourprices.get)  # type: ignore
+    return func(prices, key=prices.get)  # type: ignore
 
 
 @dataclass
 class Electricity:
     """Object representing electricity data."""
 
-    hourprices: dict[datetime, float]
+    prices: dict[datetime, float]
 
     @property
-    def current_hourprice(self) -> float | None:
+    def current_price(self) -> float | None:
         """Return the current hourprice.
 
         Returns:
-            The current hourprice or None if the current hour is not in the hourprices.
+            The price for the current hour.
         """
-        for hour, price in self.hourprices.items():
-            if hour <= _now() < hour + timedelta(hours=1):
-                return price
-        return None
+        return self.price_at_time(self.utcnow()) or None
 
     @property
-    def next_hourprice(self) -> float | None:
-        """Return the next hourprice.
+    def extreme_prices(self) -> tuple[float, float]:
+        """Return the minimum and maximum price.
 
         Returns:
-            The next hourprice or None if the next hour is not in the hourprices.
+            The minimum and maximum price.
         """
-        for hour, price in self.hourprices.items():
-            if hour - timedelta(hours=1) <= _now() < hour:
-                return price
-        return None
-
-    @property
-    def max_price(self) -> float:
-        """Return the maximum price.
-
-        Returns:
-            The maximum price.
-        """
-        return max(self.hourprices.values())
-
-    @property
-    def min_price(self) -> float:
-        """Return the minimum price.
-
-        Returns:
-            The minimum price.
-        """
-        return min(self.hourprices.values())
+        return min(self.prices.values()), max(self.prices.values())
 
     @property
     def average_price(self) -> float:
@@ -85,7 +69,7 @@ class Electricity:
         Returns:
             The average price.
         """
-        return round(sum(self.hourprices.values()) / len(self.hourprices.values()), 2)
+        return round(sum(self.prices.values()) / len(self.prices.values()), 2)
 
     @property
     def highest_price_time(self) -> datetime:
@@ -94,7 +78,7 @@ class Electricity:
         Returns:
             The time of the maximum price.
         """
-        return _get_pricetime(self.hourprices, max)
+        return _get_pricetime(self.prices, max)
 
     @property
     def lowest_price_time(self) -> datetime:
@@ -103,30 +87,61 @@ class Electricity:
         Returns:
             The time of the minimum price.
         """
-        return _get_pricetime(self.hourprices, min)
+        return _get_pricetime(self.prices, min)
 
     @property
-    def timestamp_prices(self) -> list[Any]:
-        """Return a list of prices with timestamp.
-
-        Returns:
-            list of prices with timestamp
-        """
-        timestamp_prices: list[Any] = []
-        for hour, price in self.hourprices.items():
-            str_hour = str(hour)
-            timestamp_prices.append({"time": str_hour, "value": price})
-        return timestamp_prices
-
-    @property
-    def percentage_of_max_price(self) -> float:
+    def pct_of_max_price(self) -> float:
         """Return the percentage of the maximum price.
 
         Returns:
             The percentage of the maximum price.
         """
-        current: float = self.current_hourprice or 0
-        return round((current / self.max_price) * 100, 2)
+        current: float = self.current_price or 0
+        return round((current / self.extreme_prices[1]) * 100, 2)
+
+    @property
+    def timestamp_prices(self) -> list[dict[str, float | datetime]]:
+        """Return a list of prices with timestamp.
+
+        Returns:
+            list of prices with timestamp
+        """
+        return self.generate_timestamp_list(self.prices)
+
+    def utcnow(self) -> datetime:
+        """Return the current timestamp in the UTC timezone.
+
+        Returns:
+            The current timestamp in the UTC timezone.
+        """
+        return datetime.now(timezone.utc)
+
+    def generate_timestamp_list(
+        self, prices: dict[datetime, float]
+    ) -> list[dict[str, float | datetime]]:
+        """Return a list of timestamps.
+
+        Args:
+            prices: A dictionary with the hourprices.
+
+        Returns:
+            A list of timestamps.
+        """
+        timestamp_prices: list[dict[str, float | datetime]] = []
+        for timestamp, price in prices.items():
+            timestamp_prices.append({"timestamp": timestamp, "price": price})
+        return timestamp_prices
+
+    def price_at_time(self, moment: datetime) -> float | None:
+        """Return the price at a specific time.
+
+        Args:
+            moment: The time to get the price for.
+
+        Returns:
+            The price at the specific time.
+        """
+        return _timed_value(moment, self.prices) or None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Electricity:
@@ -139,16 +154,16 @@ class Electricity:
             An Electricity object.
         """
 
-        hourprices: dict[datetime, float] = {}
+        prices: dict[datetime, float] = {}
         for item in data["Prices"]:
-            hourprices[
+            prices[
                 datetime.strptime(item["readingDate"], "%Y-%m-%dT%H:%M:%SZ").replace(
                     tzinfo=timezone.utc
                 )
             ] = item["price"]
 
         return cls(
-            hourprices=hourprices,
+            prices=prices,
         )
 
 
@@ -156,49 +171,25 @@ class Electricity:
 class Gas:
     """Object representing gas data."""
 
-    hourprices: dict[datetime, float]
+    prices: dict[datetime, float]
 
     @property
-    def current_hourprice(self) -> float | None:
-        """Return the current hourprice.
+    def current_price(self) -> float | None:
+        """Return the current gas price.
 
         Returns:
-            The current hourprice or None if the current hour is not in the hourprices.
+            The price for the current hour.
         """
-        for hour, price in self.hourprices.items():
-            if hour <= _now() < hour + timedelta(hours=1):
-                return price
-        return None
+        return self.price_at_time(self.utcnow()) or None
 
     @property
-    def next_hourprice(self) -> float | None:
-        """Return the next hourprice.
+    def extreme_prices(self) -> tuple[float, float]:
+        """Return the minimum and maximum price.
 
         Returns:
-            The next hourprice or None if the next hour is not in the hourprices.
+            The minimum and maximum price.
         """
-        for hour, price in self.hourprices.items():
-            if hour - timedelta(hours=1) <= _now() < hour:
-                return price
-        return None
-
-    @property
-    def max_price(self) -> float:
-        """Return the maximum price.
-
-        Returns:
-            The maximum price.
-        """
-        return max(self.hourprices.values())
-
-    @property
-    def min_price(self) -> float:
-        """Return the minimum price.
-
-        Returns:
-            The minimum price.
-        """
-        return min(self.hourprices.values())
+        return min(self.prices.values()), max(self.prices.values())
 
     @property
     def average_price(self) -> float:
@@ -207,7 +198,26 @@ class Gas:
         Returns:
             The average price.
         """
-        return round(sum(self.hourprices.values()) / len(self.hourprices.values()), 2)
+        return round(sum(self.prices.values()) / len(self.prices.values()), 2)
+
+    def utcnow(self) -> datetime:
+        """Return the current timestamp in the UTC timezone.
+
+        Returns:
+            The current timestamp in the UTC timezone.
+        """
+        return datetime.now(timezone.utc)
+
+    def price_at_time(self, moment: datetime) -> float | None:
+        """Return the price at a specific time.
+
+        Args:
+            moment: The time to get the price for.
+
+        Returns:
+            The price at the specific time.
+        """
+        return _timed_value(moment, self.prices) or None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Gas:
@@ -220,14 +230,14 @@ class Gas:
             A Gas object.
         """
 
-        hourprices: dict[datetime, float] = {}
+        prices: dict[datetime, float] = {}
         for item in data["Prices"]:
-            hourprices[
+            prices[
                 datetime.strptime(item["readingDate"], "%Y-%m-%dT%H:%M:%SZ").replace(
                     tzinfo=timezone.utc
                 )
             ] = item["price"]
 
         return cls(
-            hourprices=hourprices,
+            prices=prices,
         )
