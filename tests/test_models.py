@@ -1,6 +1,6 @@
 """Test the models."""
 from datetime import datetime, timezone
-from unittest import mock
+from unittest.mock import Mock, patch
 
 import aiohttp
 import pytest
@@ -12,11 +12,9 @@ from . import load_fixtures
 
 
 @pytest.mark.asyncio
-@mock.patch(
-    "energyzero.models._now",
-    return_value=datetime.strptime("2022-12-07 13:00", "%Y-%m-%d %H:%M").replace(
-        tzinfo=timezone.utc
-    ),
+@patch(
+    "energyzero.models.Electricity.utcnow",
+    Mock(return_value=datetime(2022, 12, 7, 14, 0).replace(tzinfo=timezone.utc)),
 )
 async def test_electricity_model(aresponses: ResponsesMockServer) -> None:
     """Test the electricity model."""
@@ -37,17 +35,20 @@ async def test_electricity_model(aresponses: ResponsesMockServer) -> None:
             start_date=today, end_date=today
         )
         assert energy is not None and isinstance(energy, Electricity)
-        assert energy.max_price == 0.55
-        assert energy.min_price == 0.26
+        assert energy.extreme_prices[1] == 0.55
+        assert energy.extreme_prices[0] == 0.26
         assert energy.average_price == 0.37
-        assert energy.current_hourprice == 0.44
-        assert energy.next_hourprice == 0.48
+        assert energy.current_price == 0.48
+        # The next hour price
+        next_hour = datetime(2022, 12, 7, 15, 0).replace(tzinfo=timezone.utc)
+        assert energy.price_at_time(next_hour) == 0.49
         assert energy.lowest_price_time == datetime.strptime(
             "2022-12-07 02:00", "%Y-%m-%d %H:%M"
         ).replace(tzinfo=timezone.utc)
         assert energy.highest_price_time == datetime.strptime(
             "2022-12-07 16:00", "%Y-%m-%d %H:%M"
         ).replace(tzinfo=timezone.utc)
+        assert energy.pct_of_max_price == 87.27
         assert isinstance(energy.timestamp_prices, list)
 
 
@@ -72,11 +73,9 @@ async def test_no_electricity_data(aresponses: ResponsesMockServer) -> None:
 
 
 @pytest.mark.asyncio
-@mock.patch(
-    "energyzero.models._now",
-    return_value=datetime.strptime("2022-12-05 13:00", "%Y-%m-%d %H:%M").replace(
-        tzinfo=timezone.utc
-    ),
+@patch(
+    "energyzero.models.Gas.utcnow",
+    Mock(return_value=datetime(2022, 12, 7, 14, 0).replace(tzinfo=timezone.utc)),
 )
 async def test_gas_model(aresponses: ResponsesMockServer) -> None:
     """Test the gas model."""
@@ -91,15 +90,17 @@ async def test_gas_model(aresponses: ResponsesMockServer) -> None:
         ),
     )
     async with aiohttp.ClientSession() as session:
-        today = datetime.strptime("2022-12-05", "%Y-%m-%d")
+        today = datetime.strptime("2022-12-07", "%Y-%m-%d")
         client = EnergyZero(session=session)
         gas: Gas = await client.gas_prices(start_date=today, end_date=today)
         assert gas is not None and isinstance(gas, Gas)
-        assert gas.max_price == 1.43
-        assert gas.min_price == 1.42
-        assert gas.average_price == 1.42
-        assert gas.current_hourprice == 1.43
-        assert gas.next_hourprice == 1.43
+        assert gas.extreme_prices[1] == 1.47
+        assert gas.extreme_prices[0] == 1.43
+        assert gas.average_price == 1.45
+        assert gas.current_price == 1.47
+        # The next hour price
+        next_hour = datetime(2022, 12, 7, 15, 0).replace(tzinfo=timezone.utc)
+        assert gas.price_at_time(next_hour) == 1.47
 
 
 @pytest.mark.asyncio
