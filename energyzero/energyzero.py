@@ -113,8 +113,10 @@ class EnergyZero:
         Raises:
             EnergyZeroNoDataError: No gas prices found for this period.
         """
-        start_date_utc: datetime = start_date - timedelta(hours=1)
-        end_date_utc: datetime = end_date.replace(hour=22, minute=59, second=59)
+        start_date_utc: datetime = start_date + timedelta(hours=5)
+        end_date_utc: datetime = end_date.replace(
+            hour=5, minute=59, second=59
+        ) + timedelta(days=1)
         data = await self._request(
             "energyprices",
             params={
