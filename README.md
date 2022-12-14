@@ -46,6 +46,8 @@ You can read the following datasets with this package:
 
 ### Electricity prices
 
+The energy prices are different every hour, after 15:00 (more usually already at 14:00) the prices for the next day are published and it is therefore possible to retrieve these data.
+
 - Current/Next electricity market price (float)
 - Average electricity price (float)
 - Lowest energy price (float)
@@ -55,6 +57,8 @@ You can read the following datasets with this package:
 - Percentage of the current price compared to the maximum price
 
 ### Gas prices
+
+The gas prices do not change per hour, but are fixed for 24 hours. Which means that from 06:00 in the morning the new rate for that day will be used.
 
 - Current/Next gas market price (float)
 - Average gas price (float)
