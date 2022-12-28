@@ -25,7 +25,7 @@ Asynchronous Python client for the EnergyZero API.
 
 ## About
 
-A python package with which you can retrieve the dynamic energy prices from [EnergyZero][energyzero] and can therefore also be used for third parties who purchase their energy via EnergyZero, such as:
+A python package with which you can retrieve the dynamic energy/gas prices from [EnergyZero][energyzero] and can therefore also be used for third parties who purchase their energy via EnergyZero, such as:
 
 - [ANWB Energie](https://www.anwb.nl/huis/energie/anwb-energie)
 - [Mijndomein Energie](https://www.mijndomein.nl/energie)
@@ -40,15 +40,15 @@ pip install energyzero
 
 ## Data
 
-You can read the following datasets with this package:
-
 **note**: Currently only tested for day/tomorrow prices
+
+You can read the following datasets with this package:
 
 ### Electricity prices
 
 The energy prices are different every hour, after 15:00 (more usually already at 14:00) the prices for the next day are published and it is therefore possible to retrieve these data.
 
-- Current/Next electricity market price (float)
+- Current/Next[x] hour electricity market price (float)
 - Average electricity price (float)
 - Lowest energy price (float)
 - Highest energy price (float)
@@ -60,7 +60,7 @@ The energy prices are different every hour, after 15:00 (more usually already at
 
 The gas prices do not change per hour, but are fixed for 24 hours. Which means that from 06:00 in the morning the new rate for that day will be used.
 
-- Current/Next gas market price (float)
+- Current/Next[x] hour gas market price (float)
 - Average gas price (float)
 - Lowest gas price (float)
 - Highest gas price (float)
@@ -70,14 +70,15 @@ The gas prices do not change per hour, but are fixed for 24 hours. Which means t
 ```python
 import asyncio
 
+from datetime import date
 from energyzero import EnergyZero
 
 
 async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
     async with EnergyZero(incl_btw="true") as client:
-        start_date = datetime.strptime("2022-12-07", "%Y-%m-%d")
-        end_date = datetime.strptime("2022-12-07", "%Y-%m-%d")
+        start_date = date(2022, 12, 7)
+        end_date = date(2022, 12, 7)
 
         energy = await client.energy_prices(start_date, end_date)
         gas = await client.gas_prices(start_date, end_date)

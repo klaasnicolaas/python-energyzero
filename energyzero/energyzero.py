@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import socket
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from importlib import metadata
 from typing import Any
 
@@ -98,7 +98,7 @@ class EnergyZero:
         return await response.json()
 
     async def gas_prices(
-        self, start_date: datetime, end_date: datetime, interval: int = 4
+        self, start_date: date, end_date: date, interval: int = 4
     ) -> Gas:
         """Get gas prices for a given period.
 
@@ -113,10 +113,13 @@ class EnergyZero:
         Raises:
             EnergyZeroNoDataError: No gas prices found for this period.
         """
-        start_date_utc: datetime = start_date + timedelta(hours=5)
-        end_date_utc: datetime = end_date.replace(
-            hour=5, minute=59, second=59
-        ) + timedelta(days=1)
+        # Set the start date to 5:00:00 and the end date to 5:59:59 the next day UTC
+        start_date_utc: datetime = datetime(
+            start_date.year, start_date.month, start_date.day, 5, 0, 0
+        )
+        end_date_utc: datetime = datetime(
+            end_date.year, end_date.month, end_date.day + 1, 5, 59, 59
+        )
         data = await self._request(
             "energyprices",
             params={
@@ -133,7 +136,7 @@ class EnergyZero:
         return Gas.from_dict(data)
 
     async def energy_prices(
-        self, start_date: datetime, end_date: datetime, interval: int = 4
+        self, start_date: date, end_date: date, interval: int = 4
     ) -> Electricity:
         """Get energy prices for a given period.
 
@@ -148,8 +151,13 @@ class EnergyZero:
         Raises:
             EnergyZeroNoDataError: No energy prices found for this period.
         """
-        start_date_utc = start_date - timedelta(hours=1)
-        end_date_utc = end_date.replace(hour=22, minute=59, second=59)
+        # Set the start date to 23:00:00 previous day and the end date to 22:59:59 UTC
+        start_date_utc: datetime = datetime(
+            start_date.year, start_date.month, start_date.day, 0, 0, 0
+        ) - timedelta(hours=1)
+        end_date_utc: datetime = datetime(
+            end_date.year, end_date.month, end_date.day, 22, 59, 59
+        )
         data = await self._request(
             "energyprices",
             params={
