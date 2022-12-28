@@ -6,7 +6,7 @@ import aiohttp
 import pytest
 from aresponses import ResponsesMockServer
 
-from energyzero import Electricity, EnergyZero, EnergyZeroError, Gas
+from energyzero import Electricity, EnergyZero, EnergyZeroNoDataError, Gas
 
 from . import load_fixtures
 
@@ -68,7 +68,7 @@ async def test_no_electricity_data(aresponses: ResponsesMockServer) -> None:
     async with aiohttp.ClientSession() as session:
         today = datetime.strptime("2022-12-07", "%Y-%m-%d")
         client = EnergyZero(session=session)
-        with pytest.raises(EnergyZeroError):
+        with pytest.raises(EnergyZeroNoDataError):
             await client.energy_prices(start_date=today, end_date=today)
 
 
@@ -119,5 +119,5 @@ async def test_no_gas_data(aresponses: ResponsesMockServer) -> None:
     async with aiohttp.ClientSession() as session:
         today = datetime.strptime("2022-12-07", "%Y-%m-%d")
         client = EnergyZero(session=session)
-        with pytest.raises(EnergyZeroError):
+        with pytest.raises(EnergyZeroNoDataError):
             await client.gas_prices(start_date=today, end_date=today)
