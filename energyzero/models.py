@@ -18,7 +18,7 @@ def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | Non
     """
     value = None
     for timestamp, price in prices.items():
-        if timestamp <= moment < timestamp + timedelta(hours=1):
+        if timestamp <= moment < (timestamp + timedelta(hours=1)):
             value = price
     return value
 
@@ -51,7 +51,7 @@ class Electricity:
         Returns:
             The price for the current hour.
         """
-        return self.price_at_time(self.utcnow()) or None
+        return self.price_at_time(self.utcnow())
 
     @property
     def extreme_prices(self) -> tuple[float, float]:
@@ -141,7 +141,10 @@ class Electricity:
         Returns:
             The price at the specific time.
         """
-        return _timed_value(moment, self.prices) or None
+        value = _timed_value(moment, self.prices)
+        if value is not None or value == 0:
+            return value
+        return None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Electricity:
@@ -180,7 +183,7 @@ class Gas:
         Returns:
             The price for the current hour.
         """
-        return self.price_at_time(self.utcnow()) or None
+        return self.price_at_time(self.utcnow())
 
     @property
     def extreme_prices(self) -> tuple[float, float]:
@@ -217,7 +220,10 @@ class Gas:
         Returns:
             The price at the specific time.
         """
-        return _timed_value(moment, self.prices) or None
+        value = _timed_value(moment, self.prices)
+        if value is not None or value == 0:
+            return value
+        return None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Gas:
