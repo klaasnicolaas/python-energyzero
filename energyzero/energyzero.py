@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import socket
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from importlib import metadata
 from typing import Any
 
@@ -19,6 +19,15 @@ from .exceptions import (
     EnergyZeroNoDataError,
 )
 from .models import Electricity, Gas
+
+
+def get_utcnow() -> datetime:
+    """Get the current UTC time.
+
+    Returns:
+        The current UTC time.
+    """
+    return datetime.now(timezone.utc)
 
 
 @dataclass
@@ -115,7 +124,7 @@ class EnergyZero:
         """
         start_date_utc: datetime
         end_date_utc: datetime
-        if datetime.utcnow().hour < 5:
+        if get_utcnow().hour < 5:
             # Set start_date to 05:00:00 prev day and the end_date to 04:59:59 UTC
             start_date_utc = datetime(
                 start_date.year, start_date.month, start_date.day - 1, 5, 0, 0
