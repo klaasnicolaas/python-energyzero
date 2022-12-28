@@ -12,8 +12,8 @@ async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
     async with EnergyZero() as client:
         local = pytz.timezone("Europe/Amsterdam")
-        today = date(2022, 12, 14)
-        tomorrow = date(2022, 12, 15)
+        today = date(2022, 12, 28)
+        tomorrow = date(2022, 12, 28)
 
         # Select your test readings
         energy_reading: bool = True

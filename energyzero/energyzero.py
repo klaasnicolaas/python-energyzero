@@ -113,13 +113,24 @@ class EnergyZero:
         Raises:
             EnergyZeroNoDataError: No gas prices found for this period.
         """
-        # Set the start date to 5:00:00 and the end date to 5:59:59 the next day UTC
-        start_date_utc: datetime = datetime(
-            start_date.year, start_date.month, start_date.day, 5, 0, 0
-        )
-        end_date_utc: datetime = datetime(
-            end_date.year, end_date.month, end_date.day + 1, 5, 59, 59
-        )
+        start_date_utc: datetime
+        end_date_utc: datetime
+        if datetime.utcnow().hour < 5:
+            # Set start_date to 05:00:00 prev day and the end_date to 04:59:59 UTC
+            start_date_utc = datetime(
+                start_date.year, start_date.month, start_date.day - 1, 5, 0, 0
+            )
+            end_date_utc = datetime(
+                end_date.year, end_date.month, end_date.day, 4, 59, 59
+            )
+        else:
+            # Set start_date to 05:00:00 and the end_date to 04:59:59 UTC next day
+            start_date_utc = datetime(
+                start_date.year, start_date.month, start_date.day, 5, 0, 0
+            )
+            end_date_utc = datetime(
+                end_date.year, end_date.month, end_date.day + 1, 4, 59, 59
+            )
         data = await self._request(
             "energyprices",
             params={
