@@ -53,6 +53,30 @@ async def test_electricity_model(aresponses: ResponsesMockServer) -> None:
 
 
 @pytest.mark.asyncio
+async def test_electricity_none_date(aresponses: ResponsesMockServer) -> None:
+    """Test when there is no data for the current datetime."""
+    aresponses.add(
+        "api.energyzero.nl",
+        "/v1/energyprices",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixtures("energy.json"),
+        ),
+    )
+    async with aiohttp.ClientSession() as session:
+        today = date(2022, 12, 7)
+        client = EnergyZero(session=session)
+        energy: Electricity = await client.energy_prices(
+            start_date=today, end_date=today
+        )
+        assert energy is not None and isinstance(energy, Electricity)
+        assert energy.current_price is None
+        assert energy.average_price == 0.37
+
+
+@pytest.mark.asyncio
 async def test_no_electricity_data(aresponses: ResponsesMockServer) -> None:
     """Raise exception when there is no data."""
     aresponses.add(
@@ -105,10 +129,14 @@ async def test_gas_model(aresponses: ResponsesMockServer) -> None:
 
 @pytest.mark.asyncio
 @patch(
-    "energyzero.energyzero.get_utcnow", Mock(return_value=datetime(2022, 12, 7, 2, 0))
+    "energyzero.energyzero.get_utcnow", Mock(return_value=datetime(2022, 12, 7, 4, 0))
+)
+@patch(
+    "energyzero.models.Gas.utcnow",
+    Mock(return_value=datetime(2022, 12, 7, 5, 0).replace(tzinfo=timezone.utc)),
 )
 async def test_gas_morning_model(aresponses: ResponsesMockServer) -> None:
-    """Test the gas model."""
+    """Test the gas model in the morning."""
     aresponses.add(
         "api.energyzero.nl",
         "/v1/energyprices",
@@ -124,6 +152,29 @@ async def test_gas_morning_model(aresponses: ResponsesMockServer) -> None:
         client = EnergyZero(session=session)
         gas: Gas = await client.gas_prices(start_date=today, end_date=today)
         assert gas is not None and isinstance(gas, Gas)
+        assert gas.current_price == 1.47
+        assert gas.average_price == 1.45
+
+
+@pytest.mark.asyncio
+async def test_gas_none_date(aresponses: ResponsesMockServer) -> None:
+    """Test when there is no data for the current datetime."""
+    aresponses.add(
+        "api.energyzero.nl",
+        "/v1/energyprices",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixtures("gas.json"),
+        ),
+    )
+    async with aiohttp.ClientSession() as session:
+        today = date(2022, 12, 7)
+        client = EnergyZero(session=session)
+        gas: Gas = await client.gas_prices(start_date=today, end_date=today)
+        assert gas is not None and isinstance(gas, Gas)
+        assert gas.current_price is None
         assert gas.average_price == 1.45
 
 
