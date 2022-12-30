@@ -1,6 +1,5 @@
 """Test the models."""
 from datetime import date, datetime, timezone
-from unittest.mock import Mock, patch
 
 import aiohttp
 import pytest
@@ -12,12 +11,9 @@ from . import load_fixtures
 
 
 @pytest.mark.asyncio
-@patch(
-    "energyzero.models.Electricity.utcnow",
-    Mock(return_value=datetime(2022, 12, 7, 14, 0).replace(tzinfo=timezone.utc)),
-)
+@pytest.mark.freeze_time("2022-12-07 14:00:00 UTC")
 async def test_electricity_model(aresponses: ResponsesMockServer) -> None:
-    """Test the electricity model."""
+    """Test the electricity model at 14:00:00 UTC."""
     aresponses.add(
         "api.energyzero.nl",
         "/v1/energyprices",
@@ -97,15 +93,9 @@ async def test_no_electricity_data(aresponses: ResponsesMockServer) -> None:
 
 
 @pytest.mark.asyncio
-@patch(
-    "energyzero.energyzero.get_utcnow", Mock(return_value=datetime(2022, 12, 7, 14, 0))
-)
-@patch(
-    "energyzero.models.Gas.utcnow",
-    Mock(return_value=datetime(2022, 12, 7, 14, 0).replace(tzinfo=timezone.utc)),
-)
+@pytest.mark.freeze_time("2022-12-07 14:00:00 UTC")
 async def test_gas_model(aresponses: ResponsesMockServer) -> None:
-    """Test the gas model."""
+    """Test the gas model at 14:00:00 UTC."""
     aresponses.add(
         "api.energyzero.nl",
         "/v1/energyprices",
@@ -131,12 +121,9 @@ async def test_gas_model(aresponses: ResponsesMockServer) -> None:
 
 
 @pytest.mark.asyncio
-@patch(
-    "energyzero.models.Gas.utcnow",
-    Mock(return_value=datetime(2022, 12, 7, 5, 0).replace(tzinfo=timezone.utc)),
-)
+@pytest.mark.freeze_time("2022-12-07 03:00:00 UTC")
 async def test_gas_morning_model(aresponses: ResponsesMockServer) -> None:
-    """Test the gas model in the morning."""
+    """Test the gas model in the morning at 03:00:00 UTC."""
     aresponses.add(
         "api.energyzero.nl",
         "/v1/energyprices",
@@ -152,7 +139,7 @@ async def test_gas_morning_model(aresponses: ResponsesMockServer) -> None:
         client = EnergyZero(session=session)
         gas: Gas = await client.gas_prices(start_date=today, end_date=today)
         assert gas is not None and isinstance(gas, Gas)
-        assert gas.current_price == 1.47
+        assert gas.current_price == 1.45
         assert gas.average_price == 1.45
 
 

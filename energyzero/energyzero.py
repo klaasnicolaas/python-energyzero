@@ -21,15 +21,6 @@ from .exceptions import (
 from .models import Electricity, Gas
 
 
-def get_utcnow() -> datetime:
-    """Get the current UTC time.
-
-    Returns:
-        The current UTC time.
-    """
-    return datetime.now(timezone.utc)
-
-
 @dataclass
 class EnergyZero:
     """Main class for handling data fetching from EnergyZero."""
@@ -124,7 +115,8 @@ class EnergyZero:
         """
         start_date_utc: datetime
         end_date_utc: datetime
-        if get_utcnow().hour >= 5 and get_utcnow().hour <= 22:
+        utcnow: datetime = datetime.now(timezone.utc)
+        if utcnow.hour >= 5 and utcnow.hour <= 22:
             # Set start_date to 05:00:00 and the end_date to 04:59:59 UTC next day
             start_date_utc = datetime(
                 start_date.year, start_date.month, start_date.day, 5, 0, 0
