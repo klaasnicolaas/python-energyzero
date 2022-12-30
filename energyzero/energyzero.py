@@ -132,14 +132,11 @@ class EnergyZero:
             end_date_utc = datetime(
                 end_date.year, end_date.month, end_date.day, 4, 59, 59
             ) + timedelta(days=1)
-        else:
-            # Set start_date to 05:00:00 prev day and the end_date to 04:59:59 UTC
-            start_date_utc = datetime(
-                start_date.year, start_date.month, start_date.day, 5, 0, 0
-            ) - timedelta(days=1)
-            end_date_utc = datetime(
-                end_date.year, end_date.month, end_date.day, 4, 59, 59
-            )
+        # Set start_date to 05:00:00 prev day and the end_date to 04:59:59 UTC
+        start_date_utc = datetime(
+            start_date.year, start_date.month, start_date.day, 5, 0, 0
+        ) - timedelta(days=1)
+        end_date_utc = datetime(end_date.year, end_date.month, end_date.day, 4, 59, 59)
 
         data = await self._request(
             "energyprices",
