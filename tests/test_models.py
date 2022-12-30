@@ -98,6 +98,9 @@ async def test_no_electricity_data(aresponses: ResponsesMockServer) -> None:
 
 @pytest.mark.asyncio
 @patch(
+    "energyzero.energyzero.get_utcnow", Mock(return_value=datetime(2022, 12, 7, 14, 0))
+)
+@patch(
     "energyzero.models.Gas.utcnow",
     Mock(return_value=datetime(2022, 12, 7, 14, 0).replace(tzinfo=timezone.utc)),
 )
@@ -128,9 +131,6 @@ async def test_gas_model(aresponses: ResponsesMockServer) -> None:
 
 
 @pytest.mark.asyncio
-@patch(
-    "energyzero.energyzero.get_utcnow", Mock(return_value=datetime(2022, 12, 7, 4, 0))
-)
 @patch(
     "energyzero.models.Gas.utcnow",
     Mock(return_value=datetime(2022, 12, 7, 5, 0).replace(tzinfo=timezone.utc)),
