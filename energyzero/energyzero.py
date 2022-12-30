@@ -115,8 +115,8 @@ class EnergyZero:
         """
         start_date_utc: datetime
         end_date_utc: datetime
-        now: datetime = datetime.now(timezone.utc)
-        if now.hour >= 5 and now.hour <= 22:
+        utcnow: datetime = datetime.now(timezone.utc)
+        if utcnow.hour >= 5 and utcnow.hour <= 22:
             # Set start_date to 05:00:00 and the end_date to 04:59:59 UTC next day
             start_date_utc = datetime(
                 start_date.year, start_date.month, start_date.day, 5, 0, 0
