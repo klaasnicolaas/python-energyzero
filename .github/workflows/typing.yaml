@@ -7,47 +7,28 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  DEFAULT_PYTHON: "3.9"
+
 jobs:
   mypy:
-    name: mypy on Python ${{ matrix.python }}
+    name: mypy
     runs-on: ubuntu-latest
-    if: ${{ github.actor != 'dependabot[bot]' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        python: ["3.9", "3.10", "3.11"]
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v3
-      - name: 🏗 Set up Python ${{ matrix.python }}
+      - name: 🏗 Set up Poetry
+        run: pipx install poetry
+      - name: 🏗 Set up Python ${{ env.DEFAULT_PYTHON }}
         id: python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python }}
-      - name: 🏗 Get pip cache dir
-        id: pip-cache
-        run: |
-          echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
-      - name: ⤵️ Restore cached Python PIP packages
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pip-cache.outputs.dir }}
-          key: pip-${{ runner.os }}-v1-${{ steps.python.outputs.python-version }}-${{ hashFiles('.github/workflows/requirements.txt') }}
-          restore-keys: |
-            pip-${{ runner.os }}-v1-${{ steps.python.outputs.python-version }}-
+          python-version: ${{ env.DEFAULT_PYTHON }}
+          cache: 'poetry'
       - name: 🏗 Install workflow dependencies
         run: |
-          pip install -r .github/workflows/requirements.txt
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
-      - name: ⤵️ Restore cached Python virtual environment
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-v1-${{ steps.python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-v1-${{ steps.python.outputs.python-version }}-
       - name: 🏗 Install dependencies
         run: poetry install --no-interaction
       - name: 🚀 Run mypy

@@ -6,11 +6,6 @@ updates:
     schedule:
       interval: daily
       time: "02:00"
-  - package-ecosystem: pip
-    directory: "/.github/workflows"
-    schedule:
-      interval: daily
-      time: "02:00"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

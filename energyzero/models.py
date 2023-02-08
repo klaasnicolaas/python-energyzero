@@ -3,17 +3,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | None:
     """Return a function that returns a value at a specific time.
 
-    Args:
+    Args
+    ----
         moment: The time to get the value for.
         prices: A dictionary with the prices.
 
-    Returns:
+    Returns
+    -------
         The value at the time.
     """
     value = None
@@ -24,18 +29,21 @@ def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | Non
 
 
 def _get_pricetime(
-    prices: dict[datetime, float], func: Callable[[dict[datetime, float]], datetime]
+    prices: dict[datetime, float],
+    func: Callable[[dict[datetime, float]], datetime],
 ) -> datetime:
     """Return the time of the price.
 
-    Args:
+    Args
+    ----
         prices: A dictionary with the hourprices.
         func: A function to get the time.
 
-    Returns:
+    Returns
+    -------
         The time of the price.
     """
-    return func(prices, key=prices.get)  # type: ignore
+    return func(prices, key=prices.get)  # type: ignore[call-arg]
 
 
 @dataclass
@@ -48,7 +56,8 @@ class Electricity:
     def current_price(self) -> float | None:
         """Return the current hourprice.
 
-        Returns:
+        Returns
+        -------
             The price for the current hour.
         """
         return self.price_at_time(self.utcnow())
@@ -57,7 +66,8 @@ class Electricity:
     def extreme_prices(self) -> tuple[float, float]:
         """Return the minimum and maximum price.
 
-        Returns:
+        Returns
+        -------
             The minimum and maximum price.
         """
         return min(self.prices.values()), max(self.prices.values())
@@ -66,7 +76,8 @@ class Electricity:
     def average_price(self) -> float:
         """Return the average price.
 
-        Returns:
+        Returns
+        -------
             The average price.
         """
         return round(sum(self.prices.values()) / len(self.prices.values()), 2)
@@ -75,7 +86,8 @@ class Electricity:
     def highest_price_time(self) -> datetime:
         """Return the time of the maximum price.
 
-        Returns:
+        Returns
+        -------
             The time of the maximum price.
         """
         return _get_pricetime(self.prices, max)
@@ -84,7 +96,8 @@ class Electricity:
     def lowest_price_time(self) -> datetime:
         """Return the time of the minimum price.
 
-        Returns:
+        Returns
+        -------
             The time of the minimum price.
         """
         return _get_pricetime(self.prices, min)
@@ -93,7 +106,8 @@ class Electricity:
     def pct_of_max_price(self) -> float:
         """Return the percentage of the maximum price.
 
-        Returns:
+        Returns
+        -------
             The percentage of the maximum price.
         """
         current: float = self.current_price or 0
@@ -103,7 +117,8 @@ class Electricity:
     def timestamp_prices(self) -> list[dict[str, float | datetime]]:
         """Return a list of prices with timestamp.
 
-        Returns:
+        Returns
+        -------
             list of prices with timestamp
         """
         return self.generate_timestamp_list(self.prices)
@@ -111,20 +126,24 @@ class Electricity:
     def utcnow(self) -> datetime:
         """Return the current timestamp in the UTC timezone.
 
-        Returns:
+        Returns
+        -------
             The current timestamp in the UTC timezone.
         """
         return datetime.now(timezone.utc)
 
     def generate_timestamp_list(
-        self, prices: dict[datetime, float]
+        self,
+        prices: dict[datetime, float],
     ) -> list[dict[str, float | datetime]]:
         """Return a list of timestamps.
 
-        Args:
+        Args
+        ----
             prices: A dictionary with the hourprices.
 
-        Returns:
+        Returns
+        -------
             A list of timestamps.
         """
         timestamp_prices: list[dict[str, float | datetime]] = []
@@ -135,10 +154,12 @@ class Electricity:
     def price_at_time(self, moment: datetime) -> float | None:
         """Return the price at a specific time.
 
-        Args:
+        Args
+        ----
             moment: The time to get the price for.
 
-        Returns:
+        Returns
+        -------
             The price at the specific time.
         """
         value = _timed_value(moment, self.prices)
@@ -147,21 +168,22 @@ class Electricity:
         return None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Electricity:
+    def from_dict(cls: type[Electricity], data: dict[str, Any]) -> Electricity:
         """Create an Electricity object from a dictionary.
 
-        Args:
+        Args
+        ----
             data: A dictionary with the data from the API.
 
-        Returns:
+        Returns
+        -------
             An Electricity object.
         """
-
         prices: dict[datetime, float] = {}
         for item in data["Prices"]:
             prices[
                 datetime.strptime(item["readingDate"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                    tzinfo=timezone.utc
+                    tzinfo=timezone.utc,
                 )
             ] = item["price"]
 
@@ -180,7 +202,8 @@ class Gas:
     def current_price(self) -> float | None:
         """Return the current gas price.
 
-        Returns:
+        Returns
+        -------
             The price for the current hour.
         """
         return self.price_at_time(self.utcnow())
@@ -189,7 +212,8 @@ class Gas:
     def extreme_prices(self) -> tuple[float, float]:
         """Return the minimum and maximum price.
 
-        Returns:
+        Returns
+        -------
             The minimum and maximum price.
         """
         return min(self.prices.values()), max(self.prices.values())
@@ -198,7 +222,8 @@ class Gas:
     def average_price(self) -> float:
         """Return the average price.
 
-        Returns:
+        Returns
+        -------
             The average price.
         """
         return round(sum(self.prices.values()) / len(self.prices.values()), 2)
@@ -206,7 +231,8 @@ class Gas:
     def utcnow(self) -> datetime:
         """Return the current timestamp in the UTC timezone.
 
-        Returns:
+        Returns
+        -------
             The current timestamp in the UTC timezone.
         """
         return datetime.now(timezone.utc)
@@ -214,10 +240,12 @@ class Gas:
     def price_at_time(self, moment: datetime) -> float | None:
         """Return the price at a specific time.
 
-        Args:
+        Args
+        ----
             moment: The time to get the price for.
 
-        Returns:
+        Returns
+        -------
             The price at the specific time.
         """
         value = _timed_value(moment, self.prices)
@@ -226,21 +254,22 @@ class Gas:
         return None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Gas:
+    def from_dict(cls: type[Gas], data: dict[str, Any]) -> Gas:
         """Create a Gas object from a dictionary.
 
-        Args:
+        Args
+        ----
             data: A dictionary with the data from the API.
 
-        Returns:
+        Returns
+        -------
             A Gas object.
         """
-
         prices: dict[datetime, float] = {}
         for item in data["Prices"]:
             prices[
                 datetime.strptime(item["readingDate"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                    tzinfo=timezone.utc
+                    tzinfo=timezone.utc,
                 )
             ] = item["price"]
 
