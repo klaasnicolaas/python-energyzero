@@ -6,11 +6,11 @@ import socket
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from importlib import metadata
-from typing import Any
+from typing import Any, cast
 
-import aiohttp
 import async_timeout
-from aiohttp import hdrs
+from aiohttp.client import ClientError, ClientSession
+from aiohttp.hdrs import METH_GET
 from yarl import URL
 
 from .exceptions import (
@@ -27,7 +27,7 @@ class EnergyZero:
 
     incl_btw: str = "true"
     request_timeout: float = 10.0
-    session: aiohttp.client.ClientSession | None = None
+    session: ClientSession | None = None
 
     _close_session: bool = False
 
@@ -35,20 +35,23 @@ class EnergyZero:
         self,
         uri: str,
         *,
-        method: str = hdrs.METH_GET,
+        method: str = METH_GET,
         params: dict[str, Any] | None = None,
     ) -> Any:
         """Handle a request to the API of EnergyZero.
 
-        Args:
+        Args
+        ----
             uri: Request URI, without '/', for example, 'status'
             method: HTTP method to use, for example, 'GET'
             params: Extra options to improve or limit the response.
 
-        Returns:
+        Returns
+        -------
             A Python dictionary (json) with the response from EnergyZero.
 
-        Raises:
+        Raises
+        ------
             EnergyZeroConnectionError: An error occurred while
                 communicating with the API.
             EnergyZeroError: Received an unexpected response from
@@ -56,7 +59,7 @@ class EnergyZero:
         """
         version = metadata.version(__package__)
         url = URL.build(scheme="https", host="api.energyzero.nl", path="/v1/").join(
-            URL(uri)
+            URL(uri),
         )
 
         headers = {
@@ -65,7 +68,7 @@ class EnergyZero:
         }
 
         if self.session is None:
-            self.session = aiohttp.ClientSession()
+            self.session = ClientSession()
             self._close_session = True
 
         try:
@@ -79,38 +82,46 @@ class EnergyZero:
                 )
                 response.raise_for_status()
         except asyncio.TimeoutError as exception:
+            msg = "Timeout occurred while connecting to the API."
             raise EnergyZeroConnectionError(
-                "Timeout occurred while connecting to the API."
+                msg,
             ) from exception
-        except (aiohttp.ClientError, socket.gaierror) as exception:
+        except (ClientError, socket.gaierror) as exception:
+            msg = "Error occurred while communicating with the API."
             raise EnergyZeroConnectionError(
-                "Error occurred while communicating with the API."
+                msg,
             ) from exception
 
         content_type = response.headers.get("Content-Type", "")
         if "application/json" not in content_type:
             text = await response.text()
+            msg = "Unexpected content type response from the EnergyZero API"
             raise EnergyZeroError(
-                "Unexpected content type response from the EnergyZero API",
+                msg,
                 {"Content-Type": content_type, "response": text},
             )
 
-        return await response.json()
+        return cast(dict[str, Any], await response.json())
 
     async def gas_prices(
-        self, start_date: date, end_date: date, interval: int = 4
+        self,
+        start_date: date,
+        end_date: date,
+        interval: int = 4,
     ) -> Gas:
         """Get gas prices for a given period.
 
-        Args:
+        Args
             start_date: Start date of the period.
             end_date: End date of the period.
             interval: Interval of the prices.
 
-        Returns:
+        Returns
+        -------
             A Python dictionary with the response from EnergyZero.
 
-        Raises:
+        Raises
+        ------
             EnergyZeroNoDataError: No gas prices found for this period.
         """
         start_date_utc: datetime
@@ -119,18 +130,42 @@ class EnergyZero:
         if utcnow.hour >= 5 and utcnow.hour <= 22:
             # Set start_date to 05:00:00 and the end_date to 04:59:59 UTC next day
             start_date_utc = datetime(
-                start_date.year, start_date.month, start_date.day, 5, 0, 0
+                start_date.year,
+                start_date.month,
+                start_date.day,
+                5,
+                0,
+                0,
+                tzinfo=timezone.utc,
             )
             end_date_utc = datetime(
-                end_date.year, end_date.month, end_date.day, 4, 59, 59
+                end_date.year,
+                end_date.month,
+                end_date.day,
+                4,
+                59,
+                59,
+                tzinfo=timezone.utc,
             ) + timedelta(days=1)
         else:
             # Set start_date to 05:00:00 prev day and the end_date to 04:59:59 UTC
             start_date_utc = datetime(
-                start_date.year, start_date.month, start_date.day, 5, 0, 0
+                start_date.year,
+                start_date.month,
+                start_date.day,
+                5,
+                0,
+                0,
+                tzinfo=timezone.utc,
             ) - timedelta(days=1)
             end_date_utc = datetime(
-                end_date.year, end_date.month, end_date.day, 4, 59, 59
+                end_date.year,
+                end_date.month,
+                end_date.day,
+                4,
+                59,
+                59,
+                tzinfo=timezone.utc,
             )
 
         data = await self._request(
@@ -145,31 +180,50 @@ class EnergyZero:
         )
 
         if data["Prices"] == []:
-            raise EnergyZeroNoDataError("No gas prices found for this period.")
+            msg = "No gas prices found for this period."
+            raise EnergyZeroNoDataError(msg)
         return Gas.from_dict(data)
 
     async def energy_prices(
-        self, start_date: date, end_date: date, interval: int = 4
+        self,
+        start_date: date,
+        end_date: date,
+        interval: int = 4,
     ) -> Electricity:
         """Get energy prices for a given period.
 
-        Args:
+        Args
+        ----
             start_date: Start date of the period.
             end_date: End date of the period.
             interval: Interval of the prices.
 
-        Returns:
+        Returns
+        -------
             A Python dictionary with the response from EnergyZero.
 
-        Raises:
+        Raises
+        ------
             EnergyZeroNoDataError: No energy prices found for this period.
         """
         # Set the start date to 23:00:00 previous day and the end date to 22:59:59 UTC
         start_date_utc: datetime = datetime(
-            start_date.year, start_date.month, start_date.day, 0, 0, 0
+            start_date.year,
+            start_date.month,
+            start_date.day,
+            0,
+            0,
+            0,
+            tzinfo=timezone.utc,
         ) - timedelta(hours=1)
         end_date_utc: datetime = datetime(
-            end_date.year, end_date.month, end_date.day, 22, 59, 59
+            end_date.year,
+            end_date.month,
+            end_date.day,
+            22,
+            59,
+            59,
+            tzinfo=timezone.utc,
         )
         data = await self._request(
             "energyprices",
@@ -183,7 +237,8 @@ class EnergyZero:
         )
 
         if data["Prices"] == []:
-            raise EnergyZeroNoDataError("No energy prices found for this period.")
+            msg = "No energy prices found for this period."
+            raise EnergyZeroNoDataError(msg)
         return Electricity.from_dict(data)
 
     async def close(self) -> None:
@@ -194,7 +249,8 @@ class EnergyZero:
     async def __aenter__(self) -> EnergyZero:
         """Async enter.
 
-        Returns:
+        Returns
+        -------
             The EnergyZero object.
         """
         return self
@@ -203,6 +259,7 @@ class EnergyZero:
         """Async exit.
 
         Args:
+        ----
             _exc_info: Exec type.
         """
         await self.close()
