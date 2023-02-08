@@ -61,6 +61,11 @@ repos:
         language: system
         types: [toml]
         entry: poetry run check-toml
+      - id: check-xml
+        name: ✅ Check XML files
+        entry: check-xml
+        language: system
+        types: [xml]
       - id: check-yaml
         name: ✅ Check YAML files
         language: system
@@ -121,7 +126,7 @@ repos:
         entry: poetry run trailing-whitespace-fixer
         stages: [commit, push, manual]
       - id: yamllint
-        name: 🎗  Check YAML files with yamllint
+        name: 🎗 Check YAML files with yamllint
         language: system
         types: [yaml]
         entry: poetry run yamllint
