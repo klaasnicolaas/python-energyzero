@@ -40,17 +40,17 @@ class EnergyZero:
     ) -> Any:
         """Handle a request to the API of EnergyZero.
 
-        Args
+        Args:
         ----
             uri: Request URI, without '/', for example, 'status'
             method: HTTP method to use, for example, 'GET'
             params: Extra options to improve or limit the response.
 
-        Returns
+        Returns:
         -------
             A Python dictionary (json) with the response from EnergyZero.
 
-        Raises
+        Raises:
         ------
             EnergyZeroConnectionError: An error occurred while
                 communicating with the API.
@@ -111,16 +111,17 @@ class EnergyZero:
     ) -> Gas:
         """Get gas prices for a given period.
 
-        Args
+        Args:
+        ----
             start_date: Start date of the period.
             end_date: End date of the period.
             interval: Interval of the prices.
 
-        Returns
+        Returns:
         -------
             A Python dictionary with the response from EnergyZero.
 
-        Raises
+        Raises:
         ------
             EnergyZeroNoDataError: No gas prices found for this period.
         """
@@ -192,17 +193,17 @@ class EnergyZero:
     ) -> Electricity:
         """Get energy prices for a given period.
 
-        Args
+        Args:
         ----
             start_date: Start date of the period.
             end_date: End date of the period.
             interval: Interval of the prices.
 
-        Returns
+        Returns:
         -------
             A Python dictionary with the response from EnergyZero.
 
-        Raises
+        Raises:
         ------
             EnergyZeroNoDataError: No energy prices found for this period.
         """

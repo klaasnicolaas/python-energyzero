@@ -12,12 +12,12 @@ if TYPE_CHECKING:
 def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | None:
     """Return a function that returns a value at a specific time.
 
-    Args
+    Args:
     ----
         moment: The time to get the value for.
         prices: A dictionary with the prices.
 
-    Returns
+    Returns:
     -------
         The value at the time.
     """
@@ -34,12 +34,12 @@ def _get_pricetime(
 ) -> datetime:
     """Return the time of the price.
 
-    Args
+    Args:
     ----
         prices: A dictionary with the hourprices.
         func: A function to get the time.
 
-    Returns
+    Returns:
     -------
         The time of the price.
     """
@@ -138,11 +138,11 @@ class Electricity:
     ) -> list[dict[str, float | datetime]]:
         """Return a list of timestamps.
 
-        Args
+        Args:
         ----
             prices: A dictionary with the hourprices.
 
-        Returns
+        Returns:
         -------
             A list of timestamps.
         """
@@ -154,11 +154,11 @@ class Electricity:
     def price_at_time(self, moment: datetime) -> float | None:
         """Return the price at a specific time.
 
-        Args
+        Args:
         ----
             moment: The time to get the price for.
 
-        Returns
+        Returns:
         -------
             The price at the specific time.
         """
@@ -171,11 +171,11 @@ class Electricity:
     def from_dict(cls: type[Electricity], data: dict[str, Any]) -> Electricity:
         """Create an Electricity object from a dictionary.
 
-        Args
+        Args:
         ----
             data: A dictionary with the data from the API.
 
-        Returns
+        Returns:
         -------
             An Electricity object.
         """
@@ -240,11 +240,11 @@ class Gas:
     def price_at_time(self, moment: datetime) -> float | None:
         """Return the price at a specific time.
 
-        Args
+        Args:
         ----
             moment: The time to get the price for.
 
-        Returns
+        Returns:
         -------
             The price at the specific time.
         """
@@ -257,11 +257,11 @@ class Gas:
     def from_dict(cls: type[Gas], data: dict[str, Any]) -> Gas:
         """Create a Gas object from a dictionary.
 
-        Args
+        Args:
         ----
             data: A dictionary with the data from the API.
 
-        Returns
+        Returns:
         -------
             A Gas object.
         """
