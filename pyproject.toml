@@ -41,7 +41,7 @@ black = "^22.12"
 blacken-docs = "^1.13.0"
 codespell = "^2.2.2"
 coverage = {version = ">=7.2,<8.0", extras = ["toml"]}
-mypy = ">=0.991,<1.2"
+mypy = ">=1.0,<1.2"
 pre-commit = "^3.0.3"
 pre-commit-hooks = "^4.4.0"
 pylint = "^2.16.1"
