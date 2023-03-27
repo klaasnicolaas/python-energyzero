@@ -51,7 +51,7 @@ pytest-cov = "^4.0.0"
 pytest-freezer = "^0.4.6"
 safety = "^2.3.5"
 yamllint = "^1.29.0"
-pytz = "^2022.6"
+pytz = ">=2022.6,<2024.0"
 covdefaults = "^2.2.2"
 types-pytz = ">=2022.7.1,<2024.0.0"
 
