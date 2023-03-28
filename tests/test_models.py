@@ -76,6 +76,32 @@ async def test_electricity_none_date(aresponses: ResponsesMockServer) -> None:
         assert energy.average_price == 0.37
 
 
+@pytest.mark.freeze_time("2022-12-07 00:30:00+02:00")
+async def test_electricity_midnight_cest(aresponses: ResponsesMockServer) -> None:
+    """Test the electricity model between 00:00 and 01:00 with in CEST."""
+    aresponses.add(
+        "api.energyzero.nl",
+        "/v1/energyprices",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixtures("energy.json"),
+        ),
+    )
+    async with ClientSession() as session:
+        today = date(2022, 12, 7)
+        client = EnergyZero(session=session)
+        energy: Electricity = await client.energy_prices(
+            start_date=today,
+            end_date=today,
+        )
+        assert energy is not None
+        assert isinstance(energy, Electricity)
+        # Price at 22:30:00 UTC
+        assert energy.current_price == 0.31
+
+
 async def test_no_electricity_data(aresponses: ResponsesMockServer) -> None:
     """Raise exception when there is no data."""
     aresponses.add(
