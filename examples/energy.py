@@ -12,8 +12,8 @@ async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
     async with EnergyZero() as client:
         local = pytz.timezone("CET")
-        today = date(2023, 2, 8)
-        tomorrow = date(2023, 2, 9)
+        today = date(2023, 3, 29)
+        tomorrow = date(2023, 3, 29)
 
         energy_today = await client.energy_prices(start_date=today, end_date=today)
         energy_tomorrow = await client.energy_prices(

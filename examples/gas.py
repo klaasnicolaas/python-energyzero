@@ -9,7 +9,7 @@ from energyzero import EnergyZero
 async def main() -> None:
     """Show example on fetching the gas prices from EnergyZero."""
     async with EnergyZero() as client:
-        today = date(2023, 2, 8)
+        today = date(2023, 3, 28)
 
         gas_today = await client.gas_prices(start_date=today, end_date=today)
         print()

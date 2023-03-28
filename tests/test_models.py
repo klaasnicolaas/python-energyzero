@@ -10,9 +10,9 @@ from energyzero import Electricity, EnergyZero, EnergyZeroNoDataError, Gas
 from . import load_fixtures
 
 
-@pytest.mark.freeze_time("2022-12-07 14:00:00 UTC")
+@pytest.mark.freeze_time("2022-12-07 15:00:00+01:00")
 async def test_electricity_model(aresponses: ResponsesMockServer) -> None:
-    """Test the electricity model at 14:00:00 UTC."""
+    """Test the electricity model at 15:00:00 CET."""
     aresponses.add(
         "api.energyzero.nl",
         "/v1/energyprices",
@@ -76,6 +76,32 @@ async def test_electricity_none_date(aresponses: ResponsesMockServer) -> None:
         assert energy.average_price == 0.37
 
 
+@pytest.mark.freeze_time("2022-12-07 00:30:00+02:00")
+async def test_electricity_midnight_cest(aresponses: ResponsesMockServer) -> None:
+    """Test the electricity model between 00:00 and 01:00 with in CEST."""
+    aresponses.add(
+        "api.energyzero.nl",
+        "/v1/energyprices",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixtures("energy.json"),
+        ),
+    )
+    async with ClientSession() as session:
+        today = date(2022, 12, 7)
+        client = EnergyZero(session=session)
+        energy: Electricity = await client.energy_prices(
+            start_date=today,
+            end_date=today,
+        )
+        assert energy is not None
+        assert isinstance(energy, Electricity)
+        # Price at 22:30:00 UTC
+        assert energy.current_price == 0.31
+
+
 async def test_no_electricity_data(aresponses: ResponsesMockServer) -> None:
     """Raise exception when there is no data."""
     aresponses.add(
@@ -95,9 +121,9 @@ async def test_no_electricity_data(aresponses: ResponsesMockServer) -> None:
             await client.energy_prices(start_date=today, end_date=today)
 
 
-@pytest.mark.freeze_time("2022-12-07 14:00:00 UTC")
+@pytest.mark.freeze_time("2022-12-07 15:00:00+01:00")
 async def test_gas_model(aresponses: ResponsesMockServer) -> None:
-    """Test the gas model at 14:00:00 UTC."""
+    """Test the gas model at 15:00:00 CET."""
     aresponses.add(
         "api.energyzero.nl",
         "/v1/energyprices",
@@ -123,9 +149,9 @@ async def test_gas_model(aresponses: ResponsesMockServer) -> None:
         assert gas.price_at_time(next_hour) == 1.47
 
 
-@pytest.mark.freeze_time("2022-12-07 03:00:00 UTC")
+@pytest.mark.freeze_time("2022-12-07 04:00:00+01:00")
 async def test_gas_morning_model(aresponses: ResponsesMockServer) -> None:
-    """Test the gas model in the morning at 03:00:00 UTC."""
+    """Test the gas model in the morning at 04:00:00 CET."""
     aresponses.add(
         "api.energyzero.nl",
         "/v1/energyprices",
