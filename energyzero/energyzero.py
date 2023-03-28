@@ -207,30 +207,31 @@ class EnergyZero:
         ------
             EnergyZeroNoDataError: No energy prices found for this period.
         """
-        # Set the start date to 23:00:00 previous day and the end date to 22:59:59 UTC
-        start_date_utc: datetime = datetime(
+        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        # Set start_date to 00:00:00 and the end_date to 23:59:59 and convert to UTC
+        utc_start_date = datetime(
             start_date.year,
             start_date.month,
             start_date.day,
             0,
             0,
             0,
-            tzinfo=timezone.utc,
-        ) - timedelta(hours=1)
-        end_date_utc: datetime = datetime(
+            tzinfo=local_tz,
+        ).astimezone(timezone.utc)
+        utc_end_date = datetime(
             end_date.year,
             end_date.month,
             end_date.day,
-            22,
+            23,
             59,
             59,
-            tzinfo=timezone.utc,
-        )
+            tzinfo=local_tz,
+        ).astimezone(timezone.utc)
         data = await self._request(
             "energyprices",
             params={
-                "fromDate": start_date_utc.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
-                "tillDate": end_date_utc.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
+                "fromDate": utc_start_date.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+                "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 1,
                 "inclBtw": self.incl_btw.lower(),
