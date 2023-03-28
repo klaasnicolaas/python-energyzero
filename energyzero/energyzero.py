@@ -125,55 +125,56 @@ class EnergyZero:
         ------
             EnergyZeroNoDataError: No gas prices found for this period.
         """
-        start_date_utc: datetime
-        end_date_utc: datetime
-        utcnow: datetime = datetime.now(timezone.utc)
-        if utcnow.hour >= 5 and utcnow.hour <= 22:
-            # Set start_date to 05:00:00 and the end_date to 04:59:59 UTC next day
-            start_date_utc = datetime(
-                start_date.year,
-                start_date.month,
-                start_date.day,
-                5,
-                0,
-                0,
-                tzinfo=timezone.utc,
-            )
-            end_date_utc = datetime(
-                end_date.year,
-                end_date.month,
-                end_date.day,
-                4,
-                59,
-                59,
-                tzinfo=timezone.utc,
-            ) + timedelta(days=1)
-        else:
-            # Set start_date to 05:00:00 prev day and the end_date to 04:59:59 UTC
-            start_date_utc = datetime(
-                start_date.year,
-                start_date.month,
-                start_date.day,
-                5,
-                0,
-                0,
-                tzinfo=timezone.utc,
-            ) - timedelta(days=1)
-            end_date_utc = datetime(
-                end_date.year,
-                end_date.month,
-                end_date.day,
-                4,
-                59,
-                59,
-                tzinfo=timezone.utc,
-            )
+        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        now: datetime = datetime.now(tz=local_tz)
 
+        if now.hour >= 6 and now.hour <= 23:
+            # Set start_date to 06:00:00 and the end_date to 05:59:59 next day
+            # Convert to UTC time 04:00:00 and 03:59:59 next day
+            utc_start_date = datetime(
+                start_date.year,
+                start_date.month,
+                start_date.day,
+                6,
+                0,
+                0,
+                tzinfo=local_tz,
+            ).astimezone(timezone.utc)
+            utc_end_date = datetime(
+                end_date.year,
+                end_date.month,
+                end_date.day,
+                5,
+                59,
+                59,
+                tzinfo=local_tz,
+            ).astimezone(timezone.utc) + timedelta(days=1)
+        else:
+            # Set start_date to 06:00:00 prev day and the end_date to 05:59:59
+            # Convert to UTC time 04:00:00 prev day and 03:59:59 current day
+            utc_start_date = datetime(
+                start_date.year,
+                start_date.month,
+                start_date.day,
+                6,
+                0,
+                0,
+                tzinfo=local_tz,
+            ).astimezone(timezone.utc) - timedelta(days=1)
+            utc_end_date = datetime(
+                end_date.year,
+                end_date.month,
+                end_date.day,
+                5,
+                59,
+                59,
+                tzinfo=local_tz,
+            ).astimezone(timezone.utc)
         data = await self._request(
             "energyprices",
             params={
-                "fromDate": start_date_utc.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
-                "tillDate": end_date_utc.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
+                "fromDate": utc_start_date.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+                "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 3,
                 "inclBtw": self.incl_btw.lower(),
