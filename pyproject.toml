@@ -35,7 +35,7 @@ yarl = ">=1.6.0"
 Changelog = "https://github.com/klaasnicolaas/python-energyzero/releases"
 
 [tool.poetry.group.dev.dependencies]
-ruff = ">=0.0.243,<0.0.263"
+ruff = ">=0.0.243,<0.0.264"
 aresponses = "^2.1.6"
 black = "^22.12"
 blacken-docs = "^1.13.0"
