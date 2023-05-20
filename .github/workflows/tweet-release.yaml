@@ -1,6 +1,7 @@
 ---
 name: Tweet on Release
 
+# yamllint disable rule:line-length
 # yamllint disable-line rule:truthy
 on:
   release:
