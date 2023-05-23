@@ -53,7 +53,7 @@ pytest-freezer = "0.4.6"
 pytz = "2023.3"
 ruff = "0.0.269"
 types-pytz = "2023.3.0.0"
-yamllint = "1.31.0"
+yamllint = "1.32.0"
 
 [tool.coverage.run]
 plugins = ["covdefaults"]
