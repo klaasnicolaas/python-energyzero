@@ -1,0 +1,6 @@
+---
+blank_issues_enabled: true
+contact_links:
+  - name: ❓ Ask a Question
+    url: https://github.com/klaasnicolaas/python-energyzero/discussions/new/choose
+    about: We use GitHub issues for tracking bugs / feature requests, check discussions for questions.
