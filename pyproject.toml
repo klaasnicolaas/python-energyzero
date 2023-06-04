@@ -23,7 +23,7 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 packages = [
-  { include = "energyzero" }
+  { include = "energyzero", from = "src"},
 ]
 
 [tool.poetry.dependencies]
