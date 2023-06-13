@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: release
     steps:
-      - uses: Eomm/why-don-t-you-tweet@v1
+      - uses: Eomm/why-don-t-you-tweet@v1.1.0
         with:
           # GitHub event payload
           # https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#release
