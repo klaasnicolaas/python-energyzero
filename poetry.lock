@@ -1062,13 +1062,13 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 
 [[package]]
 name = "pytest-freezer"
-version = "0.4.6"
+version = "0.4.7"
 description = "Pytest plugin providing a fixture interface for spulec/freezegun"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "pytest_freezer-0.4.6-py3-none-any.whl", hash = "sha256:ca549c30a7e12bc7b242978b6fa0bb91e73cd1bd7d5b2bb658f0f9d7f1694cac"},
-    {file = "pytest_freezer-0.4.6.tar.gz", hash = "sha256:8e88cd571d3ba10dd9e0cc09897eb01c32a37bef5ca4ff7c4ea8598c91aa6d96"},
+    {file = "pytest_freezer-0.4.7-py3-none-any.whl", hash = "sha256:e4cb3dcf10d16c15b445be4a710c85b56aaa8110f6ee6ee7b88ab85c462023b1"},
+    {file = "pytest_freezer-0.4.7.tar.gz", hash = "sha256:f9241ae5547110558f90394d8a51e216d1247a31f3c2518b1a70082f355f4864"},
 ]
 
 [package.dependencies]
@@ -1522,4 +1522,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "85fcb6cc52283a9c564547f6d44d0fc3515c9ca8ed316062e374cef521581b48"
+content-hash = "1ba3433f4ce8592abf513c533730eea8c78c3b42b0b96030d0cd1a871f33c0b6"
