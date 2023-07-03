@@ -147,10 +147,10 @@ class Electricity:
         -------
             A list of timestamps.
         """
-        timestamp_prices: list[dict[str, float | datetime]] = []
-        for timestamp, price in prices.items():
-            timestamp_prices.append({"timestamp": timestamp, "price": price})
-        return timestamp_prices
+        return [
+            {"timestamp": timestamp, "price": price}
+            for timestamp, price in prices.items()
+        ]
 
     def price_at_time(self, moment: datetime) -> float | None:
         """Return the price at a specific time.
