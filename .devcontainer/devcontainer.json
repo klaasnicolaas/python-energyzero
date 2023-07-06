@@ -1,0 +1,65 @@
+{
+  "name": "${containerWorkspaceFolderBasename}",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["README.md"]
+    },
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.vscode-github-actions",
+        "GitHub.vscode-pull-request-github",
+        "Tyriar.sort-lines",
+        "charliermarsh.ruff",
+        "esbenp.prettier-vscode",
+        "mhutchie.git-graph",
+        "ms-python.python",
+        "oderwat.indent-rainbow",
+        "redhat.vscode-yaml",
+        "ryanluker.vscode-coverage-gutters"
+      ],
+      "settings": {
+        "[python]": {
+          "editor.codeActionsOnSave": {
+            "source.fixAll": true,
+            "source.organizeImports": true
+          }
+        },
+        "coverage-gutters.customizable.context-menu": true,
+        "coverage-gutters.customizable.status-bar-toggler-watchCoverageAndVisibleEditors-enabled": true,
+        "coverage-gutters.showGutterCoverage": false,
+        "coverage-gutters.showLineCoverage": true,
+        "coverage-gutters.xmlname": "coverage.xml",
+        "python.analysis.extraPaths": ["${workspaceFolder}/src"],
+        "python.defaultInterpreterPath": ".venv/bin/python",
+        "python.formatting.provider": "black",
+        "python.linting.enabled": true,
+        "python.linting.mypyEnabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.testing.cwd": "${workspaceFolder}",
+        "python.testing.pytestArgs": ["--cov-report=xml"],
+        "python.testing.pytestEnabled": true,
+        "ruff.importStrategy": "fromEnvironment",
+        "ruff.interpreter": [".venv/bin/python"],
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-contrib/features/poetry:2": {},
+    "ghcr.io/devcontainers-contrib/features/pre-commit:2": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installOhMyZsh": true
+    },
+    "ghcr.io/devcontainers-contrib/features/zsh-plugins:0": {
+      "plugins": "git zsh-autosuggestions zsh-syntax-highlighting zsh-completions",
+      "omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions.git https://github.com/zsh-users/zsh-syntax-highlighting.git https://github.com/zsh-users/zsh-completions.git"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "installTools": false
+    }
+  }
+}
