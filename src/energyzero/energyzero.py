@@ -6,7 +6,7 @@ import socket
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from importlib import metadata
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import async_timeout
 from aiohttp.client import ClientError, ClientSession
@@ -19,6 +19,9 @@ from .exceptions import (
     EnergyZeroNoDataError,
 )
 from .models import Electricity, Gas
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 @dataclass
@@ -249,7 +252,7 @@ class EnergyZero:
         if self.session and self._close_session:
             await self.session.close()
 
-    async def __aenter__(self) -> EnergyZero:
+    async def __aenter__(self) -> Self:
         """Async enter.
 
         Returns
@@ -258,7 +261,7 @@ class EnergyZero:
         """
         return self
 
-    async def __aexit__(self, *_exc_info: Any) -> None:
+    async def __aexit__(self, *_exc_info: object) -> None:
         """Async exit.
 
         Args:
