@@ -54,6 +54,7 @@ The energy prices are different every hour, after 15:00 (more usually already at
 - Time of highest price (datetime)
 - Time of lowest price (datetime)
 - Percentage of the current price compared to the maximum price
+- Number of hours with the current price or lower (int)
 
 ### Gas prices
 
