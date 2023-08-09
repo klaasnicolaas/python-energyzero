@@ -124,6 +124,17 @@ class Electricity:
         """
         return self.generate_timestamp_list(self.prices)
 
+    @property
+    def hours_priced_equal_or_lower(self) -> int:
+        """Return the number of hours with prices equal or lower than the current price.
+
+        Returns
+        -------
+            The number of hours with prices equal or lower than the current price.
+        """
+        current: float = self.current_price or 0
+        return sum(price <= current for price in self.prices.values())
+
     def utcnow(self) -> datetime:
         """Return the current timestamp in the UTC timezone.
 

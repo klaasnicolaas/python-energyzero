@@ -49,6 +49,7 @@ async def test_electricity_model(aresponses: ResponsesMockServer) -> None:
         ).replace(tzinfo=timezone.utc)
         assert energy.pct_of_max_price == 87.27
         assert isinstance(energy.timestamp_prices, list)
+        assert energy.hours_priced_equal_or_lower == 23
 
 
 async def test_electricity_none_date(aresponses: ResponsesMockServer) -> None:
