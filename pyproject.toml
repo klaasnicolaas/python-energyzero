@@ -52,7 +52,7 @@ pytest-cov = "4.1.0"
 pytest-freezer = "0.4.8"
 pytz = "2023.3"
 ruff = "0.0.284"
-types-pytz = "2023.3.0.0"
+types-pytz = "2023.3.0.1"
 yamllint = "1.32.0"
 
 [tool.coverage.run]
