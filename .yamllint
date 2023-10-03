@@ -1,6 +1,7 @@
 ---
 ignore: |
   .venv/lib
+  .copier-answers.yml
 rules:
   braces:
     level: error
