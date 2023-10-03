@@ -4,7 +4,7 @@
   description: "A breaking change for existing users."
 - name: "bug"
   color: fc2929
-  description: "Inconsistencies or issues which will cause a problem for users or implementors."
+  description: "Inconsistencies or issues which will cause a problem for users."
 - name: "bugfix"
   color: ededed
   description: "Fixing a bug."
