@@ -76,7 +76,7 @@ from energyzero import EnergyZero
 
 async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
-    async with EnergyZero(incl_btw="true") as client:
+    async with EnergyZero(incl_vat=True) as client:
         start_date = date(2022, 12, 7)
         end_date = date(2022, 12, 7)
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
 | Parameter | value Type | Description |
 | :-------- | :--------- | :---------- |
-| `incl_btw` | str (default: **true**) | Include or exclude BTW |
+| `incl_vat` | bool (default: **True**) | Include or exclude VAT |
 
 ### Function Parameters
 

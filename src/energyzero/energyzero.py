@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 class EnergyZero:
     """Main class for handling data fetching from EnergyZero."""
 
-    incl_btw: str = "true"
+    incl_vat: bool = True
     request_timeout: float = 10.0
     session: ClientSession | None = None
 
@@ -180,7 +180,7 @@ class EnergyZero:
                 "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 3,
-                "inclBtw": self.incl_btw.lower(),
+                "inclBtw": "true" if self.incl_vat else "false",
             },
         )
 
@@ -238,7 +238,7 @@ class EnergyZero:
                 "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 1,
-                "inclBtw": self.incl_btw.lower(),
+                "inclBtw": "true" if self.incl_vat else "false",
             },
         )
 
