@@ -54,8 +54,10 @@ jobs:
           poetry config virtualenvs.in-project true
       - name: 🏗 Install Python dependencies
         run: poetry install --no-interaction
-      - name: 🚀 Run Ruff
-        run: poetry run ruff .
+      - name: 🚀 Run Ruff linter
+        run: poetry run ruff check --output-format=github .
+      - name: 🚀 Run Ruff formatter
+        run: poetry run ruff format --check .
 
   black:
     name: black
