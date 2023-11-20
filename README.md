@@ -214,7 +214,7 @@ SOFTWARE.
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2023.svg
 [maintainability-shield]: https://api.codeclimate.com/v1/badges/615e7a78f1a6191d4731/maintainability
 [maintainability-url]: https://codeclimate.com/github/klaasnicolaas/python-energyzero/maintainability
-[project-stage-shield]: https://img.shields.io/badge/project%20stage-experimental-yellow.svg
+[project-stage-shield]: https://img.shields.io/badge/project%20stage-production%20ready-brightgreen.svg
 [pypi]: https://pypi.org/project/energyzero/
 [python-versions-shield]: https://img.shields.io/pypi/pyversions/energyzero
 [typing-shield]: https://github.com/klaasnicolaas/python-energyzero/actions/workflows/typing.yaml/badge.svg
