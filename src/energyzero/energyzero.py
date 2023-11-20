@@ -6,7 +6,7 @@ import socket
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from importlib import metadata
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, Self, cast
 
 import async_timeout
 from aiohttp.client import ClientError, ClientSession
@@ -19,9 +19,6 @@ from .exceptions import (
     EnergyZeroNoDataError,
 )
 from .models import Electricity, Gas
-
-if TYPE_CHECKING:
-    from typing_extensions import Self
 
 
 @dataclass
