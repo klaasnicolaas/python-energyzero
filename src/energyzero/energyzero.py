@@ -8,7 +8,6 @@ from datetime import date, datetime, timedelta, timezone
 from importlib import metadata
 from typing import Any, Self, cast
 
-import async_timeout
 from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET
 from yarl import URL
@@ -72,7 +71,7 @@ class EnergyZero:
             self._close_session = True
 
         try:
-            async with async_timeout.timeout(self.request_timeout):
+            async with asyncio.timeout(self.request_timeout):
                 response = await self.session.request(
                     method,
                     url,
