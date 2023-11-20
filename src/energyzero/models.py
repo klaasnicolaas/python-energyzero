@@ -3,10 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
+from typing import Any, Callable
 
 
 def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | None:
@@ -52,6 +49,7 @@ class Electricity:
     """Object representing electricity data."""
 
     prices: dict[datetime, float]
+    average_price: float
 
     @property
     def current_price(self) -> float | None:
@@ -72,16 +70,6 @@ class Electricity:
             The minimum and maximum price.
         """
         return min(self.prices.values()), max(self.prices.values())
-
-    @property
-    def average_price(self) -> float:
-        """Return the average price.
-
-        Returns
-        -------
-            The average price.
-        """
-        return round(sum(self.prices.values()) / len(self.prices.values()), 2)
 
     @property
     def highest_price_time(self) -> datetime:
@@ -201,6 +189,7 @@ class Electricity:
 
         return cls(
             prices=prices,
+            average_price=data["average"],
         )
 
 
@@ -209,6 +198,7 @@ class Gas:
     """Object representing gas data."""
 
     prices: dict[datetime, float]
+    average_price: float
 
     @property
     def current_price(self) -> float | None:
@@ -229,16 +219,6 @@ class Gas:
             The minimum and maximum price.
         """
         return min(self.prices.values()), max(self.prices.values())
-
-    @property
-    def average_price(self) -> float:
-        """Return the average price.
-
-        Returns
-        -------
-            The average price.
-        """
-        return round(sum(self.prices.values()) / len(self.prices.values()), 2)
 
     def utcnow(self) -> datetime:
         """Return the current timestamp in the UTC timezone.
@@ -287,4 +267,5 @@ class Gas:
 
         return cls(
             prices=prices,
+            average_price=data["average"],
         )

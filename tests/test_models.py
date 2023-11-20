@@ -143,7 +143,7 @@ async def test_gas_model(aresponses: ResponsesMockServer) -> None:
         assert isinstance(gas, Gas)
         assert gas.extreme_prices[1] == 1.47
         assert gas.extreme_prices[0] == 1.43
-        assert gas.average_price == 1.45
+        assert gas.average_price == 1.46
         assert gas.current_price == 1.47
         # The next hour price
         next_hour = datetime(2022, 12, 7, 15, 0, tzinfo=timezone.utc)
@@ -170,7 +170,7 @@ async def test_gas_morning_model(aresponses: ResponsesMockServer) -> None:
         assert gas is not None
         assert isinstance(gas, Gas)
         assert gas.current_price == 1.45
-        assert gas.average_price == 1.45
+        assert gas.average_price == 1.46
 
 
 async def test_gas_none_date(aresponses: ResponsesMockServer) -> None:
@@ -192,7 +192,7 @@ async def test_gas_none_date(aresponses: ResponsesMockServer) -> None:
         assert gas is not None
         assert isinstance(gas, Gas)
         assert gas.current_price is None
-        assert gas.average_price == 1.45
+        assert gas.average_price == 1.46
 
 
 async def test_no_gas_data(aresponses: ResponsesMockServer) -> None:
