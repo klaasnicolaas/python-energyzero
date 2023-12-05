@@ -12,6 +12,7 @@ from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET
 from yarl import URL
 
+from .const import VatCategory
 from .exceptions import (
     EnergyZeroConnectionError,
     EnergyZeroError,
@@ -24,7 +25,7 @@ from .models import Electricity, Gas
 class EnergyZero:
     """Main class for handling data fetching from EnergyZero."""
 
-    incl_vat: bool = True
+    vat: VatCategory = VatCategory.INCL
     request_timeout: float = 10.0
     session: ClientSession | None = None
 
@@ -107,6 +108,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
+        vat: VatCategory | None = None,
     ) -> Gas:
         """Get gas prices for a given period.
 
@@ -115,6 +117,7 @@ class EnergyZero:
             start_date: Start date of the period.
             end_date: End date of the period.
             interval: Interval of the prices.
+            vat: VAT category.
 
         Returns:
         -------
@@ -176,7 +179,7 @@ class EnergyZero:
                 "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 3,
-                "inclBtw": "true" if self.incl_vat else "false",
+                "inclBtw": vat.value if vat is not None else self.vat.value,
             },
         )
 
@@ -190,6 +193,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
+        vat: VatCategory | None = None,
     ) -> Electricity:
         """Get energy prices for a given period.
 
@@ -198,6 +202,7 @@ class EnergyZero:
             start_date: Start date of the period.
             end_date: End date of the period.
             interval: Interval of the prices.
+            vat: VAT category.
 
         Returns:
         -------
@@ -234,7 +239,7 @@ class EnergyZero:
                 "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 1,
-                "inclBtw": "true" if self.incl_vat else "false",
+                "inclBtw": vat.value if vat is not None else self.vat.value,
             },
         )
 
