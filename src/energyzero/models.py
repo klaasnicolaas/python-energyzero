@@ -45,7 +45,7 @@ def _get_pricetime(
     return func(prices, key=prices.get)  # type: ignore[call-arg]
 
 
-class IncludeVat(Enum):
+class VatOption(Enum):
     """Enum representing whether to include VAT or not."""
 
     INCLUDE = "true"

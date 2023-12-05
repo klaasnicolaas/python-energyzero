@@ -17,7 +17,7 @@ from .exceptions import (
     EnergyZeroError,
     EnergyZeroNoDataError,
 )
-from .models import Electricity, Gas, IncludeVat
+from .models import Electricity, Gas, VatOption
 
 
 @dataclass
@@ -106,7 +106,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
-        incl_vat: IncludeVat = IncludeVat.INCLUDE,
+        incl_vat: VatOption = VatOption.INCLUDE,
     ) -> Gas:
         """Get gas prices for a given period.
 
@@ -190,7 +190,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
-        incl_vat: IncludeVat = IncludeVat.INCLUDE,
+        incl_vat: VatOption = VatOption.INCLUDE,
     ) -> Electricity:
         """Get energy prices for a given period.
 

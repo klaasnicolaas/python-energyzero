@@ -94,7 +94,7 @@ if __name__ == "__main__":
 | :-------- | :--------- | :---------- |
 | `start_date` | datetime | The start date of the selected period |
 | `end_date` | datetime | The end date of the selected period |
-| `incl_vat` | bool (default: **True**) | Include or exclude VAT |
+| `incl_vat` | VatOption (default: **VatOption.INCLUDE**) | Include or exclude VAT (**VatOption.INCLUDE**, **VatOption.EXCLUDE**) |
 | `interval` | integer (default: **4**) | The interval of data return (**day**, **week**, **month**, **year**) |
 
 **Interval**
