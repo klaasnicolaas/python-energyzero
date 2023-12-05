@@ -17,7 +17,7 @@ from .exceptions import (
     EnergyZeroError,
     EnergyZeroNoDataError,
 )
-from .models import Electricity, Gas
+from .models import Electricity, Gas, IncludeVat
 
 
 @dataclass
@@ -106,7 +106,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
-        incl_vat: bool = True,
+        incl_vat: IncludeVat = IncludeVat.INCLUDE,
     ) -> Gas:
         """Get gas prices for a given period.
 
@@ -176,7 +176,7 @@ class EnergyZero:
                 "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 3,
-                "inclBtw": "true" if incl_vat else "false",
+                "inclBtw": incl_vat.value,
             },
         )
 
@@ -190,7 +190,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
-        incl_vat: bool = True,
+        incl_vat: IncludeVat = IncludeVat.INCLUDE,
     ) -> Electricity:
         """Get energy prices for a given period.
 
@@ -235,7 +235,7 @@ class EnergyZero:
                 "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 1,
-                "inclBtw": "true" if incl_vat else "false",
+                "inclBtw": incl_vat.value,
             },
         )
 

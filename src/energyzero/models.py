@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from enum import Enum
 from typing import Any, Callable
 
 
@@ -42,6 +43,13 @@ def _get_pricetime(
         The time of the price.
     """
     return func(prices, key=prices.get)  # type: ignore[call-arg]
+
+
+class IncludeVat(Enum):
+    """Enum representing whether to include VAT or not."""
+
+    INCLUDE = "true"
+    EXCLUDE = "false"
 
 
 @dataclass
