@@ -1,5 +1,6 @@
 """Asynchronous Python client for the EnergyZero API."""
 
+from .const import VatOption
 from .energyzero import EnergyZero
 from .exceptions import (
     EnergyZeroConnectionError,
@@ -9,10 +10,11 @@ from .exceptions import (
 from .models import Electricity, Gas
 
 __all__ = [
-    "Gas",
     "Electricity",
     "EnergyZero",
+    "EnergyZeroConnectionError",
     "EnergyZeroError",
     "EnergyZeroNoDataError",
-    "EnergyZeroConnectionError",
+    "Gas",
+    "VatOption",
 ]
