@@ -3,12 +3,12 @@
 import asyncio
 from datetime import date, timedelta
 
-from energyzero import EnergyZero, VatCategory
+from energyzero import EnergyZero, VatOption
 
 
 async def main() -> None:
     """Show example on fetching the gas prices from EnergyZero."""
-    async with EnergyZero(vat=VatCategory.INCL) as client:
+    async with EnergyZero(vat=VatOption.INCLUDE) as client:
         today = date(2023, 12, 5)
 
         gas_today = await client.gas_prices(start_date=today, end_date=today)

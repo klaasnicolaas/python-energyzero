@@ -71,12 +71,12 @@ The gas prices do not change per hour, but are fixed for 24 hours. Which means t
 import asyncio
 
 from datetime import date
-from energyzero import EnergyZero, VatCategory
+from energyzero import EnergyZero, VatOption
 
 
 async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
-    async with EnergyZero(vat=VatCategory.INCL) as client:
+    async with EnergyZero(vat=VatOption.INCLUDE) as client:
         start_date = date(2022, 12, 7)
         end_date = date(2022, 12, 7)
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
 | Parameter | value Type | Description |
 | :-------- | :--------- | :---------- |
-| `vat` | enum (default: **INCL**) | Include or exclude VAT on class level |
+| `vat` | enum (default: **VatOption.INCLUDE**) | Include or exclude VAT on class level |
 
 ### Function Parameters
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 | `start_date` | datetime | The start date of the selected period |
 | `end_date` | datetime | The end date of the selected period |
 | `interval` | integer (default: **4**) | The interval of data return (**day**, **week**, **month**, **year**) |
-| `vat` | enum (default: class value) | Include or exclude VAT on function level |
+| `vat` | enum (default: class value) | Include or exclude VAT (**VatOption.INCLUDE** or **VatOption.EXCLUDE**) |
 
 **Interval**
 4: Dag

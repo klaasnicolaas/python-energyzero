@@ -5,7 +5,7 @@ import pytest
 from aiohttp import ClientSession
 from aresponses import ResponsesMockServer
 
-from energyzero import Electricity, EnergyZero, EnergyZeroNoDataError, Gas, VatCategory
+from energyzero import Electricity, EnergyZero, EnergyZeroNoDataError, Gas, VatOption
 
 from . import load_fixtures
 
@@ -29,7 +29,7 @@ async def test_electricity_model(aresponses: ResponsesMockServer) -> None:
         energy: Electricity = await client.energy_prices(
             start_date=today,
             end_date=today,
-            vat=VatCategory.INCL,
+            vat=VatOption.INCLUDE,
         )
         assert energy is not None
         assert isinstance(energy, Electricity)
@@ -71,7 +71,7 @@ async def test_electricity_none_date(aresponses: ResponsesMockServer) -> None:
         energy: Electricity = await client.energy_prices(
             start_date=today,
             end_date=today,
-            vat=VatCategory.INCL,
+            vat=VatOption.INCLUDE,
         )
         assert energy is not None
         assert isinstance(energy, Electricity)
@@ -98,7 +98,7 @@ async def test_electricity_midnight_cest(aresponses: ResponsesMockServer) -> Non
         energy: Electricity = await client.energy_prices(
             start_date=today,
             end_date=today,
-            vat=VatCategory.INCL,
+            vat=VatOption.INCLUDE,
         )
         assert energy is not None
         assert isinstance(energy, Electricity)
@@ -144,7 +144,7 @@ async def test_gas_model(aresponses: ResponsesMockServer) -> None:
         gas: Gas = await client.gas_prices(
             start_date=today,
             end_date=today,
-            vat=VatCategory.INCL,
+            vat=VatOption.INCLUDE,
         )
         assert gas is not None
         assert isinstance(gas, Gas)
@@ -173,7 +173,9 @@ async def test_gas_morning_model(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         today = date(2022, 12, 7)
         client = EnergyZero(session=session)
-        gas: Gas = await client.gas_prices(start_date=today, end_date=today)
+        gas: Gas = await client.gas_prices(
+            start_date=today, end_date=today, vat=VatOption.INCLUDE
+        )
         assert gas is not None
         assert isinstance(gas, Gas)
         assert gas.current_price == 1.45

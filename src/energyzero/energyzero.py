@@ -12,7 +12,7 @@ from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET
 from yarl import URL
 
-from .const import VatCategory
+from .const import VatOption
 from .exceptions import (
     EnergyZeroConnectionError,
     EnergyZeroError,
@@ -25,7 +25,7 @@ from .models import Electricity, Gas
 class EnergyZero:
     """Main class for handling data fetching from EnergyZero."""
 
-    vat: VatCategory = VatCategory.INCL
+    vat: VatOption = VatOption.INCLUDE
     request_timeout: float = 10.0
     session: ClientSession | None = None
 
@@ -108,7 +108,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
-        vat: VatCategory | None = None,
+        vat: VatOption | None = None,
     ) -> Gas:
         """Get gas prices for a given period.
 
@@ -193,7 +193,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
-        vat: VatCategory | None = None,
+        vat: VatOption | None = None,
     ) -> Electricity:
         """Get energy prices for a given period.
 

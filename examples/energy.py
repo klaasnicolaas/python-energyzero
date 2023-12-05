@@ -5,12 +5,12 @@ from datetime import date, timedelta
 
 import pytz
 
-from energyzero import EnergyZero, VatCategory
+from energyzero import EnergyZero, VatOption
 
 
 async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
-    async with EnergyZero(vat=VatCategory.INCL) as client:
+    async with EnergyZero(vat=VatOption.INCLUDE) as client:
         local = pytz.timezone("CET")
         today = date(2023, 12, 5)
         tomorrow = date(2023, 12, 6)

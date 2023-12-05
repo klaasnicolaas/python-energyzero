@@ -4,8 +4,8 @@ from __future__ import annotations
 from enum import Enum
 
 
-class VatCategory(str, Enum):
-    """Enumeration representing the VAT category."""
+class VatOption(str, Enum):
+    """Enum representing whether to include VAT or not."""
 
-    INCL = "true"
-    EXCL = "false"
+    INCLUDE = "true"
+    EXCLUDE = "false"
