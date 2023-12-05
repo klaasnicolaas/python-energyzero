@@ -76,7 +76,7 @@ from energyzero import EnergyZero
 
 async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
-    async with EnergyZero(incl_vat=True) as client:
+    async with EnergyZero() as client:
         start_date = date(2022, 12, 7)
         end_date = date(2022, 12, 7)
 
@@ -88,18 +88,13 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-### Class Parameters
-
-| Parameter | value Type | Description |
-| :-------- | :--------- | :---------- |
-| `incl_vat` | bool (default: **True**) | Include or exclude VAT |
-
 ### Function Parameters
 
 | Parameter | value Type | Description |
 | :-------- | :--------- | :---------- |
 | `start_date` | datetime | The start date of the selected period |
 | `end_date` | datetime | The end date of the selected period |
+| `incl_vat` | bool (default: **True**) | Include or exclude VAT |
 | `interval` | integer (default: **4**) | The interval of data return (**day**, **week**, **month**, **year**) |
 
 **Interval**

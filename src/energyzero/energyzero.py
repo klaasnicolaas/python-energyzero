@@ -24,7 +24,6 @@ from .models import Electricity, Gas
 class EnergyZero:
     """Main class for handling data fetching from EnergyZero."""
 
-    incl_vat: bool = True
     request_timeout: float = 10.0
     session: ClientSession | None = None
 
@@ -107,6 +106,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
+        incl_vat: bool = True,
     ) -> Gas:
         """Get gas prices for a given period.
 
@@ -176,7 +176,7 @@ class EnergyZero:
                 "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 3,
-                "inclBtw": "true" if self.incl_vat else "false",
+                "inclBtw": "true" if incl_vat else "false",
             },
         )
 
@@ -190,6 +190,7 @@ class EnergyZero:
         start_date: date,
         end_date: date,
         interval: int = 4,
+        incl_vat: bool = True,
     ) -> Electricity:
         """Get energy prices for a given period.
 
@@ -234,7 +235,7 @@ class EnergyZero:
                 "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
                 "interval": interval,
                 "usageType": 1,
-                "inclBtw": "true" if self.incl_vat else "false",
+                "inclBtw": "true" if incl_vat else "false",
             },
         )
 
