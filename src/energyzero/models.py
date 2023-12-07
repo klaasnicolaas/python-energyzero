@@ -44,6 +44,24 @@ def _get_pricetime(
     return func(prices, key=prices.get)  # type: ignore[call-arg]
 
 
+def _generate_timestamp_list(
+    prices: dict[datetime, float],
+) -> list[dict[str, float | datetime]]:
+    """Return a list of timestamps.
+
+    Args:
+    ----
+        prices: A dictionary with the hourprices.
+
+    Returns:
+    -------
+        A list of timestamps.
+    """
+    return [
+        {"timestamp": timestamp, "price": price} for timestamp, price in prices.items()
+    ]
+
+
 @dataclass
 class Electricity:
     """Object representing electricity data."""
@@ -110,7 +128,7 @@ class Electricity:
         -------
             list of prices with timestamp
         """
-        return self.generate_timestamp_list(self.prices)
+        return _generate_timestamp_list(self.prices)
 
     @property
     def hours_priced_equal_or_lower(self) -> int:
@@ -131,25 +149,6 @@ class Electricity:
             The current timestamp in the UTC timezone.
         """
         return datetime.now(timezone.utc)
-
-    def generate_timestamp_list(
-        self,
-        prices: dict[datetime, float],
-    ) -> list[dict[str, float | datetime]]:
-        """Return a list of timestamps.
-
-        Args:
-        ----
-            prices: A dictionary with the hourprices.
-
-        Returns:
-        -------
-            A list of timestamps.
-        """
-        return [
-            {"timestamp": timestamp, "price": price}
-            for timestamp, price in prices.items()
-        ]
 
     def price_at_time(self, moment: datetime) -> float | None:
         """Return the price at a specific time.
@@ -219,6 +218,16 @@ class Gas:
             The minimum and maximum price.
         """
         return min(self.prices.values()), max(self.prices.values())
+
+    @property
+    def timestamp_prices(self) -> list[dict[str, float | datetime]]:
+        """Return a list of prices with timestamp.
+
+        Returns
+        -------
+            list of prices with timestamp
+        """
+        return _generate_timestamp_list(self.prices)
 
     def utcnow(self) -> datetime:
         """Return the current timestamp in the UTC timezone.

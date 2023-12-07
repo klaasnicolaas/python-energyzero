@@ -155,6 +155,7 @@ async def test_gas_model(aresponses: ResponsesMockServer) -> None:
         # The next hour price
         next_hour = datetime(2022, 12, 7, 15, 0, tzinfo=timezone.utc)
         assert gas.price_at_time(next_hour) == 1.47
+        assert isinstance(gas.timestamp_prices, list)
 
 
 @pytest.mark.freeze_time("2022-12-07 04:00:00+01:00")
