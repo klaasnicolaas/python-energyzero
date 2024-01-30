@@ -56,6 +56,7 @@ class EnergyZero:
                 communicating with the API.
             EnergyZeroError: Received an unexpected response from
                 the API.
+
         """
         version = metadata.version(__package__)
         url = URL.build(scheme="https", host="api.energyzero.nl", path="/v1/").join(
@@ -126,6 +127,7 @@ class EnergyZero:
         Raises:
         ------
             EnergyZeroNoDataError: No gas prices found for this period.
+
         """
         local_tz = datetime.now(timezone.utc).astimezone().tzinfo
         now: datetime = datetime.now(tz=local_tz)
@@ -211,6 +213,7 @@ class EnergyZero:
         Raises:
         ------
             EnergyZeroNoDataError: No energy prices found for this period.
+
         """
         local_tz = datetime.now(timezone.utc).astimezone().tzinfo
         # Set start_date to 00:00:00 and the end_date to 23:59:59 and convert to UTC
@@ -259,6 +262,7 @@ class EnergyZero:
         Returns
         -------
             The EnergyZero object.
+
         """
         return self
 
@@ -268,5 +272,6 @@ class EnergyZero:
         Args:
         ----
             _exc_info: Exec type.
+
         """
         await self.close()
