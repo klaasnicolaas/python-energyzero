@@ -17,6 +17,7 @@ def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | Non
     Returns:
     -------
         The value at the time.
+
     """
     value = None
     for timestamp, price in prices.items():
@@ -40,6 +41,7 @@ def _get_pricetime(
     Returns:
     -------
         The time of the price.
+
     """
     return func(prices, key=prices.get)  # type: ignore[call-arg]
 
@@ -56,6 +58,7 @@ def _generate_timestamp_list(
     Returns:
     -------
         A list of timestamps.
+
     """
     return [
         {"timestamp": timestamp, "price": price} for timestamp, price in prices.items()
@@ -76,6 +79,7 @@ class Electricity:
         Returns
         -------
             The price for the current hour.
+
         """
         return self.price_at_time(self.utcnow())
 
@@ -86,6 +90,7 @@ class Electricity:
         Returns
         -------
             The minimum and maximum price.
+
         """
         return min(self.prices.values()), max(self.prices.values())
 
@@ -96,6 +101,7 @@ class Electricity:
         Returns
         -------
             The time of the maximum price.
+
         """
         return _get_pricetime(self.prices, max)
 
@@ -106,6 +112,7 @@ class Electricity:
         Returns
         -------
             The time of the minimum price.
+
         """
         return _get_pricetime(self.prices, min)
 
@@ -116,6 +123,7 @@ class Electricity:
         Returns
         -------
             The percentage of the maximum price.
+
         """
         current: float = self.current_price or 0
         return round((current / self.extreme_prices[1]) * 100, 2)
@@ -127,6 +135,7 @@ class Electricity:
         Returns
         -------
             list of prices with timestamp
+
         """
         return _generate_timestamp_list(self.prices)
 
@@ -137,6 +146,7 @@ class Electricity:
         Returns
         -------
             The number of hours with prices equal or lower than the current price.
+
         """
         current: float = self.current_price or 0
         return sum(price <= current for price in self.prices.values())
@@ -147,6 +157,7 @@ class Electricity:
         Returns
         -------
             The current timestamp in the UTC timezone.
+
         """
         return datetime.now(timezone.utc)
 
@@ -160,6 +171,7 @@ class Electricity:
         Returns:
         -------
             The price at the specific time.
+
         """
         value = _timed_value(moment, self.prices)
         if value is not None or value == 0:
@@ -177,6 +189,7 @@ class Electricity:
         Returns:
         -------
             An Electricity object.
+
         """
         prices: dict[datetime, float] = {}
         for item in data["Prices"]:
@@ -206,6 +219,7 @@ class Gas:
         Returns
         -------
             The price for the current hour.
+
         """
         return self.price_at_time(self.utcnow())
 
@@ -216,6 +230,7 @@ class Gas:
         Returns
         -------
             The minimum and maximum price.
+
         """
         return min(self.prices.values()), max(self.prices.values())
 
@@ -226,6 +241,7 @@ class Gas:
         Returns
         -------
             list of prices with timestamp
+
         """
         return _generate_timestamp_list(self.prices)
 
@@ -235,6 +251,7 @@ class Gas:
         Returns
         -------
             The current timestamp in the UTC timezone.
+
         """
         return datetime.now(timezone.utc)
 
@@ -248,6 +265,7 @@ class Gas:
         Returns:
         -------
             The price at the specific time.
+
         """
         value = _timed_value(moment, self.prices)
         if value is not None or value == 0:
@@ -265,6 +283,7 @@ class Gas:
         Returns:
         -------
             A Gas object.
+
         """
         prices: dict[datetime, float] = {}
         for item in data["Prices"]:
