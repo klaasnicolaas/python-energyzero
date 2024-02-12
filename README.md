@@ -30,6 +30,8 @@ A python package with which you can retrieve the dynamic energy/gas prices from 
 - [Mijndomein Energie](https://www.mijndomein.nl/energie)
 - [Energie van Ons](https://www.energie.vanons.org)
 - [GroeneStroomLokaal](https://www.groenestroomlokaal.nl)
+- [SamSam](https://www.samsam.nu)
+- [ZonderGas](https://www.zondergas.nu/slimme-energie)
 
 ## Installation
 
