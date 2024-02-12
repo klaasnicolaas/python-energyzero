@@ -38,6 +38,15 @@ async def test_electricity_model(
 
         assert energy == snapshot
         assert isinstance(energy, Electricity)
+        assert isinstance(energy.timestamp_prices, list)
+
+        assert energy.extreme_prices[1] == 0.55
+        assert energy.extreme_prices[0] == 0.26
+        assert energy.average_price == 0.37
+        assert energy.current_price == 0.48
+        assert energy.pct_of_max_price == 87.27
+        assert energy.hours_priced_equal_or_lower == 23
+
         # The next hour price
         next_hour = datetime(2022, 12, 7, 15, 0, tzinfo=timezone.utc)
         assert energy.price_at_time(next_hour) == 0.49
@@ -49,7 +58,6 @@ async def test_electricity_model(
             "2022-12-07 16:00",
             "%Y-%m-%d %H:%M",
         ).replace(tzinfo=timezone.utc)
-        assert isinstance(energy.timestamp_prices, list)
 
 
 async def test_electricity_none_date(
@@ -158,10 +166,14 @@ async def test_gas_model(
 
         assert gas == snapshot
         assert isinstance(gas, Gas)
+        assert isinstance(gas.timestamp_prices, list)
+
+        assert gas.extreme_prices[1] == 1.47
+        assert gas.extreme_prices[0] == 1.43
+
         # The next hour price
         next_hour = datetime(2022, 12, 7, 15, 0, tzinfo=timezone.utc)
         assert gas.price_at_time(next_hour) == 1.47
-        assert isinstance(gas.timestamp_prices, list)
 
 
 @pytest.mark.freeze_time("2022-12-07 04:00:00+01:00")
@@ -189,7 +201,6 @@ async def test_gas_morning_model(
 
         assert gas == snapshot
         assert isinstance(gas, Gas)
-        assert gas.current_price == 1.45
 
 
 async def test_gas_none_date(
