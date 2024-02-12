@@ -27,11 +27,11 @@ Asynchronous Python client for the EnergyZero API.
 A python package with which you can retrieve the dynamic energy/gas prices from [EnergyZero][energyzero] and can therefore also be used for third parties who purchase their energy via EnergyZero, such as:
 
 - [ANWB Energie](https://www.anwb.nl/huis/energie/anwb-energie)
-- [Mijndomein Energie](https://www.mijndomein.nl/energie)
 - [Energie van Ons](https://www.energie.vanons.org)
 - [GroeneStroomLokaal](https://www.groenestroomlokaal.nl)
+- [Mijndomein Energie](https://www.mijndomein.nl/energie)
 - [SamSam](https://www.samsam.nu)
-- [ZonderGas](https://www.zondergas.nu/slimme-energie)
+- [ZonderGas](https://www.zondergas.nu)
 
 ## Installation
 
