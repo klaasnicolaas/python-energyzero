@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from typing import Any, Callable
+from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | None:
@@ -159,7 +162,7 @@ class Electricity:
             The current timestamp in the UTC timezone.
 
         """
-        return datetime.now(timezone.utc)
+        return datetime.now(UTC)
 
     def price_at_time(self, moment: datetime) -> float | None:
         """Return the price at a specific time.
@@ -195,7 +198,7 @@ class Electricity:
         for item in data["Prices"]:
             prices[
                 datetime.strptime(item["readingDate"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                    tzinfo=timezone.utc,
+                    tzinfo=UTC,
                 )
             ] = item["price"]
 
@@ -253,7 +256,7 @@ class Gas:
             The current timestamp in the UTC timezone.
 
         """
-        return datetime.now(timezone.utc)
+        return datetime.now(UTC)
 
     def price_at_time(self, moment: datetime) -> float | None:
         """Return the price at a specific time.
@@ -289,7 +292,7 @@ class Gas:
         for item in data["Prices"]:
             prices[
                 datetime.strptime(item["readingDate"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                    tzinfo=timezone.utc,
+                    tzinfo=UTC,
                 )
             ] = item["price"]
 

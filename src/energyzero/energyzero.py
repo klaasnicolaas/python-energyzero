@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import socket
 from dataclasses import dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from importlib import metadata
 from typing import Any, Self, cast
 
@@ -82,7 +82,7 @@ class EnergyZero:
                     ssl=True,
                 )
                 response.raise_for_status()
-        except asyncio.TimeoutError as exception:
+        except TimeoutError as exception:
             msg = "Timeout occurred while connecting to the API."
             raise EnergyZeroConnectionError(
                 msg,
@@ -129,7 +129,7 @@ class EnergyZero:
             EnergyZeroNoDataError: No gas prices found for this period.
 
         """
-        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        local_tz = datetime.now(UTC).astimezone().tzinfo
         now: datetime = datetime.now(tz=local_tz)
 
         if now.hour >= 6 and now.hour <= 23:
@@ -143,7 +143,7 @@ class EnergyZero:
                 0,
                 0,
                 tzinfo=local_tz,
-            ).astimezone(timezone.utc)
+            ).astimezone(UTC)
             utc_end_date = datetime(
                 end_date.year,
                 end_date.month,
@@ -152,7 +152,7 @@ class EnergyZero:
                 59,
                 59,
                 tzinfo=local_tz,
-            ).astimezone(timezone.utc) + timedelta(days=1)
+            ).astimezone(UTC) + timedelta(days=1)
         else:
             # Set start_date to 06:00:00 prev day and the end_date to 05:59:59
             # Convert to UTC time 04:00:00 prev day and 03:59:59 current day
@@ -164,7 +164,7 @@ class EnergyZero:
                 0,
                 0,
                 tzinfo=local_tz,
-            ).astimezone(timezone.utc) - timedelta(days=1)
+            ).astimezone(UTC) - timedelta(days=1)
             utc_end_date = datetime(
                 end_date.year,
                 end_date.month,
@@ -173,7 +173,7 @@ class EnergyZero:
                 59,
                 59,
                 tzinfo=local_tz,
-            ).astimezone(timezone.utc)
+            ).astimezone(UTC)
         data = await self._request(
             "energyprices",
             params={
@@ -215,7 +215,7 @@ class EnergyZero:
             EnergyZeroNoDataError: No energy prices found for this period.
 
         """
-        local_tz = datetime.now(timezone.utc).astimezone().tzinfo
+        local_tz = datetime.now(UTC).astimezone().tzinfo
         # Set start_date to 00:00:00 and the end_date to 23:59:59 and convert to UTC
         utc_start_date = datetime(
             start_date.year,
@@ -225,7 +225,7 @@ class EnergyZero:
             0,
             0,
             tzinfo=local_tz,
-        ).astimezone(timezone.utc)
+        ).astimezone(UTC)
         utc_end_date = datetime(
             end_date.year,
             end_date.month,
@@ -234,7 +234,7 @@ class EnergyZero:
             59,
             59,
             tzinfo=local_tz,
-        ).astimezone(timezone.utc)
+        ).astimezone(UTC)
         data = await self._request(
             "energyprices",
             params={

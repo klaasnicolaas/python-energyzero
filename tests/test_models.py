@@ -1,5 +1,5 @@
 """Test the models."""
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import pytest
 from aiohttp import ClientSession
@@ -48,16 +48,16 @@ async def test_electricity_model(
         assert energy.hours_priced_equal_or_lower == 23
 
         # The next hour price
-        next_hour = datetime(2022, 12, 7, 15, 0, tzinfo=timezone.utc)
+        next_hour = datetime(2022, 12, 7, 15, 0, tzinfo=UTC)
         assert energy.price_at_time(next_hour) == 0.49
         assert energy.lowest_price_time == datetime.strptime(
             "2022-12-07 02:00",
             "%Y-%m-%d %H:%M",
-        ).replace(tzinfo=timezone.utc)
+        ).replace(tzinfo=UTC)
         assert energy.highest_price_time == datetime.strptime(
             "2022-12-07 16:00",
             "%Y-%m-%d %H:%M",
-        ).replace(tzinfo=timezone.utc)
+        ).replace(tzinfo=UTC)
 
 
 async def test_electricity_none_date(
@@ -172,7 +172,7 @@ async def test_gas_model(
         assert gas.extreme_prices[0] == 1.43
 
         # The next hour price
-        next_hour = datetime(2022, 12, 7, 15, 0, tzinfo=timezone.utc)
+        next_hour = datetime(2022, 12, 7, 15, 0, tzinfo=UTC)
         assert gas.price_at_time(next_hour) == 1.47
 
 
