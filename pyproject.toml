@@ -97,19 +97,7 @@ warn_unused_configs = true
 warn_unused_ignores = true
 
 [tool.pylint.BASIC]
-good-names = [
-  "_",
-  "ex",
-  "fp",
-  "i",
-  "id",
-  "j",
-  "k",
-  "on",
-  "Run",
-  "T",
-  "wv",
-]
+good-names = ["_", "ex", "fp", "i", "id", "j", "k", "on", "Run", "T"]
 
 [tool.pylint."MESSAGES CONTROL"]
 disable= [
@@ -132,26 +120,21 @@ addopts = "--cov"
 asyncio_mode = "auto"
 
 [tool.ruff]
+target-version = "py311"
 lint.select = ["ALL"]
 lint.ignore = [
-  "ANN101", # Self... explanatory
-  "ANN401", # Opinioated warning on disallowing dynamically typed expressions
-  "D203", # Conflicts with other rules
-  "D213", # Conflicts with other rules
-  "D417", # False positives in some occasions
+  "ANN101",  # Self... explanatory
+  "ANN102",  # cls... just as useless
+  "ANN401",  # Opinioated warning on disallowing dynamically typed expressions
+  "D203",    # Conflicts with other rules
+  "D213",    # Conflicts with other rules
+  "D417",    # False positives in some occasions
   "PLR2004", # Just annoying, not really useful
+  "SLOT000", # Has a bug with enums: https://github.com/astral-sh/ruff/issues/5748
 
-  # Formatter conflicts
+  # Conflicts with the Ruff formatter
   "COM812",
-  "COM819",
-  "D206",
-  "E501",
   "ISC001",
-  "Q000",
-  "Q001",
-  "Q002",
-  "Q003",
-  "W191",
 ]
 
 [tool.ruff.lint.flake8-pytest-style]
