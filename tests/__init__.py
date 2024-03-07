@@ -1,4 +1,5 @@
 """Asynchronous Python client for the EnergyZero API."""
+
 from pathlib import Path
 
 

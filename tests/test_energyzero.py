@@ -1,4 +1,5 @@
 """Basic tests for the EnergyZero API."""
+
 # pylint: disable=protected-access
 import asyncio
 from unittest.mock import patch
@@ -88,9 +89,12 @@ async def test_client_error() -> None:
     """Test request client error is handled correctly."""
     async with ClientSession() as session:
         client = EnergyZero(session=session)
-        with patch.object(
-            session,
-            "request",
-            side_effect=ClientError,
-        ), pytest.raises(EnergyZeroConnectionError):
+        with (
+            patch.object(
+                session,
+                "request",
+                side_effect=ClientError,
+            ),
+            pytest.raises(EnergyZeroConnectionError),
+        ):
             assert await client._request("test")

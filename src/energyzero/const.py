@@ -1,4 +1,5 @@
 """Constants for EnergyZero API client."""
+
 from __future__ import annotations
 
 from enum import Enum

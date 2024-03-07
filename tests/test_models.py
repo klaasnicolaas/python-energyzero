@@ -1,4 +1,5 @@
 """Test the models."""
+
 from datetime import UTC, date, datetime
 
 import pytest
