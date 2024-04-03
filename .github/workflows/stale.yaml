@@ -4,13 +4,16 @@ name: Stale
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: "0 14 * * *"
+    - cron: "0 7 * * *"
   workflow_dispatch:
 
 jobs:
   stale:
     name: 🧹 Clean up stale issues and PRs
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: 🚀 Run stale
         uses: actions/stale@v9.0.0
