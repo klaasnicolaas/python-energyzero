@@ -36,7 +36,6 @@ Changelog = "https://github.com/klaasnicolaas/python-energyzero/releases"
 
 [tool.poetry.group.dev.dependencies]
 aresponses = "3.0.0"
-blacken-docs = "1.16.0"
 codespell = "2.3.0"
 covdefaults = "2.3.0"
 coverage = {version = "7.5.2", extras = ["toml"]}
