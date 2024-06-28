@@ -21,6 +21,8 @@ from .exceptions import (
 )
 from .models import Electricity, Gas
 
+VERSION = metadata.version(__package__)
+
 
 @dataclass
 class EnergyZero:
@@ -59,14 +61,13 @@ class EnergyZero:
                 the API.
 
         """
-        version = metadata.version(__package__)
         url = URL.build(scheme="https", host="api.energyzero.nl", path="/v1/").join(
             URL(uri),
         )
 
         headers = {
             "Accept": "application/json, text/plain",
-            "User-Agent": f"PythonEnergyZero/{version}",
+            "User-Agent": f"PythonEnergyZero/{VERSION}",
         }
 
         if self.session is None:
