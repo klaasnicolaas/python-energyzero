@@ -58,6 +58,8 @@ version-resolver:
 template: |
   ## What's changed
 
+  _To receive a notification on new releases, click on **Watch** > **Custom** > **Releases** on the top._
+
   $CHANGES
 
   **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
