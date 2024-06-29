@@ -21,6 +21,7 @@
       ],
       "settings": {
         "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
           "editor.codeActionsOnSave": {
             "source.fixAll": true,
             "source.organizeImports": true
@@ -33,7 +34,7 @@
         "coverage-gutters.xmlname": "coverage.xml",
         "python.analysis.extraPaths": ["${workspaceFolder}/src"],
         "python.defaultInterpreterPath": ".venv/bin/python",
-        "python.formatting.provider": "black",
+        "python.formatting.provider": "ruff",
         "python.linting.enabled": true,
         "python.linting.mypyEnabled": true,
         "python.linting.pylintEnabled": true,
