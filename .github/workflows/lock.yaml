@@ -4,22 +4,21 @@ name: Lock
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 jobs:
-  lock:
-    name: 🔒 Lock closed issues and PRs
+  inactivity-lock:
+    name: Lock issues and PRs
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
-      discussions: write
     steps:
-      - uses: dessant/lock-threads@v5.0.1
+      - name: 🔒 Lock closed issues and PRs
+        uses: klaasnicolaas/action-inactivity-lock@v1.0.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-inactive-days: "30"
-          issue-lock-reason: ""
-          pr-inactive-days: "1"
-          pr-lock-reason: ""
+          days-inactive-issues: 30
+          lock-reason-issues: ""
+          days-inactive-prs: 1
+          lock-reason-prs: ""
