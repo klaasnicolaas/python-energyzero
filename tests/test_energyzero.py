@@ -14,7 +14,9 @@ from energyzero.exceptions import EnergyZeroConnectionError, EnergyZeroError
 from . import load_fixtures
 
 
-async def test_json_request(aresponses: ResponsesMockServer) -> None:
+async def test_json_request(
+    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
+) -> None:
     """Test JSON response is handled correctly."""
     aresponses.add(
         "api.energyzero.nl",
@@ -26,11 +28,8 @@ async def test_json_request(aresponses: ResponsesMockServer) -> None:
             text=load_fixtures("energy.json"),
         ),
     )
-    async with ClientSession() as session:
-        client = EnergyZero(session=session)
-        response = await client._request("test")
-        assert response is not None
-        await client.close()
+    await energyzero_client._request("test")
+    await energyzero_client.close()
 
 
 async def test_internal_session(aresponses: ResponsesMockServer) -> None:
@@ -65,7 +64,9 @@ async def test_timeout(aresponses: ResponsesMockServer) -> None:
             assert await client._request("test")
 
 
-async def test_content_type(aresponses: ResponsesMockServer) -> None:
+async def test_content_type(
+    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
+) -> None:
     """Test request content type error is handled correctly."""
     aresponses.add(
         "api.energyzero.nl",
@@ -76,13 +77,8 @@ async def test_content_type(aresponses: ResponsesMockServer) -> None:
             headers={"Content-Type": "blabla/blabla"},
         ),
     )
-
-    async with ClientSession() as session:
-        client = EnergyZero(
-            session=session,
-        )
-        with pytest.raises(EnergyZeroError):
-            assert await client._request("test")
+    with pytest.raises(EnergyZeroError):
+        assert await energyzero_client._request("test")
 
 
 async def test_client_error() -> None:
