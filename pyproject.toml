@@ -53,7 +53,7 @@ pytest-freezer = "0.4.9"
 pytz = "2025.1"
 ruff = "0.9.4"
 syrupy = "4.8.1"
-types-pytz = "2024.2.0.20241221"
+types-pytz = "2025.1.0.20250204"
 yamllint = "1.35.1"
 
 [tool.coverage.run]
