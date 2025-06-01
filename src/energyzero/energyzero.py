@@ -82,7 +82,7 @@ class EnergyZero:
                     url,
                     params=params,
                     headers=headers,
-                    ssl=False,
+                    ssl=True,
                     json=json,
                 )
                 response.raise_for_status()
