@@ -66,10 +66,10 @@ The gas prices do not change per hour, but are fixed for 24 hours. Which means t
 - Average gas price (float)
 - Lowest gas price (float)
 - Highest gas price (float)
-- Time of highest price (datetime or TimeRange)
-- Time of lowest price (datetime or TimeRange)
-- Percentage of the current price compared to the maximum price
-- Number of time ranges (days in the case of gas prices) with the current price or lower (int)
+- Time of highest price (TimeRange). Only available for `gas_prices_ex`
+- Time of lowest price (TimeRange). Only available for `gas_prices_ex`
+- Percentage of the current price compared to the maximum price. Only available for `gas_prices_ex`
+- Number of time ranges (days in the case of gas prices) with the current price or lower (int). Only available for `gas_prices_ex`
 
 ## Example
 
