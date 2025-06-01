@@ -50,7 +50,7 @@ def _print_energy_price_info(energy_prices: EnergyPrices) -> None:
     if next_hour_price is not None:
         print(f"Next hourprice: {_price_to_string(next_hour_price)}")
 
-    best_hours = energy_prices.hours_priced_equal_or_lower
+    best_hours = energy_prices.time_ranges_priced_equal_or_lower
 
     if best_hours is not None and best_hours > 0:
         print(f"Hours lower or equal than current price: {best_hours}")

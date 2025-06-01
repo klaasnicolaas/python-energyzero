@@ -399,11 +399,11 @@ class EnergyPrices:
 
     @property
     def current_price(self) -> float | None:
-        """Return the current hourprice.
+        """Return the price at the current time.
 
         Returns
         -------
-            The price for the current hour.
+            The price for the current time.
 
         """
         return self.price_at_time(self.utcnow())
@@ -481,12 +481,12 @@ class EnergyPrices:
         return _generate_timestamp_range_list(self.prices)
 
     @property
-    def hours_priced_equal_or_lower(self) -> int | None:
-        """Return the number of hours with prices equal or lower than the current price.
+    def time_ranges_priced_equal_or_lower(self) -> int | None:
+        """Return the number of time ranges with prices <= current price.
 
         Returns
         -------
-            The number of hours with prices equal or lower than the current price.
+            The number of time ranges with prices equal or lower than the current price.
 
         """
         if len(self.prices) == 0:

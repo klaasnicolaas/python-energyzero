@@ -286,7 +286,7 @@ async def test_electricity_ex_model(
     assert energy.average_price == 0.24064782499999993
     assert energy.current_price == 0.1566829
     assert energy.pct_of_max_price == 40.23
-    assert energy.hours_priced_equal_or_lower == 6
+    assert energy.time_ranges_priced_equal_or_lower == 6
 
     # The next hour price
     next_hour = datetime(2025, 5, 31, 15, 0, tzinfo=UTC)

@@ -47,25 +47,29 @@ You can read the following datasets with this package:
 
 ### Electricity prices
 
-The energy prices are different every hour, after 15:00 (more usually already at 14:00) the prices for the next day are published and it is therefore possible to retrieve these data.
+The electricity prices are different every hour, after 15:00 (more usually already at 14:00) the prices for the next day are published and it is therefore possible to retrieve these data.
 
 - Current/Next[x] hour electricity market price (float)
 - Average electricity price (float)
-- Lowest energy price (float)
-- Highest energy price (float)
-- Time of highest price (datetime)
-- Time of lowest price (datetime)
+- Lowest electricity price (float)
+- Highest electricity price (float)
+- Time of highest price (datetime or TimeRange)
+- Time of lowest price (datetime or TimeRange)
 - Percentage of the current price compared to the maximum price
-- Number of hours with the current price or lower (int)
+- Number of time ranges (hours in the case of electricity prices) with the current price or lower (int)
 
 ### Gas prices
 
 The gas prices do not change per hour, but are fixed for 24 hours. Which means that from 06:00 in the morning the new rate for that day will be used.
 
-- Current/Next[x] hour gas market price (float)
+- Current/Next[x] day gas market price (float)
 - Average gas price (float)
 - Lowest gas price (float)
 - Highest gas price (float)
+- Time of highest price (datetime or TimeRange)
+- Time of lowest price (datetime or TimeRange)
+- Percentage of the current price compared to the maximum price
+- Number of time ranges (days in the case of gas prices) with the current price or lower (int)
 
 ## Example
 
@@ -82,8 +86,8 @@ async def main() -> None:
         start_date = date(2022, 12, 7)
         end_date = date(2022, 12, 7)
 
-        energy = await client.energy_prices(start_date, end_date)
-        gas = await client.gas_prices(start_date, end_date)
+        energy = await client.electricity_prices_ex(start_date, end_date)
+        gas = await client.gas_prices_ex(start_date, end_date)
 
 
 if __name__ == "__main__":
@@ -92,18 +96,19 @@ if __name__ == "__main__":
 
 ### Class Parameters
 
-| Parameter | value Type | Description |
-| :-------- | :--------- | :---------- |
-| `vat` | enum (default: **VatOption.INCLUDE**) | Include or exclude VAT on class level |
+| Parameter | value Type | Description | Used for |
+| :-------- | :--------- | :---------- | :---------- |
+| `vat` | enum (default: **VatOption.INCLUDE**) | Include or exclude VAT on class level. | `electricity_prices`, `gas_prices` |
 
 ### Function Parameters
 
-| Parameter | value Type | Description |
-| :-------- | :--------- | :---------- |
-| `start_date` | datetime | The start date of the selected period |
-| `end_date` | datetime | The end date of the selected period |
-| `interval` | integer (default: **4**) | The interval of data return (**day**, **week**, **month**, **year**) |
-| `vat` | enum (default: class value) | Include or exclude VAT (**VatOption.INCLUDE** or **VatOption.EXCLUDE**) |
+| Parameter | value Type | Description | Used for |
+| :-------- | :--------- | :---------- | :---------- |
+| `start_date` | datetime | The start date of the selected period | `electricity_prices_ex`, `gas_prices_ex`, `electricity_prices`, `gas_prices` |
+| `end_date` | datetime | The end date of the selected period | `electricity_prices_ex`, `gas_prices_ex`, `electricity_prices`, `gas_prices` |
+| `interval` | integer (default: **4**) | The interval of data return (**day**, **week**, **month**, **year**) | `electricity_prices`, `gas_prices` |
+| `vat` | enum (default: class value) | Include or exclude VAT (**VatOption.INCLUDE** or **VatOption.EXCLUDE**) | `electricity_prices`, `gas_prices` |
+| `price_type` | enum | Market or Consumer all-in prices (**PriceType.ALL_IN** or **PriceType.MARKET**) | `electricity_prices_ex`, `gas_prices_ex` |
 
 **Interval**
 4: Dag
