@@ -1,92 +1,55 @@
 """Asynchronous Python client for the EnergyZero API."""
 
 import asyncio
-from datetime import UTC, datetime, timedelta
-from os import environ
-from time import tzset
+from datetime import date, timedelta
 
-from energyzero import EnergyPrices, EnergyZero
+import pytz
 
-
-def _price_to_string(price: float | None) -> str:
-    if price is None:
-        return "Unknown"
-
-    return f"€{price:0.2f} (€{price})"
-
-
-def _print_energy_price_info(energy_prices: EnergyPrices) -> None:
-    local_tz = datetime.now(UTC).astimezone().tzinfo
-
-    if len(energy_prices.prices) == 0:
-        print("No data available")
-        return
-
-    today_extreme_prices = energy_prices.extreme_prices
-    next_hour = energy_prices.utcnow() + timedelta(hours=1)
-    current_price = energy_prices.current_price
-    next_hour_price = energy_prices.price_at_time(next_hour)
-    today_highest_price_time_range = energy_prices.highest_price_time_range
-    today_lowest_price_time_range = energy_prices.lowest_price_time_range
-
-    if today_extreme_prices is not None:
-        print(f"Max price: {_price_to_string(today_extreme_prices[1])}")
-        print(f"Min price: {_price_to_string(today_extreme_prices[0])}")
-
-    print(f"Average price: {_price_to_string(energy_prices.average_price)}")
-
-    if current_price is not None:
-        print(f"Percentage: {energy_prices.pct_of_max_price}%")
-
-    if today_highest_price_time_range is not None:
-        print(f"High time: {today_highest_price_time_range.astimezone(local_tz)}")
-
-    if today_lowest_price_time_range is not None:
-        print(f"Lowest time: {today_lowest_price_time_range.astimezone(local_tz)}")
-
-    if current_price is not None:
-        print(f"Current hourprice: {_price_to_string(current_price)}")
-
-    if next_hour_price is not None:
-        print(f"Next hourprice: {_price_to_string(next_hour_price)}")
-
-    best_hours = energy_prices.time_ranges_priced_equal_or_lower
-
-    if best_hours is not None and best_hours > 0:
-        print(f"Hours lower or equal than current price: {best_hours}")
+from energyzero import EnergyZero, VatOption
 
 
 async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
-    async with EnergyZero() as client:
-        # Note: The devcontainer's timezone is always UTC
-        # Simulate a call from a client running in the Netherlands
-        environ["TZ"] = "Europe/Amsterdam"
-        tzset()
+    async with EnergyZero(vat=VatOption.INCLUDE) as client:
+        local = pytz.timezone("CET")
+        today = date(2023, 12, 5)
+        tomorrow = date(2023, 12, 6)
 
-        local_tz = datetime.now(UTC).astimezone().tzinfo
-        today = datetime.now(tz=local_tz).date()
-        tomorrow = today + timedelta(days=1)
-
-        energy_today = await client.electricity_prices_ex(
-            start_date=today, end_date=today
-        )
-        energy_tomorrow = await client.electricity_prices_ex(
-            start_date=tomorrow, end_date=tomorrow
+        energy_today = await client.energy_prices(start_date=today, end_date=today)
+        energy_tomorrow = await client.energy_prices(
+            start_date=tomorrow,
+            end_date=tomorrow,
         )
 
         print("--- ENERGY TODAY ---")
-
-        _print_energy_price_info(energy_today)
-
-        # Note: tomorrow's prices will be known after 15:00 today,
-        # if you run this sample before 15:00, no data for tomorrow
-        # will be available.
+        print(f"Max price: €{energy_today.extreme_prices[1]}")
+        print(f"Min price: €{energy_today.extreme_prices[0]}")
+        print(f"Average price: €{energy_today.average_price}")
+        print(f"Percentage: {energy_today.pct_of_max_price}%")
+        print()
+        print(
+            f"High time: {energy_today.highest_price_time.astimezone(local)}",
+        )
+        print(
+            f"Lowest time: {energy_today.lowest_price_time.astimezone(local)}",
+        )
+        print()
+        print(f"Current hourprice: €{energy_today.current_price}")
+        next_hour = energy_today.utcnow() + timedelta(hours=1)
+        print(f"Next hourprice: €{energy_today.price_at_time(next_hour)}")
+        best_hours = energy_today.hours_priced_equal_or_lower
+        print(f"Hours lower or equal than current price: {best_hours}")
 
         print()
         print("--- ENERGY TOMORROW ---")
-
-        _print_energy_price_info(energy_tomorrow)
+        print(f"Max price: €{energy_tomorrow.extreme_prices[1]}")
+        print(f"Min price: €{energy_tomorrow.extreme_prices[0]}")
+        print(f"Average price: €{energy_tomorrow.average_price}")
+        print()
+        time_high = energy_tomorrow.highest_price_time.astimezone(local)
+        print(f"Highest price time: {time_high}")
+        time_low = energy_tomorrow.lowest_price_time.astimezone(local)
+        print(f"Lowest price time: {time_low}")
 
 
 if __name__ == "__main__":
