@@ -1,0 +1,52 @@
+{
+    "data": {
+        "energyMarketPrices": {
+            "averageExcl": 0.33,
+            "averageIncl": 0.4,
+            "prices": [
+                {
+                    "energyPriceExcl": 0.339263481788,
+                    "energyPriceIncl": 0.41050881296348,
+                    "from": "2025-05-30T04:00:00Z",
+                    "isAverage": true,
+                    "till": "2025-05-31T04:00:00Z",
+                    "type": "Gas",
+                    "vat": 0.07124533117548,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.57816,
+                            "priceIncl": 0.6995736
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.08561,
+                            "priceIncl": 0.1035881
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.327266604556,
+                    "energyPriceIncl": 0.39599259151276,
+                    "from": "2025-05-31T04:00:00Z",
+                    "isAverage": true,
+                    "till": "2025-06-01T04:00:00Z",
+                    "type": "Gas",
+                    "vat": 0.06872598695676,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.57816,
+                            "priceIncl": 0.6995736
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.08561,
+                            "priceIncl": 0.1035881
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

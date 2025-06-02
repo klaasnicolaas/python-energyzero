@@ -10,3 +10,10 @@ class VatOption(str, Enum):
 
     INCLUDE = "true"
     EXCLUDE = "false"
+
+
+class PriceType(Enum):
+    """Enum representing what kind of prices to return."""
+
+    MARKET = 1
+    ALL_IN = 2
