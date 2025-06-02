@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, tzinfo
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -67,6 +67,49 @@ def _generate_timestamp_list(
     return [
         {"timestamp": timestamp, "price": price} for timestamp, price in prices.items()
     ]
+
+
+@dataclass(frozen=True)
+class TimeRange:
+    """Object representing a range of time specified by a start and end time."""
+
+    start_including: datetime
+    end_excluding: datetime
+
+    def contains(self, time: datetime) -> bool:
+        """Check if this range contains the specified time.
+
+        Args:
+        ----
+            time: The time to check against.
+
+        """
+        return self.start_including <= time < self.end_excluding
+
+    def astimezone(self, tz: tzinfo | None = None) -> TimeRange:
+        """Convert range to the specified time zone.
+
+        Args:
+        ----
+            tz: The target time zone.
+
+        Returns:
+        -------
+            The current range in the specified time zone.
+
+        """
+        return TimeRange(
+            self.start_including.astimezone(tz), self.end_excluding.astimezone(tz)
+        )
+
+    def __str__(self) -> str:
+        """Return a human readable string representation of this range."""
+        format_string = "%Y-%m-%d %H:%M:%S"
+
+        return (
+            f"{self.start_including.strftime(format_string)} - "
+            f"{self.end_excluding.strftime(format_string)}"
+        )
 
 
 @dataclass
