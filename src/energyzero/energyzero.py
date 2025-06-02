@@ -264,10 +264,13 @@ class EnergyZero:
             start_date: Start date of the period. Local timezone.
             end_date: End date of the period. Local timezone.
             interval: Interval of the prices.
-            all_in_price: True=return prices including energy tax,
-                VAT and purchasing cost. This is how much a
-                consumer would actually pay.
-                False=return prices without any taxes applied
+            price_type:
+                PriceType.ALL_IN: return prices including energy tax,
+                    VAT and purchasing cost. This is how much a
+                    consumer would actually pay.
+                    False=return prices without any taxes applied
+                PriceType.MARKET: return the raw market prices,
+                    excluding taxes and purchase fees
 
         Returns:
         -------
@@ -345,10 +348,13 @@ class EnergyZero:
             start_date: Start date of the period. Local timezone.
             end_date: End date of the period. Local timezone.
             interval: Interval of the prices.
-            all_in_price: True=return prices including energy tax,
-                VAT and purchasing cost. This is how much a
-                consumer would actually pay.
-                False=return prices without any taxes applied
+            price_type:
+                PriceType.ALL_IN: return prices including energy tax,
+                    VAT and purchasing cost. This is how much a
+                    consumer would actually pay.
+                    False=return prices without any taxes applied
+                PriceType.MARKET: return the raw market prices,
+                    excluding taxes and purchase fees
 
         Returns:
         -------
