@@ -40,6 +40,7 @@ class EnergyZero:
         *,
         method: str = METH_GET,
         params: dict[str, Any] | None = None,
+        json: Any = None,
     ) -> Any:
         """Handle a request to the API of EnergyZero.
 
@@ -82,6 +83,7 @@ class EnergyZero:
                     params=params,
                     headers=headers,
                     ssl=True,
+                    json=json,
                 )
                 response.raise_for_status()
         except TimeoutError as exception:
