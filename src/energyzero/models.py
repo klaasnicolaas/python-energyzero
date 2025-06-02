@@ -31,6 +31,27 @@ def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | Non
     return value
 
 
+def _value_at_time(moment: datetime, prices: dict[TimeRange, float]) -> float | None:
+    """Return a function that returns a value at a specific time.
+
+    Args:
+    ----
+        moment: The time to get the value for.
+        prices: A dictionary with the prices.
+
+    Returns:
+    -------
+        The value at the time.
+
+    """
+    value = None
+    for timestamp_range, price in prices.items():
+        if timestamp_range.contains(moment):
+            value = price
+            break
+    return value
+
+
 def _get_pricetime(
     prices: dict[datetime, float],
     func: Callable[[dict[datetime, float]], datetime],
