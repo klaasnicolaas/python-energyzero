@@ -268,7 +268,6 @@ class EnergyZero:
                 PriceType.ALL_IN: return prices including energy tax,
                     VAT and purchasing cost. This is how much a
                     consumer would actually pay.
-                    False=return prices without any taxes applied
                 PriceType.MARKET: return the raw market prices,
                     excluding taxes and purchase fees
 
@@ -352,7 +351,6 @@ class EnergyZero:
                 PriceType.ALL_IN: return prices including energy tax,
                     VAT and purchasing cost. This is how much a
                     consumer would actually pay.
-                    False=return prices without any taxes applied
                 PriceType.MARKET: return the raw market prices,
                     excluding taxes and purchase fees
 
