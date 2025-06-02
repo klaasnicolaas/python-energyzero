@@ -177,3 +177,21 @@ async def test_post_client_error() -> None:
             pytest.raises(EnergyZeroConnectionError),
         ):
             assert await client._request("test", method=METH_POST)
+
+
+async def test_post_server_error(
+    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
+) -> None:
+    """Test request content type error is handled correctly."""
+    aresponses.add(
+        "api.energyzero.nl",
+        "/v1/gql",
+        "POST",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixtures("gql_error.json"),
+        ),
+    )
+    with pytest.raises(EnergyZeroError):
+        assert await energyzero_client._request("gql", method=METH_POST)

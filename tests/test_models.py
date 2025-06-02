@@ -1,6 +1,6 @@
 """Test the models."""
 
-from datetime import UTC, date, datetime, time
+from datetime import UTC, date, datetime, time, timedelta, timezone
 
 import pytest
 from aresponses import ResponsesMockServer
@@ -485,3 +485,60 @@ async def test_no_gas_ex_data(
     today = date(2025, 5, 31)
     with pytest.raises(EnergyZeroNoDataError):
         await energyzero_client.gas_prices_ex(start_date=today, end_date=today)
+
+
+async def test_timerange_astimezone() -> None:
+    """Raise exception when there is no data."""
+    tz_from = timezone.min
+    tz_to = timezone.max
+    range_start = datetime.now(tz=tz_from)
+    range_end = range_start + timedelta(hours=6)
+
+    range_from_tz = TimeRange(range_start, range_end)
+    range_to_tz = range_from_tz.astimezone(tz_to)
+
+    assert range_from_tz.start_including.tzinfo == tz_from
+    assert range_from_tz.end_excluding.tzinfo == tz_from
+    assert range_to_tz.start_including.tzinfo == tz_to
+    assert range_to_tz.end_excluding.tzinfo == tz_to
+
+
+async def test_timerange_str() -> None:
+    """Raise exception when there is no data."""
+    range_from_tz = TimeRange(
+        datetime(year=2025, month=1, day=2, hour=10, minute=9, second=8, tzinfo=UTC),
+        datetime(year=2025, month=3, day=4, hour=7, minute=6, second=5, tzinfo=UTC),
+    )
+
+    assert f"{range_from_tz}" == "2025-01-02 10:09:08 - 2025-03-04 07:06:05"
+
+
+@pytest.mark.freeze_time("2025-01-01 00:30:00+01:00")
+async def test_electricity_ex_no_prices(
+    aresponses: ResponsesMockServer,
+    snapshot: SnapshotAssertion,
+    energyzero_client: EnergyZero,
+) -> None:
+    """Test when there is no data for the current datetime."""
+    aresponses.add(
+        "api.energyzero.nl",
+        "/v1/gql",
+        "POST",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixtures("energy_ex_no_prices.json"),
+        ),
+    )
+    today = date(2025, 5, 31)
+    energy: EnergyPrices = await energyzero_client.electricity_prices_ex(
+        start_date=today,
+        end_date=today,
+        price_type=PriceType.ALL_IN,
+    )
+    assert energy == snapshot
+    assert energy.extreme_prices is None
+    assert energy.highest_price_time_range is None
+    assert energy.lowest_price_time_range is None
+    assert energy.pct_of_max_price is None
+    assert energy.time_ranges_priced_equal_or_lower is None
