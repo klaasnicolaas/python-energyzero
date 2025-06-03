@@ -1,6 +1,6 @@
 {
   "name": "${containerWorkspaceFolderBasename}",
-  "image": "mcr.microsoft.com/devcontainers/python:3.13",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "customizations": {
     "codespaces": {
       "openFiles": ["README.md"]
