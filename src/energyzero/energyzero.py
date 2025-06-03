@@ -40,6 +40,7 @@ class EnergyZero:
         *,
         method: str = METH_GET,
         params: dict[str, Any] | None = None,
+        json: Any = None,
     ) -> Any:
         """Handle a request to the API of EnergyZero.
 
@@ -82,6 +83,7 @@ class EnergyZero:
                     params=params,
                     headers=headers,
                     ssl=True,
+                    json=json,
                 )
                 response.raise_for_status()
         except TimeoutError as exception:
@@ -106,6 +108,34 @@ class EnergyZero:
 
         return await response.json()
 
+    def to_datetime_string(
+        self, base_date: date, delta: timedelta = timedelta(0)
+    ) -> str:
+        """Convert a local timezone date to a UTC datetime string.
+
+        Args:
+        ----
+            base_date: The base date (local timezone) to convert.
+            delta: A timedelta to add to the base date.
+
+        Returns:
+        -------
+            A string representing the date in ISO 8601 format with UTC timezone.
+
+        """
+        local_tz = datetime.now(UTC).astimezone().tzinfo
+        date_utc = (
+            datetime(
+                base_date.year,
+                base_date.month,
+                base_date.day,
+                tzinfo=local_tz,
+            ).astimezone(UTC)
+            + delta
+        )
+
+        return date_utc.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
     async def gas_prices(
         self,
         start_date: date,
@@ -117,8 +147,8 @@ class EnergyZero:
 
         Args:
         ----
-            start_date: Start date of the period.
-            end_date: End date of the period.
+            start_date: Start date (local timezone) of the period.
+            end_date: End date (local timezone) of the period.
             interval: Interval of the prices.
             vat: VAT category.
 
@@ -137,50 +167,25 @@ class EnergyZero:
         if now.hour >= 6 and now.hour <= 23:
             # Set start_date to 06:00:00 and the end_date to 05:59:59 next day
             # Convert to UTC time 04:00:00 and 03:59:59 next day
-            utc_start_date = datetime(
-                start_date.year,
-                start_date.month,
-                start_date.day,
-                6,
-                0,
-                0,
-                tzinfo=local_tz,
-            ).astimezone(UTC)
-            utc_end_date = datetime(
-                end_date.year,
-                end_date.month,
-                end_date.day,
-                5,
-                59,
-                59,
-                tzinfo=local_tz,
-            ).astimezone(UTC) + timedelta(days=1)
+            utc_start_date_str = self.to_datetime_string(start_date, timedelta(hours=6))
+            utc_end_date_str = self.to_datetime_string(
+                end_date,
+                timedelta(hours=5, minutes=59, seconds=59, milliseconds=999, days=1),
+            )
         else:
             # Set start_date to 06:00:00 prev day and the end_date to 05:59:59
             # Convert to UTC time 04:00:00 prev day and 03:59:59 current day
-            utc_start_date = datetime(
-                start_date.year,
-                start_date.month,
-                start_date.day,
-                6,
-                0,
-                0,
-                tzinfo=local_tz,
-            ).astimezone(UTC) - timedelta(days=1)
-            utc_end_date = datetime(
-                end_date.year,
-                end_date.month,
-                end_date.day,
-                5,
-                59,
-                59,
-                tzinfo=local_tz,
-            ).astimezone(UTC)
+            utc_start_date_str = self.to_datetime_string(
+                start_date, timedelta(hours=6, days=-1)
+            )
+            utc_end_date_str = self.to_datetime_string(
+                end_date, timedelta(hours=5, minutes=59, seconds=59, milliseconds=999)
+            )
         data = await self._request(
             "energyprices",
             params={
-                "fromDate": utc_start_date.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
-                "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
+                "fromDate": utc_start_date_str,
+                "tillDate": utc_end_date_str,
                 "interval": interval,
                 "usageType": 3,
                 "inclBtw": vat.value if vat is not None else self.vat.value,
@@ -203,8 +208,8 @@ class EnergyZero:
 
         Args:
         ----
-            start_date: Start date of the period.
-            end_date: End date of the period.
+            start_date: Start date (local timezone) of the period.
+            end_date: End date (local timezone) of the period.
             interval: Interval of the prices.
             vat: VAT category.
 
@@ -217,31 +222,14 @@ class EnergyZero:
             EnergyZeroNoDataError: No energy prices found for this period.
 
         """
-        local_tz = datetime.now(UTC).astimezone().tzinfo
-        # Set start_date to 00:00:00 and the end_date to 23:59:59 and convert to UTC
-        utc_start_date = datetime(
-            start_date.year,
-            start_date.month,
-            start_date.day,
-            0,
-            0,
-            0,
-            tzinfo=local_tz,
-        ).astimezone(UTC)
-        utc_end_date = datetime(
-            end_date.year,
-            end_date.month,
-            end_date.day,
-            23,
-            59,
-            59,
-            tzinfo=local_tz,
-        ).astimezone(UTC)
         data = await self._request(
             "energyprices",
             params={
-                "fromDate": utc_start_date.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
-                "tillDate": utc_end_date.strftime("%Y-%m-%dT%H:%M:%S.999Z"),
+                "fromDate": self.to_datetime_string(start_date),
+                "tillDate": self.to_datetime_string(
+                    end_date,
+                    timedelta(hours=23, minutes=59, seconds=59, milliseconds=999),
+                ),
                 "interval": interval,
                 "usageType": 1,
                 "inclBtw": vat.value if vat is not None else self.vat.value,
