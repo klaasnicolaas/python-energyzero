@@ -111,11 +111,11 @@ class EnergyZero:
     def to_datetime_string(
         self, base_date: date, delta: timedelta = timedelta(0)
     ) -> str:
-        """Convert a date to a UTC datetime string.
+        """Convert a local timezone date to a UTC datetime string.
 
         Args:
         ----
-            base_date: The base date to convert.
+            base_date: The base date (local timezone) to convert.
             delta: A timedelta to add to the base date.
 
         Returns:
