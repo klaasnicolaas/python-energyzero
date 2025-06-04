@@ -249,7 +249,7 @@ async def test_no_gas_data(
 
 
 async def test_timerange_astimezone() -> None:
-    """Raise exception when there is no data."""
+    """Test if astimezone returns the correct new time range."""
     tz_from = timezone.min
     tz_to = timezone.max
     range_start = datetime.now(tz=tz_from)
@@ -265,7 +265,7 @@ async def test_timerange_astimezone() -> None:
 
 
 async def test_timerange_str() -> None:
-    """Raise exception when there is no data."""
+    """Test if the string representation for a TimeRange is correct."""
     range_from_tz = TimeRange(
         datetime(year=2025, month=1, day=2, hour=10, minute=9, second=8, tzinfo=UTC),
         datetime(year=2025, month=3, day=4, hour=7, minute=6, second=5, tzinfo=UTC),

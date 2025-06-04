@@ -158,6 +158,10 @@ class TimeRange:
         )
 
 
+def _parse_datetime_str(datetime_str: str) -> datetime:
+    return datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+
+
 @dataclass
 class Electricity:
     """Object representing electricity data."""
@@ -286,11 +290,7 @@ class Electricity:
         """
         prices: dict[datetime, float] = {}
         for item in data["Prices"]:
-            prices[
-                datetime.strptime(item["readingDate"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                    tzinfo=UTC,
-                )
-            ] = item["price"]
+            prices[_parse_datetime_str(item["readingDate"])] = item["price"]
 
         return cls(
             prices=prices,
@@ -380,11 +380,7 @@ class Gas:
         """
         prices: dict[datetime, float] = {}
         for item in data["Prices"]:
-            prices[
-                datetime.strptime(item["readingDate"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                    tzinfo=UTC,
-                )
-            ] = item["price"]
+            prices[_parse_datetime_str(item["readingDate"])] = item["price"]
 
         return cls(
             prices=prices,
