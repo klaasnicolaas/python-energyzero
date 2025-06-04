@@ -111,10 +111,6 @@ def _generate_timestamp_list(
     ]
 
 
-def _parse_datetime_str(datetime_str: str) -> datetime:
-    return datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
-
-
 @dataclass(frozen=True)
 class TimeRange:
     """Object representing a range of time specified by a start and end time."""
