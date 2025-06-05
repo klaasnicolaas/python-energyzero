@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta, tzinfo
 from typing import TYPE_CHECKING, Any
 
+from .const import PriceType
+
 if TYPE_CHECKING:
     from collections.abc import Callable
 
@@ -379,4 +381,193 @@ class Gas:
         return cls(
             prices=prices,
             average_price=data["average"],
+        )
+
+
+@dataclass
+class EnergyPrices:
+    """Object representing energy price data.
+
+    Can represent both electricity and gas price data. All time ranges are in UTC.
+
+    """
+
+    prices: dict[TimeRange, float]
+    average_price: float | None
+
+    @property
+    def current_price(self) -> float | None:
+        """Return the price at the current time.
+
+        Returns
+        -------
+            The price for the current time.
+
+        """
+        return self.price_at_time(self.utcnow())
+
+    @property
+    def extreme_prices(self) -> tuple[float, float] | None:
+        """Return the minimum and maximum price.
+
+        Returns
+        -------
+            The minimum and maximum price.
+
+        """
+        if len(self.prices) == 0:
+            return None
+
+        return min(self.prices.values()), max(self.prices.values())
+
+    @property
+    def highest_price_time_range(self) -> TimeRange | None:
+        """Return the UTC time range of the maximum price.
+
+        Returns
+        -------
+            The UTC time range of the maximum price.
+
+        """
+        if len(self.prices) == 0:
+            return None
+
+        max_range, _ = max(self.prices.items(), key=lambda kv: kv[1])
+        return max_range
+
+    @property
+    def lowest_price_time_range(self) -> TimeRange | None:
+        """Return the UTC time range of the minimum price.
+
+        Returns
+        -------
+            The UTC time range of the minimum price.
+
+        """
+        if len(self.prices) == 0:
+            return None
+
+        max_range, _ = min(self.prices.items(), key=lambda kv: kv[1])
+        return max_range
+
+    @property
+    def pct_of_max_price(self) -> float | None:
+        """Return the percentage of the maximum price.
+
+        Returns
+        -------
+            The percentage of the maximum price.
+
+        """
+        current: float = self.current_price or 0
+        extreme_prices = self.extreme_prices
+
+        if extreme_prices is None:
+            return None
+
+        return round((current / extreme_prices[1]) * 100, 2)
+
+    @property
+    def timestamp_prices(self) -> list[dict[str, float | TimeRange]]:
+        """Return a list of prices with UTC time ranges.
+
+        Returns
+        -------
+            list of prices with UTC time ranges.
+
+        """
+        return _generate_timestamp_range_list(self.prices)
+
+    @property
+    def time_ranges_priced_equal_or_lower(self) -> int | None:
+        """Return the number of time ranges with prices <= current price.
+
+        Returns
+        -------
+            The number of time ranges with prices equal or lower than the current price.
+
+        """
+        if len(self.prices) == 0:
+            return None
+
+        current: float = self.current_price or 0
+        return sum(price <= current for price in self.prices.values())
+
+    def utcnow(self) -> datetime:
+        """Return the current timestamp in the UTC timezone.
+
+        Returns
+        -------
+            The current timestamp in the UTC timezone.
+
+        """
+        return datetime.now(UTC)
+
+    def price_at_time(self, moment: datetime) -> float | None:
+        """Return the price at a specific UTC time.
+
+        Args:
+        ----
+            moment: The UTC time to get the price for.
+
+        Returns:
+        -------
+            The price at the specific UTC time.
+
+        """
+        value = _value_at_time(moment, self.prices)
+        if value is not None or value == 0:
+            return value
+        return None
+
+    @classmethod
+    def from_dict(
+        cls: type[EnergyPrices],
+        data: dict[str, Any],
+        price_type: PriceType = PriceType.ALL_IN,
+    ) -> EnergyPrices:
+        """Create an Energy object from a dictionary.
+
+        Uses a dictionary as returned by the GraphQL endpoint.
+
+        Args:
+        ----
+            data: A dictionary with the data from the API.
+
+        Returns:
+        -------
+            An Energy object.
+
+        """
+        prices: dict[TimeRange, float] = {}
+        source_market_prices = data["energyMarketPrices"]["prices"]
+
+        price_key = (
+            "energyPriceIncl" if price_type == PriceType.ALL_IN else "energyPriceExcl"
+        )
+
+        price_sum = 0
+
+        for item in source_market_prices:
+            key = TimeRange(
+                _parse_datetime_str(item["from"]), _parse_datetime_str(item["till"])
+            )
+
+            price = item[price_key]
+
+            if price_type == PriceType.ALL_IN:
+                additional_costs = item["additionalCosts"]
+                price += sum(d["priceIncl"] for d in additional_costs)
+
+            prices[key] = price
+            price_sum += price
+
+        average_price = None
+
+        if len(source_market_prices) > 0:
+            average_price = price_sum / len(source_market_prices)
+
+        return cls(
+            prices=prices,
+            average_price=average_price,
         )
