@@ -1,0 +1,514 @@
+{
+    "data": {
+        "energyMarketPrices": {
+            "averageExcl": 0.07,
+            "averageIncl": 0.08,
+            "prices": [
+                {
+                    "energyPriceExcl": 0.107,
+                    "energyPriceIncl": 0.12947,
+                    "from": "2025-05-30T22:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-30T23:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.02247,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.0977,
+                    "energyPriceIncl": 0.118217,
+                    "from": "2025-05-30T23:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T00:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.020517,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.09481,
+                    "energyPriceIncl": 0.1147201,
+                    "from": "2025-05-31T00:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T01:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0199101,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.09363,
+                    "energyPriceIncl": 0.1132923,
+                    "from": "2025-05-31T01:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T02:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0196623,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.09413,
+                    "energyPriceIncl": 0.1138973,
+                    "from": "2025-05-31T02:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T03:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0197673,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.09258,
+                    "energyPriceIncl": 0.1120218,
+                    "from": "2025-05-31T03:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T04:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0194418,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.09479,
+                    "energyPriceIncl": 0.1146959,
+                    "from": "2025-05-31T04:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T05:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0199059,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.0858,
+                    "energyPriceIncl": 0.103818,
+                    "from": "2025-05-31T05:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T06:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.018018,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.05381,
+                    "energyPriceIncl": 0.0651101,
+                    "from": "2025-05-31T06:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T07:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0113001,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.001,
+                    "energyPriceIncl": 0.00121,
+                    "from": "2025-05-31T07:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T08:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.00021,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": -0.00002,
+                    "energyPriceIncl": -0.0000242,
+                    "from": "2025-05-31T08:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T09:00:00Z",
+                    "type": "Electricity",
+                    "vat": -0.0000042,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": -0.001,
+                    "energyPriceIncl": -0.00121,
+                    "from": "2025-05-31T09:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T10:00:00Z",
+                    "type": "Electricity",
+                    "vat": -0.00021,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": -0.00307,
+                    "energyPriceIncl": -0.0037147,
+                    "from": "2025-05-31T10:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T11:00:00Z",
+                    "type": "Electricity",
+                    "vat": -0.0006447,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": -0.01317,
+                    "energyPriceIncl": -0.0159357,
+                    "from": "2025-05-31T11:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T12:00:00Z",
+                    "type": "Electricity",
+                    "vat": -0.0027657,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": -0.00775,
+                    "energyPriceIncl": -0.0093775,
+                    "from": "2025-05-31T12:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T13:00:00Z",
+                    "type": "Electricity",
+                    "vat": -0.0016275,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": -0.003,
+                    "energyPriceIncl": -0.00363,
+                    "from": "2025-05-31T13:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T14:00:00Z",
+                    "type": "Electricity",
+                    "vat": -0.00063,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": -0.00005,
+                    "energyPriceIncl": -0.0000605,
+                    "from": "2025-05-31T14:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T15:00:00Z",
+                    "type": "Electricity",
+                    "vat": -0.0000105,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.0365,
+                    "energyPriceIncl": 0.044165,
+                    "from": "2025-05-31T15:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T16:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.007665,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.08885,
+                    "energyPriceIncl": 0.1075085,
+                    "from": "2025-05-31T16:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T17:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0186585,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.13141,
+                    "energyPriceIncl": 0.1590061,
+                    "from": "2025-05-31T17:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T18:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0275961,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.19235,
+                    "energyPriceIncl": 0.2327435,
+                    "from": "2025-05-31T18:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T19:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0403935,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.19237,
+                    "energyPriceIncl": 0.2327677,
+                    "from": "2025-05-31T19:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T20:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0403977,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.13576,
+                    "energyPriceIncl": 0.1642696,
+                    "from": "2025-05-31T20:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T21:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0285096,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                },
+                {
+                    "energyPriceExcl": 0.09979,
+                    "energyPriceIncl": 0.1207459,
+                    "from": "2025-05-31T21:00:00Z",
+                    "isAverage": false,
+                    "till": "2025-05-31T22:00:00Z",
+                    "type": "Electricity",
+                    "vat": 0.0209559,
+                    "additionalCosts": [
+                        {
+                            "name": "Energy tax",
+                            "priceExcl": 0.10154,
+                            "priceIncl": 0.1228634
+                        },
+                        {
+                            "name": "Purchasing cost",
+                            "priceExcl": 0.028,
+                            "priceIncl": 0.03388
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
