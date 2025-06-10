@@ -185,14 +185,12 @@ class EnergyZero:
         else:
             # Set start_date to 06:00:00 prev day and the end_date to 05:59:59
             # Convert to UTC time 04:00:00 prev day and 03:59:59 current day
-
             utc_start_date_str = self.to_datetime_string(
                 start_date, timedelta(hours=6, days=-1)
             )
             utc_end_date_str = self.to_datetime_string(
                 end_date, timedelta(hours=5, minutes=59, seconds=59, milliseconds=999)
             )
-
         data = await self._request(
             "energyprices",
             params={
