@@ -121,30 +121,6 @@ class EnergyZero:
     def to_datetime_string(
         self, base_date: date, delta: timedelta = timedelta(0)
     ) -> str:
-        """Get the string representation for a date and delta.
-
-        Add the specified time delta to a date and convert it to a UTC,
-        ISO format string.
-        """
-        local_tz = datetime.now(UTC).astimezone().tzinfo
-
-        # Convert to UTC and add optional delta
-
-        date_utc = (
-            datetime(
-                base_date.year,
-                base_date.month,
-                base_date.day,
-                tzinfo=local_tz,
-            ).astimezone(UTC)
-            + delta
-        )
-
-        return date_utc.isoformat(timespec="milliseconds").replace("+00:00", "Z")
-
-    def to_datetime_string(
-        self, base_date: date, delta: timedelta = timedelta(0)
-    ) -> str:
         """Convert a local timezone date to a UTC datetime string.
 
         Args:
