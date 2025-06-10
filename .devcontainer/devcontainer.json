@@ -1,10 +1,24 @@
 {
   "name": "${containerWorkspaceFolderBasename}",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-  "customizations": {
-    "codespaces": {
-      "openFiles": ["README.md"]
+  "image": "mcr.microsoft.com/devcontainers/python:3.13",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "installTools": false
     },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installOhMyZsh": true
+    },
+    "ghcr.io/devcontainers-extra/features/poetry:2": {},
+    "ghcr.io/devcontainers-extra/features/pre-commit:2": {},
+    "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
+      "plugins": "git zsh-autosuggestions zsh-syntax-highlighting zsh-completions",
+      "omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions.git https://github.com/zsh-users/zsh-syntax-highlighting.git https://github.com/zsh-users/zsh-completions.git"
+    },
+    "ghcr.io/hwaien/devcontainer-features/match-host-time-zone": {}
+  },
+  "customizations": {
     "vscode": {
       "extensions": [
         "GitHub.copilot",
@@ -27,40 +41,27 @@
             "source.organizeImports": true
           }
         },
-        "coverage-gutters.customizable.context-menu": true,
-        "coverage-gutters.customizable.status-bar-toggler-watchCoverageAndVisibleEditors-enabled": true,
-        "coverage-gutters.showGutterCoverage": false,
-        "coverage-gutters.showLineCoverage": true,
-        "coverage-gutters.xmlname": "coverage.xml",
+        "ruff.importStrategy": "fromEnvironment",
+        "ruff.interpreter": [".venv/bin/python"],
         "python.analysis.extraPaths": ["${workspaceFolder}/src"],
         "python.defaultInterpreterPath": ".venv/bin/python",
         "python.formatting.provider": "ruff",
         "python.linting.enabled": true,
         "python.linting.mypyEnabled": true,
-        "python.linting.pylintEnabled": true,
+        "python.linting.pylintEnabled": false,
         "python.testing.cwd": "${workspaceFolder}",
-        "python.testing.pytestArgs": ["--cov-report=xml"],
         "python.testing.pytestEnabled": true,
-        "ruff.importStrategy": "fromEnvironment",
-        "ruff.interpreter": [".venv/bin/python"],
+        "python.testing.pytestArgs": ["--cov-report=xml"],
+        "coverage-gutters.customizable.context-menu": true,
+        "coverage-gutters.customizable.status-bar-toggler-watchCoverageAndVisibleEditors-enabled": true,
+        "coverage-gutters.showGutterCoverage": false,
+        "coverage-gutters.showLineCoverage": true,
+        "coverage-gutters.xmlname": "coverage.xml",
         "terminal.integrated.defaultProfile.linux": "zsh"
       }
     }
   },
-  "features": {
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers-contrib/features/poetry:2": {},
-    "ghcr.io/devcontainers-contrib/features/pre-commit:2": {},
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installOhMyZsh": true
-    },
-    "ghcr.io/devcontainers-contrib/features/zsh-plugins:0": {
-      "plugins": "git zsh-autosuggestions zsh-syntax-highlighting zsh-completions",
-      "omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions.git https://github.com/zsh-users/zsh-syntax-highlighting.git https://github.com/zsh-users/zsh-completions.git"
-    },
-    "ghcr.io/devcontainers/features/python:1": {
-      "installTools": false
-    }
-  }
+  "postCreateCommand": "poetry config virtualenvs.in-project true && poetry install",
+  "onCreateCommand": "",
+  "remoteUser": "vscode"
 }
