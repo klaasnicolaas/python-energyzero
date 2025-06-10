@@ -142,6 +142,34 @@ class EnergyZero:
 
         return date_utc.isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
+    def to_datetime_string(
+        self, base_date: date, delta: timedelta = timedelta(0)
+    ) -> str:
+        """Convert a local timezone date to a UTC datetime string.
+
+        Args:
+        ----
+            base_date: The base date (local timezone) to convert.
+            delta: A timedelta to add to the base date.
+
+        Returns:
+        -------
+            A string representing the date in ISO 8601 format with UTC timezone.
+
+        """
+        local_tz = datetime.now(UTC).astimezone().tzinfo
+        date_utc = (
+            datetime(
+                base_date.year,
+                base_date.month,
+                base_date.day,
+                tzinfo=local_tz,
+            ).astimezone(UTC)
+            + delta
+        )
+
+        return date_utc.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
     async def gas_prices(
         self,
         start_date: date,
@@ -153,8 +181,8 @@ class EnergyZero:
 
         Args:
         ----
-            start_date: Start date of the period. Local timezone.
-            end_date: End date of the period. Local timezone.
+            start_date: Start date (local timezone) of the period.
+            end_date: End date (local timezone) of the period.
             interval: Interval of the prices.
             vat: VAT category.
 
@@ -179,6 +207,9 @@ class EnergyZero:
                 timedelta(hours=5, minutes=59, seconds=59, milliseconds=999, days=1),
             )
         else:
+            # Set start_date to 06:00:00 prev day and the end_date to 05:59:59
+            # Convert to UTC time 04:00:00 prev day and 03:59:59 current day
+
             utc_start_date_str = self.to_datetime_string(
                 start_date, timedelta(hours=6, days=-1)
             )
@@ -213,8 +244,8 @@ class EnergyZero:
 
         Args:
         ----
-            start_date: Start date of the period. Local timezone.
-            end_date: End date of the period. Local timezone.
+            start_date: Start date (local timezone) of the period.
+            end_date: End date (local timezone) of the period.
             interval: Interval of the prices.
             vat: VAT category.
 

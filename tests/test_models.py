@@ -1,6 +1,7 @@
 """Test the models."""
 
 from datetime import UTC, date, datetime, time, timedelta, timezone
+from json import loads
 
 import pytest
 from aresponses import ResponsesMockServer
@@ -504,7 +505,7 @@ async def test_timerange_astimezone() -> None:
 
 
 async def test_timerange_str() -> None:
-    """Raise exception when there is no data."""
+    """Test if the string representation for a TimeRange is correct."""
     range_from_tz = TimeRange(
         datetime(year=2025, month=1, day=2, hour=10, minute=9, second=8, tzinfo=UTC),
         datetime(year=2025, month=3, day=4, hour=7, minute=6, second=5, tzinfo=UTC),
@@ -542,3 +543,43 @@ async def test_electricity_ex_no_prices(
     assert energy.lowest_price_time_range is None
     assert energy.pct_of_max_price is None
     assert energy.time_ranges_priced_equal_or_lower is None
+
+    
+async def test_empty_energyprices() -> None:
+    """Verify that an empty EnergyPrices returns None where applicable."""
+    prices = EnergyPrices(dict[TimeRange, float](), 0)
+    assert prices.current_price is None
+    assert prices.extreme_prices is None
+    assert prices.highest_price_time_range is None
+    assert prices.lowest_price_time_range is None
+    assert prices.pct_of_max_price is None
+
+    assert len(prices.timestamp_prices) == 0
+    assert prices.time_ranges_priced_equal_or_lower is None
+    assert isinstance(prices.utcnow(), datetime)
+    assert prices.price_at_time(datetime.now(UTC)) is None
+
+
+@pytest.mark.freeze_time("2025-05-31 15:00:00+01:00")
+async def test_energyprices_fromdict() -> None:
+    """Verify that an empty EnergyPrices returns None where applicable."""
+    data = loads(load_fixtures("energy_ex.json"))["data"]
+    prices = EnergyPrices.from_dict(data, PriceType.ALL_IN)
+
+    today = date(2025, 5, 31)
+
+    assert prices.current_price == 0.1566829
+    assert prices.extreme_prices == (0.1408077, 0.3895111)
+    assert prices.lowest_price_time_range == TimeRange(
+        datetime.combine(today, time(11, 0, 0), UTC),
+        datetime.combine(today, time(12, 0, 0), UTC),
+    )
+    assert prices.highest_price_time_range == TimeRange(
+        datetime.combine(today, time(19, 0, 0), UTC),
+        datetime.combine(today, time(20, 0, 0), UTC),
+    )
+
+    assert prices.pct_of_max_price == 40.23
+
+    assert len(prices.timestamp_prices) == 24
+    assert prices.time_ranges_priced_equal_or_lower == 6
