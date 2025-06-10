@@ -544,7 +544,7 @@ async def test_electricity_ex_no_prices(
     assert energy.pct_of_max_price is None
     assert energy.time_ranges_priced_equal_or_lower is None
 
-    
+
 async def test_empty_energyprices() -> None:
     """Verify that an empty EnergyPrices returns None where applicable."""
     prices = EnergyPrices(dict[TimeRange, float](), 0)
