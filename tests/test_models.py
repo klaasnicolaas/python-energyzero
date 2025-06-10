@@ -472,7 +472,7 @@ async def test_gas_ex_none_date(
 async def test_no_gas_ex_data(
     aresponses: ResponsesMockServer, energyzero_client: EnergyZero
 ) -> None:
-    """Raise exception when there is no data."""
+    """Test if a response without any data throws the correct exception."""
     aresponses.add(
         "api.energyzero.nl",
         "/v1/gql",
@@ -489,7 +489,7 @@ async def test_no_gas_ex_data(
 
 
 async def test_timerange_astimezone() -> None:
-    """Raise exception when there is no data."""
+    """Test if astimezone returns the correct new time range."""
     tz_from = timezone.min
     tz_to = timezone.max
     range_start = datetime.now(tz=tz_from)
