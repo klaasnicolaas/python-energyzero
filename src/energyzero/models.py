@@ -73,25 +73,6 @@ def _get_pricetime(
     return func(prices, key=prices.get)  # type: ignore[call-arg]
 
 
-def _generate_timestamp_range_list(
-    prices: dict[TimeRange, float],
-) -> list[dict[str, float | TimeRange]]:
-    """Return a list of timestamps.
-
-    Args:
-    ----
-        prices: A dictionary with the hourprices.
-
-    Returns:
-    -------
-        A list of timestamps.
-
-    """
-    return [
-        {"timerange": timerange, "price": price} for timerange, price in prices.items()
-    ]
-
-
 def _generate_timestamp_list(
     prices: dict[datetime, float],
 ) -> list[dict[str, float | datetime]]:
