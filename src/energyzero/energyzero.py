@@ -10,16 +10,16 @@ from importlib import metadata
 from typing import Any, Self
 
 from aiohttp.client import ClientError, ClientSession
-from aiohttp.hdrs import METH_GET
+from aiohttp.hdrs import METH_GET, METH_POST
 from yarl import URL
 
-from .const import VatOption
+from .const import PriceType, VatOption
 from .exceptions import (
     EnergyZeroConnectionError,
     EnergyZeroError,
     EnergyZeroNoDataError,
 )
-from .models import Electricity, Gas
+from .models import Electricity, EnergyPrices, Gas
 
 VERSION = metadata.version(__package__)
 
@@ -106,7 +106,17 @@ class EnergyZero:
                 {"Content-Type": content_type, "response": text},
             )
 
-        return await response.json()
+        data = await response.json()
+        errors_key = "errors"
+
+        if errors_key in data:
+            error_messages = ", ".join([item["message"] for item in data[errors_key]])
+            msg = f"The API returned error(s): {error_messages}"
+            raise EnergyZeroError(
+                msg,
+            )
+
+        return data
 
     def to_datetime_string(
         self, base_date: date, delta: timedelta = timedelta(0)
@@ -240,6 +250,177 @@ class EnergyZero:
             msg = "No energy prices found for this period."
             raise EnergyZeroNoDataError(msg)
         return Electricity.from_dict(data)
+
+    async def electricity_prices_ex(
+        self,
+        start_date: date,
+        end_date: date,
+        price_type: PriceType = PriceType.ALL_IN,
+    ) -> EnergyPrices:
+        """Get electricity prices for a given period.
+
+        Uses the EnergyZero GraphQL API for more accurate results.
+        Can also return all-in prices.
+
+        NOTE: This method ignores EnergyZero.vat!
+
+        Args:
+        ----
+            start_date: Start date of the period. Local timezone.
+            end_date: End date of the period. Local timezone.
+            interval: Interval of the prices.
+            price_type:
+                PriceType.ALL_IN: return prices including energy tax,
+                    VAT and purchasing cost. This is how much a
+                    consumer would actually pay.
+                PriceType.MARKET: return the raw market prices,
+                    excluding taxes and purchase fees
+
+        Returns:
+        -------
+            A Python dictionary with the response from EnergyZero.
+
+        Raises:
+        ------
+            EnergyZeroNoDataError: No energy prices found for this period.
+
+        """
+        gql_query = """
+            query EnergyMarketPrices($input: EnergyMarketPricesInput!) {
+            energyMarketPrices(input: $input) {
+                averageExcl
+                averageIncl
+                prices {
+                energyPriceExcl
+                energyPriceIncl
+                from
+                isAverage
+                till
+                type
+                vat
+                additionalCosts {
+                    name
+                    priceExcl
+                    priceIncl
+                }
+                }
+            }
+            }
+            """
+
+        from_str = self.to_datetime_string(start_date)
+        till_str = self.to_datetime_string(end_date, timedelta(days=1))
+
+        data = await self._request(
+            "gql",
+            method=METH_POST,
+            json={
+                "query": gql_query,
+                "variables": {
+                    "input": {
+                        "from": from_str,
+                        "till": till_str,
+                        "intervalType": "Hourly",
+                        "type": "Electricity",
+                    },
+                },
+                "operationName": "EnergyMarketPrices",
+            },
+        )
+
+        if data["data"] == []:
+            msg = "No energy prices found for this period."
+            raise EnergyZeroNoDataError(msg)
+
+        return EnergyPrices.from_dict(data["data"], price_type)
+
+    async def gas_prices_ex(
+        self,
+        start_date: date,
+        end_date: date,
+        price_type: PriceType = PriceType.ALL_IN,
+    ) -> EnergyPrices:
+        """Get gas prices for a given period.
+
+        Uses the EnergyZero GraphQL API for more accurate results.
+        Can also return all-in prices.
+
+        NOTE: This method ignores EnergyZero.vat!
+
+        Args:
+        ----
+            start_date: Start date of the period. Local timezone.
+            end_date: End date of the period. Local timezone.
+            interval: Interval of the prices.
+            price_type:
+                PriceType.ALL_IN: return prices including energy tax,
+                    VAT and purchasing cost. This is how much a
+                    consumer would actually pay.
+                PriceType.MARKET: return the raw market prices,
+                    excluding taxes and purchase fees
+
+        Returns:
+        -------
+            A Python dictionary with the response from EnergyZero.
+
+        Raises:
+        ------
+            EnergyZeroNoDataError: No energy prices found for this period.
+
+        """
+        gql_query = """
+            query EnergyMarketPricesGas($input: EnergyMarketPricesInput!) {
+            energyMarketPrices(input: $input) {
+                averageExcl
+                averageIncl
+                prices {
+                energyPriceExcl
+                energyPriceIncl
+                from
+                isAverage
+                till
+                type
+                vat
+                additionalCosts {
+                    name
+                    priceExcl
+                    priceIncl
+                }
+                }
+            }
+            }
+            """
+
+        # Gas prices are valid from 06:00 to 06:00 the next day, so to make sure
+        # we include gas prices for the entire specified date range
+        # (start_date 00:00 to end_date 23:59:59), we need to also include parts
+        # of the day before and the day after the specified range:
+
+        from_str = self.to_datetime_string(start_date, timedelta(hours=6, days=-1))
+        till_str = self.to_datetime_string(end_date, timedelta(hours=6, days=1))
+
+        data = await self._request(
+            "gql",
+            method=METH_POST,
+            json={
+                "query": gql_query,
+                "variables": {
+                    "input": {
+                        "from": from_str,
+                        "till": till_str,
+                        "intervalType": "Daily",
+                        "type": "Gas",
+                    },
+                },
+                "operationName": "EnergyMarketPricesGas",
+            },
+        )
+
+        if data["data"] == []:
+            msg = "No gas prices found for this period."
+            raise EnergyZeroNoDataError(msg)
+
+        return EnergyPrices.from_dict(data["data"], price_type)
 
     async def close(self) -> None:
         """Close open client session."""

@@ -73,6 +73,25 @@ def _get_pricetime(
     return func(prices, key=prices.get)  # type: ignore[call-arg]
 
 
+def _generate_timestamp_list(
+    prices: dict[datetime, float],
+) -> list[dict[str, float | datetime]]:
+    """Return a list of timestamps.
+
+    Args:
+    ----
+        prices: A dictionary with the hourprices.
+
+    Returns:
+    -------
+        A list of timestamps.
+
+    """
+    return [
+        {"timestamp": timestamp, "price": price} for timestamp, price in prices.items()
+    ]
+
+
 def _generate_timestamp_range_list(
     prices: dict[TimeRange, float],
 ) -> list[dict[str, float | TimeRange]]:
@@ -92,23 +111,8 @@ def _generate_timestamp_range_list(
     ]
 
 
-def _generate_timestamp_list(
-    prices: dict[datetime, float],
-) -> list[dict[str, float | datetime]]:
-    """Return a list of timestamps.
-
-    Args:
-    ----
-        prices: A dictionary with the hourprices.
-
-    Returns:
-    -------
-        A list of timestamps.
-
-    """
-    return [
-        {"timestamp": timestamp, "price": price} for timestamp, price in prices.items()
-    ]
+def _parse_datetime_str(datetime_str: str) -> datetime:
+    return datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
 
 
 @dataclass(frozen=True)
@@ -152,10 +156,6 @@ class TimeRange:
             f"{self.start_including.strftime(format_string)} - "
             f"{self.end_excluding.strftime(format_string)}"
         )
-
-
-def _parse_datetime_str(datetime_str: str) -> datetime:
-    return datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
 
 
 @dataclass
@@ -384,6 +384,8 @@ class Gas:
         )
 
 
+# Note: This class replaces both the 'Electricity' class and the 'Gas' class
+# when using the 'EnergyZero.energy_prices_ex' or 'EnergyZero.gas_prices_ex' functions.
 @dataclass
 class EnergyPrices:
     """Object representing energy price data.

@@ -1,0 +1,18 @@
+{
+    "errors": [
+        {
+            "message": "internal_server_error",
+            "extensions": {
+                "code": "DOWNSTREAM_SERVICE_ERROR",
+                "serviceName": "energy-market",
+                "exception": {
+                    "message": "internal_server_error",
+                    "path": [
+                        "energyMarketPrices"
+                    ]
+                }
+            }
+        }
+    ],
+    "data": null
+}
