@@ -39,38 +39,6 @@ A python package with which you can retrieve the dynamic energy/gas prices from 
 pip install energyzero
 ```
 
-## Data
-
-**note**: Currently only tested for day/tomorrow prices
-
-You can read the following datasets with this package:
-
-### Electricity prices
-
-The electricity prices are different every hour, after 15:00 (more usually already at 14:00) the prices for the next day are published and it is therefore possible to retrieve these data.
-
-- Current/Next[x] hour electricity market price (float)
-- Average electricity price (float)
-- Lowest electricity price (float)
-- Highest electricity price (float)
-- Time of highest price (datetime or TimeRange)
-- Time of lowest price (datetime or TimeRange)
-- Percentage of the current price compared to the maximum price
-- Number of time ranges (hours in the case of electricity prices) with the current price or lower (int)
-
-### Gas prices
-
-The gas prices do not change per hour, but are fixed for 24 hours. Which means that from 06:00 in the morning the new rate for that day will be used.
-
-- Current/Next[x] day gas market price (float)
-- Average gas price (float)
-- Lowest gas price (float)
-- Highest gas price (float)
-- Time of highest price (TimeRange). Only available for `gas_prices_ex`
-- Time of lowest price (TimeRange). Only available for `gas_prices_ex`
-- Percentage of the current price compared to the maximum price. Only available for `gas_prices_ex`
-- Number of time ranges (days in the case of gas prices) with the current price or lower (int). Only available for `gas_prices_ex`
-
 ## Example
 
 ```python
@@ -94,27 +62,154 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+More examples can be found in the [examples folder](./examples/).
+
+## Data
+
+> **Note:** Currently tested primarily with day-ahead pricing (today/tomorrow).
+
+You can retrieve both electricity and gas pricing data using this package. Each data type supports a set of common fields, with some additional properties depending on whether you use the **GraphQL** or **legacy REST** endpoint.
+
+## ⚡ Electricity Prices
+
+Electricity prices change **every hour**. Prices for the next day are typically published between **14:00–15:00**.
+
+### Common fields (`Electricity` and `EnergyPrices`)
+
+- `current_price` — Current electricity price for the current hour or time range
+- `average_price` — Average price over the selected period
+- `extreme_prices` — Tuple of `(min_price, max_price)`
+- `pct_of_max_price` — Current price as a percentage of the maximum
+- `price_at_time(moment)` — Get price for a specific `datetime`
+- `timestamp_prices` — List of hourly price entries:
+  - REST: `{"timestamp": datetime, "price": float}`
+  - GraphQL: `{"timerange": TimeRange, "price": float}`
+
+### GraphQL-only (`get_electricity_prices()`)
+
+- `highest_price_time_range` — `TimeRange` where the price is highest
+- `lowest_price_time_range` — `TimeRange` where the price is lowest
+- `time_ranges_priced_equal_or_lower` — Count of hours where the price is less than or equal to the current
+
+### REST-only (`get_electricity_prices_legacy()`)
+
+- `highest_price_time` — Timestamp of the highest hourly price
+- `lowest_price_time` — Timestamp of the lowest hourly price
+- `hours_priced_equal_or_lower` — Count of hours with a price ≤ current price
+
+## 🔥 Gas Prices
+
+Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at **06:00** each morning.
+
+### Common fields (`Gas` and `EnergyPrices`)
+
+- `current_price` — Current gas price for today
+- `average_price` — Average gas price over the selected period
+- `extreme_prices` — Tuple of `(min_price, max_price)`
+- `price_at_time(moment)` — Get price for a specific `datetime`
+- `timestamp_prices` — List of daily price entries:
+  - REST: `{"timestamp": datetime, "price": float}`
+  - GraphQL: `{"timerange": TimeRange, "price": float}`
+
+### GraphQL-only (`get_gas_prices()`)
+
+- `highest_price_time_range` — Time range with the highest daily price
+- `lowest_price_time_range` — Time range with the lowest daily price
+- `pct_of_max_price` — Current price as a percentage of the maximum
+- `time_ranges_priced_equal_or_lower` — Count of days with a price ≤ current price
+
+## Function Parameters
+
 ### Class Parameters
 
-| Parameter | value Type | Description | Used for |
-| :-------- | :--------- | :---------- | :---------- |
-| `vat` | enum (default: **VatOption.INCLUDE**) | Include or exclude VAT on class level. | `electricity_prices`, `gas_prices` |
+| Parameter | Type                             | Description                            | Used by                                                  |
+|-----------|:---------------------------------|:---------------------------------------|:---------------------------------------------------------|
+| `vat`     | `VatOption` (default: `INCLUDE`) | Include or exclude VAT at class level. | `get_electricity_prices_legacy`, `get_gas_prices_legacy` |
 
-### Function Parameters
+### Interval Values
 
-| Parameter | value Type | Description | Used for |
-| :-------- | :--------- | :---------- | :---------- |
-| `start_date` | datetime | The start date of the selected period | `electricity_prices_ex`, `gas_prices_ex`, `electricity_prices`, `gas_prices` |
-| `end_date` | datetime | The end date of the selected period | `electricity_prices_ex`, `gas_prices_ex`, `electricity_prices`, `gas_prices` |
-| `interval` | integer (default: **4**) | The interval of data return (**day**, **week**, **month**, **year**) | `electricity_prices`, `gas_prices` |
-| `vat` | enum (default: class value) | Include or exclude VAT (**VatOption.INCLUDE** or **VatOption.EXCLUDE**) | `electricity_prices`, `gas_prices` |
-| `price_type` | enum | Market or Consumer all-in prices (**PriceType.ALL_IN** or **PriceType.MARKET**) | `electricity_prices_ex`, `gas_prices_ex` |
+| Value | Meaning  |
+|------:|:---------|
+| `4`   | Day      |
+| `5`   | Month    |
+| `6`   | Year     |
+| `9`   | Week     |
 
-**Interval**
-4: Dag
-5: Maand
-6: Jaar
-9: Week
+## Modern GraphQL Methods
+
+### `get_electricity_prices()`
+
+| Parameter    | Type        | Description                                    |
+|--------------|-------------|------------------------------------------------|
+| `start_date` | `date`      | Start of the period (local timezone).          |
+| `end_date`   | `date`      | End of the period (local timezone).            |
+| `price_type` | `PriceType` | Type of price to return: `ALL_IN` or `MARKET`. |
+
+> ⚠️ This method **does not use** the class-level `vat` setting.
+
+---
+
+### `get_gas_prices()`
+
+| Parameter    | Type        | Description                                    |
+|--------------|-------------|------------------------------------------------|
+| `start_date` | `date`      | Start of the period (local timezone).          |
+| `end_date`   | `date`      | End of the period (local timezone).            |
+| `price_type` | `PriceType` | Type of price to return: `ALL_IN` or `MARKET`. |
+
+> ⚠️ This method **does not use** the class-level `vat` setting.
+
+---
+
+## Legacy REST Methods
+
+### `get_electricity_prices_legacy()`
+
+| Parameter    | Type                | Description                                          |
+|--------------|---------------------|------------------------------------------------------|
+| `start_date` | `date`              | Start of the period (local timezone).                |
+| `end_date`   | `date`              | End of the period (local timezone).                  |
+| `interval`   | `int`               | Data interval (see interval values table).           |
+| `vat`        | `VatOption \| None` | VAT inclusion (fallback to class setting if `None`). |
+
+---
+
+### `get_gas_prices_legacy()`
+
+| Parameter    | Type                | Description                                          |
+|--------------|---------------------|------------------------------------------------------|
+| `start_date` | `date`              | Start of the period (local timezone).                |
+| `end_date`   | `date`              | End of the period (local timezone).                  |
+| `interval`   | `int`               | Data interval (see interval values table).           |
+| `vat`        | `VatOption \| None` | VAT inclusion (fallback to class setting if `None`). |
+
+## Enum Options
+
+### `VatOption`
+
+Defines whether prices returned by legacy methods should include VAT.
+
+| Value          | Description                     |
+|----------------|---------------------------------|
+| `INCLUDE`      | Return prices **including VAT** |
+| `EXCLUDE`      | Return prices **excluding VAT** |
+
+Used in: `get_electricity_prices_legacy`, `get_gas_prices_legacy`
+> 📝 Ignored in GraphQL methods (`get_electricity_prices`, `get_gas_prices`)
+
+---
+
+### `PriceType`
+
+Specifies the type of prices returned by GraphQL methods.
+
+| Value       | Description                                                          |
+|-------------|----------------------------------------------------------------------|
+| `MARKET`    | Raw wholesale market price (excludes tax, VAT, and purchasing costs) |
+| `ALL_IN`    | Final consumer price (includes energy tax, VAT, and purchase fees)   |
+
+Used in: `get_electricity_prices`, `get_gas_prices`
+
 
 ## Contributing
 
