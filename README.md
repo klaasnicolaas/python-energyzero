@@ -54,8 +54,8 @@ async def main() -> None:
         start_date = date(2022, 12, 7)
         end_date = date(2022, 12, 7)
 
-        energy = await client.electricity_prices_ex(start_date, end_date)
-        gas = await client.gas_prices_ex(start_date, end_date)
+        energy = await client.get_electricity_prices(start_date, end_date)
+        gas = await client.get_gas_prices(start_date, end_date)
 
 
 if __name__ == "__main__":
