@@ -303,11 +303,11 @@ class Gas:
 
     @property
     def current_price(self) -> float | None:
-        """Return the current gas price.
+        """Return the current daily gas price.
 
         Returns
         -------
-            The price for the current hour.
+            The price for the current day.
 
         """
         return self.price_at_time(self.utcnow())
@@ -384,8 +384,6 @@ class Gas:
         )
 
 
-# Note: This class replaces both the 'Electricity' class and the 'Gas' class
-# when using the 'EnergyZero.energy_prices_ex' or 'EnergyZero.gas_prices_ex' functions.
 @dataclass
 class EnergyPrices:
     """Object representing energy price data.
@@ -449,8 +447,8 @@ class EnergyPrices:
         if len(self.prices) == 0:
             return None
 
-        max_range, _ = min(self.prices.items(), key=lambda kv: kv[1])
-        return max_range
+        min_range, _ = min(self.prices.items(), key=lambda kv: kv[1])
+        return min_range
 
     @property
     def pct_of_max_price(self) -> float | None:
