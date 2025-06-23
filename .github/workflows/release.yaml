@@ -48,8 +48,9 @@ jobs:
 
   twitter:
     name: 🐦 Tweet the release
-    runs-on: ubuntu-latest
     needs: release
+    runs-on: ubuntu-latest
+    permissions: none
     steps:
       - uses: Eomm/why-don-t-you-tweet@v2.0.0
         with:
