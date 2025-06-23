@@ -11,7 +11,7 @@ async def main() -> None:
     async with EnergyZero(vat=VatOption.INCLUDE) as client:
         today = date(2025, 6, 3)
 
-        gas_today = await client.gas_prices(start_date=today, end_date=today)
+        gas_today = await client.get_gas_prices_legacy(start_date=today, end_date=today)
         print()
         print("--- GAS TODAY ---")
         print(f"Max price: €{gas_today.extreme_prices[1]}")
