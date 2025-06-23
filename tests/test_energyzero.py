@@ -26,7 +26,7 @@ async def test_json_request(
         aresponses.Response(
             status=200,
             headers={"Content-Type": "application/json"},
-            text=load_fixtures("energy.json"),
+            text=load_fixtures("legacy/energy.json"),
         ),
     )
     await energyzero_client._request("test")
@@ -44,7 +44,7 @@ async def test_json_gql_request(
         aresponses.Response(
             status=200,
             headers={"Content-Type": "application/json"},
-            text=load_fixtures("energy_ex.json"),
+            text=load_fixtures("graphql/energy.json"),
         ),
     )
     await energyzero_client._request("test", method=METH_POST)
@@ -60,7 +60,7 @@ async def test_internal_session(aresponses: ResponsesMockServer) -> None:
         aresponses.Response(
             status=200,
             headers={"Content-Type": "application/json"},
-            text=load_fixtures("energy.json"),
+            text=load_fixtures("legacy/energy.json"),
         ),
     )
     async with EnergyZero() as client:
@@ -76,7 +76,7 @@ async def test_gql_internal_session(aresponses: ResponsesMockServer) -> None:
         aresponses.Response(
             status=200,
             headers={"Content-Type": "application/json"},
-            text=load_fixtures("energy_ex.json"),
+            text=load_fixtures("graphql/energy.json"),
         ),
     )
     async with EnergyZero() as client:
@@ -190,7 +190,7 @@ async def test_post_server_error(
         aresponses.Response(
             status=200,
             headers={"Content-Type": "application/json"},
-            text=load_fixtures("gql_error.json"),
+            text=load_fixtures("graphql/gql_error.json"),
         ),
     )
     with pytest.raises(EnergyZeroError):

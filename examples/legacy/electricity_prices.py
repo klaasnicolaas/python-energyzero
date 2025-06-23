@@ -15,8 +15,10 @@ async def main() -> None:
         today = date(2025, 6, 3)
         tomorrow = date(2025, 6, 4)
 
-        energy_today = await client.energy_prices(start_date=today, end_date=today)
-        energy_tomorrow = await client.energy_prices(
+        energy_today = await client.get_electricity_prices_legacy(
+            start_date=today, end_date=today
+        )
+        energy_tomorrow = await client.get_electricity_prices_legacy(
             start_date=tomorrow,
             end_date=tomorrow,
         )
