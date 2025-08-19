@@ -123,15 +123,6 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 |-----------|:---------------------------------|:---------------------------------------|:---------------------------------------------------------|
 | `vat`     | `VatOption` (default: `INCLUDE`) | Include or exclude VAT at class level. | `get_electricity_prices_legacy`, `get_gas_prices_legacy` |
 
-### Interval Values
-
-| Value | Meaning  |
-|------:|:---------|
-| `4`   | Day      |
-| `5`   | Month    |
-| `6`   | Year     |
-| `9`   | Week     |
-
 ## Modern GraphQL Methods
 
 ### `get_electricity_prices()`
@@ -166,7 +157,7 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 |--------------|---------------------|------------------------------------------------------|
 | `start_date` | `date`              | Start of the period (local timezone).                |
 | `end_date`   | `date`              | End of the period (local timezone).                  |
-| `interval`   | `int`               | Data interval (see interval values table).           |
+| `interval`   | `Interval`          | Data interval (see `Interval` enum values).           |
 | `vat`        | `VatOption \| None` | VAT inclusion (fallback to class setting if `None`). |
 
 ---
@@ -177,7 +168,7 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 |--------------|---------------------|------------------------------------------------------|
 | `start_date` | `date`              | Start of the period (local timezone).                |
 | `end_date`   | `date`              | End of the period (local timezone).                  |
-| `interval`   | `int`               | Data interval (see interval values table).           |
+| `interval`   | `Interval`          | Data interval (see `Interval` enum values).           |
 | `vat`        | `VatOption \| None` | VAT inclusion (fallback to class setting if `None`). |
 
 ## Enum Options
@@ -207,6 +198,20 @@ Specifies the type of prices returned by GraphQL methods.
 
 Used in: `get_electricity_prices`, `get_gas_prices`
 
+---
+
+### `Interval`
+
+Specifies the interval for prices returned by the legacy methods.
+
+| Value        | Description    |
+|--------------|----------------|
+| `DAY = 4`    | Daily prices   |
+| `MONTH = 5`  | Monthly prices |
+| `YEAR = 6`   | Yearly prices  |
+| `WEEK = 9`   | Weekly prices  |
+
+Used in: `get_electricity_prices_legacy`, `get_gas_prices_legacy`
 
 ## Contributing
 
