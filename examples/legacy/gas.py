@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import pytz
 
-from energyzero import EnergyZero, VatOption
+from energyzero import EnergyZero
 
 
 def _price_to_string(price: float | None) -> str:
@@ -16,7 +16,7 @@ def _price_to_string(price: float | None) -> str:
 
 async def main() -> None:
     """Show example on fetching the legacy gas prices from EnergyZero."""
-    async with EnergyZero(vat=VatOption.INCLUDE) as client:
+    async with EnergyZero() as client:
         tz = pytz.timezone("Europe/Amsterdam")
         today = datetime.now(tz).date()
 
