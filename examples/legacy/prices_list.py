@@ -5,7 +5,7 @@ from datetime import date, datetime, time
 
 import pytz
 
-from energyzero import EnergyZero, VatOption
+from energyzero import EnergyZero
 
 
 def print_timestamp_prices(
@@ -31,7 +31,7 @@ def print_timestamp_prices(
 
 async def main() -> None:
     """Fetch and print electricity and gas prices (legacy) with timestamp lists."""
-    async with EnergyZero(vat=VatOption.INCLUDE) as client:
+    async with EnergyZero() as client:
         today = date(2025, 6, 23)
         tz = pytz.timezone("Europe/Amsterdam")
 

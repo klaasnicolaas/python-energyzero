@@ -48,20 +48,20 @@ def _print_energy_price_info(prices: Electricity, tz: tzinfo) -> None:
 
 async def main() -> None:
     """Show example on fetching the electricity prices (legacy) from EnergyZero."""
-    async with EnergyZero(vat=VatOption.EXCLUDE) as client:
+    async with EnergyZero() as client:
         tz = pytz.timezone("Europe/Amsterdam")
         today = date(2025, 6, 23)
         tomorrow = date(2025, 6, 24)
 
         print("--- ENERGY TODAY ---")
         energy_today = await client.get_electricity_prices_legacy(
-            start_date=today, end_date=today
+            start_date=today, end_date=today, vat=VatOption.EXCLUDE
         )
         _print_energy_price_info(energy_today, tz)
 
         print("\n--- ENERGY TOMORROW ---")
         energy_tomorrow = await client.get_electricity_prices_legacy(
-            start_date=tomorrow, end_date=tomorrow
+            start_date=tomorrow, end_date=tomorrow, vat=VatOption.EXCLUDE
         )
         _print_energy_price_info(energy_tomorrow, tz)
 
