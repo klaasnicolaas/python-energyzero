@@ -28,7 +28,6 @@ VERSION = metadata.version(__package__)
 class EnergyZero:
     """Main class for handling data fetching from EnergyZero."""
 
-    vat: VatOption = VatOption.INCLUDE
     request_timeout: float = 10.0
     session: ClientSession | None = None
 
@@ -160,7 +159,7 @@ class EnergyZero:
             start_date: Start date (local timezone) of the period.
             end_date: End date (local timezone) of the period.
             interval: Interval of the prices.
-            vat: VAT category.
+            vat: VAT category (included by default).
 
         Returns:
         -------
@@ -198,7 +197,7 @@ class EnergyZero:
                 "tillDate": utc_end_date_str,
                 "interval": interval,
                 "usageType": 3,
-                "inclBtw": vat.value if vat is not None else self.vat.value,
+                "inclBtw": vat.value if vat is not None else VatOption.INCLUDE,
             },
         )
 
@@ -221,7 +220,7 @@ class EnergyZero:
             start_date: Start date (local timezone) of the period.
             end_date: End date (local timezone) of the period.
             interval: Interval of the prices.
-            vat: VAT category.
+            vat: VAT category (included by default).
 
         Returns:
         -------
@@ -242,7 +241,7 @@ class EnergyZero:
                 ),
                 "interval": interval,
                 "usageType": 1,
-                "inclBtw": vat.value if vat is not None else self.vat.value,
+                "inclBtw": vat.value if vat is not None else VatOption.INCLUDE,
             },
         )
 
@@ -261,8 +260,6 @@ class EnergyZero:
 
         Uses the EnergyZero GraphQL API for more accurate results.
         Can also return all-in prices.
-
-        NOTE: This method ignores EnergyZero.vat!
 
         Args:
         ----
@@ -348,8 +345,6 @@ class EnergyZero:
 
         Uses the EnergyZero GraphQL API for more accurate results.
         Can also return all-in prices.
-
-        NOTE: This method ignores EnergyZero.vat!
 
         Args:
         ----

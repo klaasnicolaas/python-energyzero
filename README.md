@@ -42,12 +42,12 @@ pip install energyzero
 import asyncio
 
 from datetime import date
-from energyzero import EnergyZero, VatOption
+from energyzero import EnergyZero
 
 
 async def main() -> None:
     """Show example on fetching the energy prices from EnergyZero."""
-    async with EnergyZero(vat=VatOption.INCLUDE) as client:
+    async with EnergyZero() as client:
         start_date = date(2022, 12, 7)
         end_date = date(2022, 12, 7)
 
@@ -115,14 +115,6 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 - `pct_of_max_price` — Current price as a percentage of the maximum
 - `time_ranges_priced_equal_or_lower` — Count of days with a price ≤ current price
 
-## Function Parameters
-
-### Class Parameters
-
-| Parameter | Type                             | Description                            | Used by                                                  |
-|-----------|:---------------------------------|:---------------------------------------|:---------------------------------------------------------|
-| `vat`     | `VatOption` (default: `INCLUDE`) | Include or exclude VAT at class level. | `get_electricity_prices_legacy`, `get_gas_prices_legacy` |
-
 ## Modern GraphQL Methods
 
 ### `get_electricity_prices()`
@@ -133,8 +125,6 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 | `end_date`   | `date`      | End of the period (local timezone).            |
 | `price_type` | `PriceType` | Type of price to return: `ALL_IN` or `MARKET`. |
 
-> ⚠️ This method **does not use** the class-level `vat` setting.
-
 ---
 
 ### `get_gas_prices()`
@@ -144,8 +134,6 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 | `start_date` | `date`      | Start of the period (local timezone).          |
 | `end_date`   | `date`      | End of the period (local timezone).            |
 | `price_type` | `PriceType` | Type of price to return: `ALL_IN` or `MARKET`. |
-
-> ⚠️ This method **does not use** the class-level `vat` setting.
 
 ---
 
@@ -158,7 +146,7 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 | `start_date` | `date`              | Start of the period (local timezone).                |
 | `end_date`   | `date`              | End of the period (local timezone).                  |
 | `interval`   | `Interval`          | Data interval (see `Interval` enum values).           |
-| `vat`        | `VatOption \| None` | VAT inclusion (fallback to class setting if `None`). |
+| `vat`        | `VatOption \| None` | VAT inclusion (included by default). |
 
 ---
 
@@ -169,7 +157,7 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 | `start_date` | `date`              | Start of the period (local timezone).                |
 | `end_date`   | `date`              | End of the period (local timezone).                  |
 | `interval`   | `Interval`          | Data interval (see `Interval` enum values).           |
-| `vat`        | `VatOption \| None` | VAT inclusion (fallback to class setting if `None`). |
+| `vat`        | `VatOption \| None` | VAT inclusion (included by default). |
 
 ## Enum Options
 
