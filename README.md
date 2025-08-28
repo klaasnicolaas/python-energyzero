@@ -115,17 +115,6 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 - `pct_of_max_price` — Current price as a percentage of the maximum
 - `time_ranges_priced_equal_or_lower` — Count of days with a price ≤ current price
 
-## Function Parameters
-
-### Interval Values
-
-| Value | Meaning  |
-|------:|:---------|
-| `4`   | Day      |
-| `5`   | Month    |
-| `6`   | Year     |
-| `9`   | Week     |
-
 ## Modern GraphQL Methods
 
 ### `get_electricity_prices()`
@@ -156,7 +145,7 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 |--------------|---------------------|------------------------------------------------------|
 | `start_date` | `date`              | Start of the period (local timezone).                |
 | `end_date`   | `date`              | End of the period (local timezone).                  |
-| `interval`   | `int`               | Data interval (see interval values table).           |
+| `interval`   | `Interval`          | Data interval (see `Interval` enum values).           |
 | `vat`        | `VatOption \| None` | VAT inclusion (included by default). |
 
 ---
@@ -167,7 +156,7 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 |--------------|---------------------|------------------------------------------------------|
 | `start_date` | `date`              | Start of the period (local timezone).                |
 | `end_date`   | `date`              | End of the period (local timezone).                  |
-| `interval`   | `int`               | Data interval (see interval values table).           |
+| `interval`   | `Interval`          | Data interval (see `Interval` enum values).           |
 | `vat`        | `VatOption \| None` | VAT inclusion (included by default). |
 
 ## Enum Options
@@ -197,6 +186,20 @@ Specifies the type of prices returned by GraphQL methods.
 
 Used in: `get_electricity_prices`, `get_gas_prices`
 
+---
+
+### `Interval`
+
+Specifies the interval for prices returned by the legacy methods.
+
+| Value        | Description    |
+|--------------|----------------|
+| `DAY = 4`    | Daily prices   |
+| `MONTH = 5`  | Monthly prices |
+| `YEAR = 6`   | Yearly prices  |
+| `WEEK = 9`   | Weekly prices  |
+
+Used in: `get_electricity_prices_legacy`, `get_gas_prices_legacy`
 
 ## Contributing
 

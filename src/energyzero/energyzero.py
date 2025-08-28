@@ -13,7 +13,7 @@ from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET, METH_POST
 from yarl import URL
 
-from .const import PriceType, VatOption
+from .const import Interval, PriceType, VatOption
 from .exceptions import (
     EnergyZeroConnectionError,
     EnergyZeroError,
@@ -210,7 +210,7 @@ class EnergyZero:
         self,
         start_date: date,
         end_date: date,
-        interval: int = 4,
+        interval: Interval = Interval.DAY,
         vat: VatOption | None = None,
     ) -> Electricity:
         """[LEGACY] Get energy prices for a given period.
