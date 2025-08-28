@@ -7,10 +7,11 @@ from .exceptions import (
     EnergyZeroError,
     EnergyZeroNoDataError,
 )
-from .models import Electricity, EnergyPrices, Gas, TimeRange
+from .models import Electricity, EnergyPriceBlock, EnergyPrices, Gas, TimeRange
 
 __all__ = [
     "Electricity",
+    "EnergyPriceBlock",
     "EnergyPrices",
     "EnergyZero",
     "EnergyZeroConnectionError",
