@@ -92,7 +92,7 @@ async def test_graphql_electricity_none_date(
     energy: EnergyPrices = await energyzero_client.get_electricity_prices(
         start_date=today,
         end_date=today,
-        price_type=PriceType.ALL_IN,
+        price_type=PriceType.MARKET,
     )
     assert energy == snapshot
     assert isinstance(energy, EnergyPrices)
