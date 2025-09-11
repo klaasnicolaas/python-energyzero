@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta, tzinfo
 from typing import TYPE_CHECKING, Any
 
@@ -385,6 +385,31 @@ class Gas:
 
 
 @dataclass
+class EnergyPriceBlock:
+    """Object representing a block of energy prices."""
+
+    time_range: TimeRange
+    energy_price_excl: float
+    energy_price_incl: float
+    vat: float
+    additional_costs: list[dict[str, float]]
+
+    @property
+    def total_excl(self) -> float:
+        """Return the total price excluding VAT and additional costs."""
+        return self.energy_price_excl + sum(
+            cost["priceExcl"] for cost in self.additional_costs
+        )
+
+    @property
+    def total_incl(self) -> float:
+        """Return the total price including VAT and additional costs."""
+        return self.energy_price_incl + sum(
+            cost["priceIncl"] for cost in self.additional_costs
+        )
+
+
+@dataclass
 class EnergyPrices:
     """Object representing energy price data.
 
@@ -394,6 +419,7 @@ class EnergyPrices:
 
     prices: dict[TimeRange, float]
     average_price: float | None
+    raw_blocks: list[EnergyPriceBlock] = field(default_factory=list)
 
     @property
     def current_price(self) -> float | None:
@@ -533,13 +559,15 @@ class EnergyPrices:
         Args:
         ----
             data: A dictionary with the data from the API.
+            price_type: The type of price to use, either ALL_IN or EXCL_VAT.
 
         Returns:
         -------
-            An Energy object.
+            An EnergyPrices object.
 
         """
         prices: dict[TimeRange, float] = {}
+        blocks: list[EnergyPriceBlock] = []
         source_market_prices = data["energyMarketPrices"]["prices"]
 
         price_key = (
@@ -552,22 +580,33 @@ class EnergyPrices:
             key = TimeRange(
                 _parse_datetime_str(item["from"]), _parse_datetime_str(item["till"])
             )
-
             price = item[price_key]
 
             if price_type == PriceType.ALL_IN:
                 additional_costs = item["additionalCosts"]
                 price += sum(d["priceIncl"] for d in additional_costs)
+            else:
+                additional_costs = []
 
             prices[key] = price
             price_sum += price
 
-        average_price = None
+            blocks.append(
+                EnergyPriceBlock(
+                    time_range=key,
+                    energy_price_excl=item["energyPriceExcl"],
+                    energy_price_incl=item["energyPriceIncl"],
+                    vat=item.get("vat", 0),
+                    additional_costs=item.get("additionalCosts", []),
+                )
+            )
 
+        average_price = None
         if len(source_market_prices) > 0:
             average_price = price_sum / len(source_market_prices)
 
         return cls(
             prices=prices,
             average_price=average_price,
+            raw_blocks=blocks,
         )
