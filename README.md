@@ -16,6 +16,7 @@
 [![Build Status][build-shield]][build-url]
 [![Typing Status][typing-shield]][typing-url]
 [![Code Coverage][codecov-shield]][codecov-url]
+[![OpenSSF Scorecard][scorecard-shield]][scorecard-url]
 
 Asynchronous Python client for the EnergyZero API.
 
@@ -314,6 +315,8 @@ SOFTWARE.
 [typing-url]: https://github.com/klaasnicolaas/python-energyzero/actions/workflows/typing.yaml
 [releases-shield]: https://img.shields.io/github/release/klaasnicolaas/python-energyzero.svg
 [releases]: https://github.com/klaasnicolaas/python-energyzero/releases
+[scorecard-shield]: https://api.scorecard.dev/projects/github.com/klaasnicolaas/python-energyzero/badge
+[scorecard-url]: https://scorecard.dev/viewer/?uri=github.com/klaasnicolaas/python-energyzero
 
 [poetry-install]: https://python-poetry.org/docs/#installation
 [poetry]: https://python-poetry.org
