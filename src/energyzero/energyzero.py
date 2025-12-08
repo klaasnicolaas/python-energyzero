@@ -197,7 +197,7 @@ class EnergyZero:
                 "tillDate": utc_end_date_str,
                 "interval": interval,
                 "usageType": 3,
-                "inclBtw": vat.value if vat is not None else VatOption.INCLUDE,
+                "inclBtw": vat.value if vat is not None else VatOption.INCLUDE.value,
             },
         )
 
@@ -241,7 +241,7 @@ class EnergyZero:
                 ),
                 "interval": interval,
                 "usageType": 1,
-                "inclBtw": vat.value if vat is not None else VatOption.INCLUDE,
+                "inclBtw": vat.value if vat is not None else VatOption.INCLUDE.value,
             },
         )
 
