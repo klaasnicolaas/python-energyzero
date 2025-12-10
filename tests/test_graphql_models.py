@@ -50,7 +50,6 @@ async def test_graphql_electricity_model(
     assert isinstance(energy.timestamp_prices, list)
 
     # Electricity prices
-    assert energy.extreme_prices is not None
     assert energy.extreme_prices[1] == 0.3895111
     assert energy.extreme_prices[0] == 0.1408077
     assert energy.average_price == 0.24064782499999993
@@ -173,7 +172,6 @@ async def test_graphql_gas_model(
     assert isinstance(gas, EnergyPrices)
     assert isinstance(gas.timestamp_prices, list)
 
-    assert gas.extreme_prices is not None
     assert gas.extreme_prices[1] == 1.21367051296348
     assert gas.extreme_prices[0] == 1.19915429151276
 
@@ -307,26 +305,36 @@ async def test_graphql_electricity_no_prices(
         price_type=PriceType.ALL_IN,
     )
     assert energy == snapshot
-    assert energy.extreme_prices is None
-    assert energy.highest_price_time_range is None
-    assert energy.lowest_price_time_range is None
-    assert energy.pct_of_max_price is None
-    assert energy.time_ranges_priced_equal_or_lower is None
+    # All properties should raise EnergyZeroNoDataError when no prices available
+    for prop in [
+        "extreme_prices",
+        "highest_price_time_range",
+        "lowest_price_time_range",
+        "pct_of_max_price",
+        "time_ranges_priced_equal_or_lower",
+    ]:
+        with pytest.raises(EnergyZeroNoDataError, match="No prices available"):
+            getattr(energy, prop)
 
 
 async def test_empty_energyprices() -> None:
-    """Verify that an empty EnergyPrices returns None where applicable."""
+    """Verify that empty EnergyPrices raises EnergyZeroNoDataError where applicable."""
     prices = EnergyPrices(dict[TimeRange, float](), 0)
     assert prices.current_price is None
-    assert prices.extreme_prices is None
-    assert prices.highest_price_time_range is None
-    assert prices.lowest_price_time_range is None
-    assert prices.pct_of_max_price is None
-
     assert len(prices.timestamp_prices) == 0
-    assert prices.time_ranges_priced_equal_or_lower is None
     assert isinstance(prices.utcnow(), datetime)
     assert prices.price_at_time(datetime.now(UTC)) is None
+
+    # All properties should raise EnergyZeroNoDataError when no prices available
+    for prop in [
+        "extreme_prices",
+        "highest_price_time_range",
+        "lowest_price_time_range",
+        "pct_of_max_price",
+        "time_ranges_priced_equal_or_lower",
+    ]:
+        with pytest.raises(EnergyZeroNoDataError, match="No prices available"):
+            getattr(prices, prop)
 
 
 @pytest.mark.freeze_time("2025-05-31 15:00:00+01:00")

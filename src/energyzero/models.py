@@ -7,6 +7,7 @@ from datetime import UTC, datetime, timedelta, tzinfo
 from typing import TYPE_CHECKING, Any
 
 from .const import PriceType
+from .exceptions import EnergyZeroNoDataError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -433,63 +434,79 @@ class EnergyPrices:
         return self.price_at_time(self.utcnow())
 
     @property
-    def extreme_prices(self) -> tuple[float, float] | None:
+    def extreme_prices(self) -> tuple[float, float]:
         """Return the minimum and maximum price.
 
         Returns
         -------
             The minimum and maximum price.
 
+        Raises
+        ------
+            EnergyZeroNoDataError: If no prices are available.
+
         """
         if len(self.prices) == 0:
-            return None
+            msg = "No prices available"
+            raise EnergyZeroNoDataError(msg)
 
         return min(self.prices.values()), max(self.prices.values())
 
     @property
-    def highest_price_time_range(self) -> TimeRange | None:
+    def highest_price_time_range(self) -> TimeRange:
         """Return the UTC time range of the maximum price.
 
         Returns
         -------
             The UTC time range of the maximum price.
 
+        Raises
+        ------
+            EnergyZeroNoDataError: If no prices are available.
+
         """
         if len(self.prices) == 0:
-            return None
+            msg = "No prices available"
+            raise EnergyZeroNoDataError(msg)
 
         max_range, _ = max(self.prices.items(), key=lambda kv: kv[1])
         return max_range
 
     @property
-    def lowest_price_time_range(self) -> TimeRange | None:
+    def lowest_price_time_range(self) -> TimeRange:
         """Return the UTC time range of the minimum price.
 
         Returns
         -------
             The UTC time range of the minimum price.
 
+        Raises
+        ------
+            EnergyZeroNoDataError: If no prices are available.
+
         """
         if len(self.prices) == 0:
-            return None
+            msg = "No prices available"
+            raise EnergyZeroNoDataError(msg)
 
         min_range, _ = min(self.prices.items(), key=lambda kv: kv[1])
         return min_range
 
     @property
-    def pct_of_max_price(self) -> float | None:
+    def pct_of_max_price(self) -> float:
         """Return the percentage of the maximum price.
 
         Returns
         -------
             The percentage of the maximum price.
 
+        Raises
+        ------
+            EnergyZeroNoDataError: If no prices are available.
+
         """
         current: float = self.current_price or 0
         extreme_prices = self.extreme_prices
-
-        if extreme_prices is None:
-            return None
 
         return round((current / extreme_prices[1]) * 100, 2)
 
@@ -505,16 +522,21 @@ class EnergyPrices:
         return _generate_timestamp_range_list(self.prices)
 
     @property
-    def time_ranges_priced_equal_or_lower(self) -> int | None:
+    def time_ranges_priced_equal_or_lower(self) -> int:
         """Return the number of time ranges with prices <= current price.
 
         Returns
         -------
             The number of time ranges with prices equal or lower than the current price.
 
+        Raises
+        ------
+            EnergyZeroNoDataError: If no prices are available.
+
         """
         if len(self.prices) == 0:
-            return None
+            msg = "No prices available"
+            raise EnergyZeroNoDataError(msg)
 
         current: float = self.current_price or 0
         return sum(price <= current for price in self.prices.values())
