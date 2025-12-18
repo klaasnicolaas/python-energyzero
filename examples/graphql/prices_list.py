@@ -5,7 +5,7 @@ from datetime import datetime, tzinfo
 
 import pytz
 
-from energyzero import EnergyZero, TimeRange
+from energyzero import APIBackend, EnergyZero, TimeRange
 
 
 def _price_to_string(price: float | None) -> str:
@@ -31,7 +31,7 @@ def _price_list_item_to_str(entry: dict[str, float | TimeRange], tz: tzinfo) -> 
 
 async def main() -> None:
     """Show example on fetching the electricity and gas prices from EnergyZero."""
-    async with EnergyZero() as client:
+    async with EnergyZero(backend=APIBackend.GRAPHQL) as client:
         local_tz = pytz.timezone("Europe/Amsterdam")
         today = datetime.now(local_tz).date()
 
