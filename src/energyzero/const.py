@@ -2,27 +2,21 @@
 
 from __future__ import annotations
 
-from enum import Enum, IntEnum
+from enum import Enum
 
 
-class VatOption(str, Enum):
-    """Enum representing whether to include VAT or not."""
+class PriceType(str, Enum):
+    """Enum describing the price flavor returned by the APIs."""
 
-    INCLUDE = "true"
-    EXCLUDE = "false"
-
-
-class PriceType(Enum):
-    """Enum representing what kind of prices to return."""
-
-    MARKET = 1
-    ALL_IN = 2
+    MARKET = "market"
+    ALL_IN = "all_in"
+    MARKET_WITH_VAT = "market_with_vat"
+    ALL_IN_EXCL_VAT = "all_in_excl_vat"
 
 
-class Interval(IntEnum):
-    """Enum representing the time intervals of prices."""
+class Interval(str, Enum):
+    """Interval constants for REST API."""
 
-    DAY = 4
-    MONTH = 5
-    YEAR = 6
-    WEEK = 9
+    QUARTER = "INTERVAL_QUARTER"
+    HOUR = "INTERVAL_HOUR"
+    DAY = "INTERVAL_DAY"

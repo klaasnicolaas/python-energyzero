@@ -1,0 +1,5 @@
+{
+  "code": 3,
+  "message": "invalid DailyEnergyPricesRequest.Date: value does not match regex pattern \"^\\\\d{2}-\\\\d{2}-\\\\d{4}$\"",
+  "details": []
+}

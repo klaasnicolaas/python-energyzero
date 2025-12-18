@@ -3,35 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta, tzinfo
-from typing import TYPE_CHECKING, Any
+from datetime import UTC, date, datetime, tzinfo
+from typing import Any
 
 from .const import PriceType
 from .exceptions import EnergyZeroNoDataError
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-
-def _timed_value(moment: datetime, prices: dict[datetime, float]) -> float | None:
-    """Return a function that returns a value at a specific time.
-
-    Args:
-    ----
-        moment: The time to get the value for.
-        prices: A dictionary with the prices.
-
-    Returns:
-    -------
-        The value at the time.
-
-    """
-    value = None
-    for timestamp, price in prices.items():
-        future_ts = timestamp + timedelta(hours=1)
-        if timestamp <= moment < future_ts:
-            value = price
-    return value
+REST_PRICE_STREAMS: dict[PriceType, str] = {
+    PriceType.MARKET: "base",
+    PriceType.MARKET_WITH_VAT: "base_with_vat",
+    PriceType.ALL_IN_EXCL_VAT: "all_in",
+    PriceType.ALL_IN: "all_in_with_vat",
+}
 
 
 def _value_at_time(moment: datetime, prices: dict[TimeRange, float]) -> float | None:
@@ -53,44 +36,6 @@ def _value_at_time(moment: datetime, prices: dict[TimeRange, float]) -> float | 
             value = price
             break
     return value
-
-
-def _get_pricetime(
-    prices: dict[datetime, float],
-    func: Callable[[dict[datetime, float]], datetime],
-) -> datetime:
-    """Return the time of the price.
-
-    Args:
-    ----
-        prices: A dictionary with the hourprices.
-        func: A function to get the time.
-
-    Returns:
-    -------
-        The time of the price.
-
-    """
-    return func(prices, key=prices.get)  # type: ignore[call-arg]
-
-
-def _generate_timestamp_list(
-    prices: dict[datetime, float],
-) -> list[dict[str, float | datetime]]:
-    """Return a list of timestamps.
-
-    Args:
-    ----
-        prices: A dictionary with the hourprices.
-
-    Returns:
-    -------
-        A list of timestamps.
-
-    """
-    return [
-        {"timestamp": timestamp, "price": price} for timestamp, price in prices.items()
-    ]
 
 
 def _generate_timestamp_range_list(
@@ -160,232 +105,6 @@ class TimeRange:
 
 
 @dataclass
-class Electricity:
-    """Object representing electricity data."""
-
-    prices: dict[datetime, float]
-    average_price: float
-
-    @property
-    def current_price(self) -> float | None:
-        """Return the current hourprice.
-
-        Returns
-        -------
-            The price for the current hour.
-
-        """
-        return self.price_at_time(self.utcnow())
-
-    @property
-    def extreme_prices(self) -> tuple[float, float]:
-        """Return the minimum and maximum price.
-
-        Returns
-        -------
-            The minimum and maximum price.
-
-        """
-        return min(self.prices.values()), max(self.prices.values())
-
-    @property
-    def highest_price_time(self) -> datetime:
-        """Return the time of the maximum price.
-
-        Returns
-        -------
-            The time of the maximum price.
-
-        """
-        return _get_pricetime(self.prices, max)
-
-    @property
-    def lowest_price_time(self) -> datetime:
-        """Return the time of the minimum price.
-
-        Returns
-        -------
-            The time of the minimum price.
-
-        """
-        return _get_pricetime(self.prices, min)
-
-    @property
-    def pct_of_max_price(self) -> float:
-        """Return the percentage of the maximum price.
-
-        Returns
-        -------
-            The percentage of the maximum price.
-
-        """
-        current: float = self.current_price or 0
-        return round((current / self.extreme_prices[1]) * 100, 2)
-
-    @property
-    def timestamp_prices(self) -> list[dict[str, float | datetime]]:
-        """Return a list of prices with timestamp.
-
-        Returns
-        -------
-            list of prices with timestamp
-
-        """
-        return _generate_timestamp_list(self.prices)
-
-    @property
-    def hours_priced_equal_or_lower(self) -> int:
-        """Return the number of hours with prices equal or lower than the current price.
-
-        Returns
-        -------
-            The number of hours with prices equal or lower than the current price.
-
-        """
-        current: float = self.current_price or 0
-        return sum(price <= current for price in self.prices.values())
-
-    def utcnow(self) -> datetime:
-        """Return the current timestamp in the UTC timezone.
-
-        Returns
-        -------
-            The current timestamp in the UTC timezone.
-
-        """
-        return datetime.now(UTC)
-
-    def price_at_time(self, moment: datetime) -> float | None:
-        """Return the price at a specific time.
-
-        Args:
-        ----
-            moment: The time to get the price for.
-
-        Returns:
-        -------
-            The price at the specific time.
-
-        """
-        value = _timed_value(moment, self.prices)
-        if value is not None or value == 0:
-            return value
-        return None
-
-    @classmethod
-    def from_dict(cls: type[Electricity], data: dict[str, Any]) -> Electricity:
-        """Create an Electricity object from a dictionary.
-
-        Args:
-        ----
-            data: A dictionary with the data from the API.
-
-        Returns:
-        -------
-            An Electricity object.
-
-        """
-        prices: dict[datetime, float] = {}
-        for item in data["Prices"]:
-            prices[_parse_datetime_str(item["readingDate"])] = item["price"]
-
-        return cls(
-            prices=prices,
-            average_price=data["average"],
-        )
-
-
-@dataclass
-class Gas:
-    """Object representing gas data."""
-
-    prices: dict[datetime, float]
-    average_price: float
-
-    @property
-    def current_price(self) -> float | None:
-        """Return the current daily gas price.
-
-        Returns
-        -------
-            The price for the current day.
-
-        """
-        return self.price_at_time(self.utcnow())
-
-    @property
-    def extreme_prices(self) -> tuple[float, float]:
-        """Return the minimum and maximum price.
-
-        Returns
-        -------
-            The minimum and maximum price.
-
-        """
-        return min(self.prices.values()), max(self.prices.values())
-
-    @property
-    def timestamp_prices(self) -> list[dict[str, float | datetime]]:
-        """Return a list of prices with timestamp.
-
-        Returns
-        -------
-            list of prices with timestamp
-
-        """
-        return _generate_timestamp_list(self.prices)
-
-    def utcnow(self) -> datetime:
-        """Return the current timestamp in the UTC timezone.
-
-        Returns
-        -------
-            The current timestamp in the UTC timezone.
-
-        """
-        return datetime.now(UTC)
-
-    def price_at_time(self, moment: datetime) -> float | None:
-        """Return the price at a specific time.
-
-        Args:
-        ----
-            moment: The time to get the price for.
-
-        Returns:
-        -------
-            The price at the specific time.
-
-        """
-        value = _timed_value(moment, self.prices)
-        if value is not None or value == 0:
-            return value
-        return None
-
-    @classmethod
-    def from_dict(cls: type[Gas], data: dict[str, Any]) -> Gas:
-        """Create a Gas object from a dictionary.
-
-        Args:
-        ----
-            data: A dictionary with the data from the API.
-
-        Returns:
-        -------
-            A Gas object.
-
-        """
-        prices: dict[datetime, float] = {}
-        for item in data["Prices"]:
-            prices[_parse_datetime_str(item["readingDate"])] = item["price"]
-
-        return cls(
-            prices=prices,
-            average_price=data["average"],
-        )
-
-
-@dataclass
 class EnergyPriceBlock:
     """Object representing a block of energy prices."""
 
@@ -448,7 +167,7 @@ class EnergyPrices:
         """
         if len(self.prices) == 0:
             msg = "No prices available"
-            raise EnergyZeroNoDataError(msg)
+            raise EnergyZeroNoDataError(message=msg)
 
         return min(self.prices.values()), max(self.prices.values())
 
@@ -467,7 +186,7 @@ class EnergyPrices:
         """
         if len(self.prices) == 0:
             msg = "No prices available"
-            raise EnergyZeroNoDataError(msg)
+            raise EnergyZeroNoDataError(message=msg)
 
         max_range, _ = max(self.prices.items(), key=lambda kv: kv[1])
         return max_range
@@ -487,7 +206,7 @@ class EnergyPrices:
         """
         if len(self.prices) == 0:
             msg = "No prices available"
-            raise EnergyZeroNoDataError(msg)
+            raise EnergyZeroNoDataError(message=msg)
 
         min_range, _ = min(self.prices.items(), key=lambda kv: kv[1])
         return min_range
@@ -536,7 +255,7 @@ class EnergyPrices:
         """
         if len(self.prices) == 0:
             msg = "No prices available"
-            raise EnergyZeroNoDataError(msg)
+            raise EnergyZeroNoDataError(message=msg)
 
         current: float = self.current_price or 0
         return sum(price <= current for price in self.prices.values())
@@ -581,7 +300,8 @@ class EnergyPrices:
         Args:
         ----
             data: A dictionary with the data from the API.
-            price_type: The type of price to use, either ALL_IN or EXCL_VAT.
+            price_type: Desired price flavor. Refer to ``PriceType`` for the available
+                market/all-in options with or without VAT.
 
         Returns:
         -------
@@ -592,23 +312,26 @@ class EnergyPrices:
         blocks: list[EnergyPriceBlock] = []
         source_market_prices = data["energyMarketPrices"]["prices"]
 
-        price_key = (
-            "energyPriceIncl" if price_type == PriceType.ALL_IN else "energyPriceExcl"
-        )
-
         price_sum = 0
 
         for item in source_market_prices:
             key = TimeRange(
                 _parse_datetime_str(item["from"]), _parse_datetime_str(item["till"])
             )
-            price = item[price_key]
+            additional_costs = item.get("additionalCosts", [])
 
             if price_type == PriceType.ALL_IN:
-                additional_costs = item["additionalCosts"]
-                price += sum(d["priceIncl"] for d in additional_costs)
-            else:
-                additional_costs = []
+                price = item["energyPriceIncl"] + sum(
+                    cost["priceIncl"] for cost in additional_costs
+                )
+            elif price_type == PriceType.ALL_IN_EXCL_VAT:
+                price = item["energyPriceExcl"] + sum(
+                    cost["priceExcl"] for cost in additional_costs
+                )
+            elif price_type == PriceType.MARKET_WITH_VAT:
+                price = item["energyPriceIncl"]
+            else:  # PriceType.MARKET
+                price = item["energyPriceExcl"]
 
             prices[key] = price
             price_sum += price
@@ -631,4 +354,57 @@ class EnergyPrices:
             prices=prices,
             average_price=average_price,
             raw_blocks=blocks,
+        )
+
+    @classmethod
+    def from_rest_dict(
+        cls: type[EnergyPrices],
+        data: dict[str, Any],
+        price_type: PriceType = PriceType.ALL_IN,
+        filter_date: date | None = None,
+    ) -> EnergyPrices:
+        """Create an EnergyPrices object from a REST API response.
+
+        Args:
+        ----
+            data: A dictionary with the data from the REST API.
+            price_type: Desired price flavor. Refer to ``PriceType`` for the available
+                market/all-in options with or without VAT.
+            filter_date: Optional local date that should be retained. Entries
+                outside of this local date are discarded.
+
+        Returns:
+        -------
+            An EnergyPrices object.
+
+        """
+        prices: dict[TimeRange, float] = {}
+
+        source_prices = data[REST_PRICE_STREAMS[price_type]]
+
+        local_tz = None
+        if filter_date:
+            local_tz = datetime.now().astimezone().tzinfo or UTC
+
+        for item in source_prices:
+            start_time = _parse_datetime_str(item["start"])
+            end_time = _parse_datetime_str(item["end"])
+            price = float(item["price"]["value"])
+
+            key = TimeRange(start_time, end_time)
+            if filter_date and local_tz:
+                start_local_date = key.start_including.astimezone(local_tz).date()
+                if start_local_date != filter_date:
+                    continue
+
+            prices[key] = price
+
+        average_price = None
+        if prices:
+            average_price = sum(prices.values()) / len(prices)
+
+        return cls(
+            prices=prices,
+            average_price=average_price,
+            raw_blocks=[],  # REST API doesn't provide detailed blocks
         )

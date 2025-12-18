@@ -26,7 +26,7 @@ from . import load_fixtures
 async def test_graphql_electricity_model(
     aresponses: ResponsesMockServer,
     snapshot: SnapshotAssertion,
-    energyzero_client: EnergyZero,
+    graphql_energyzero_client: EnergyZero,
 ) -> None:
     """Test the electricity model at 15:00:00 CET."""
     aresponses.add(
@@ -40,7 +40,7 @@ async def test_graphql_electricity_model(
         ),
     )
     today = date(2025, 5, 31)
-    energy: EnergyPrices = await energyzero_client.get_electricity_prices(
+    energy: EnergyPrices = await graphql_energyzero_client.get_electricity_prices(
         start_date=today,
         end_date=today,
         price_type=PriceType.ALL_IN,
@@ -74,7 +74,7 @@ async def test_graphql_electricity_model(
 async def test_graphql_electricity_none_date(
     aresponses: ResponsesMockServer,
     snapshot: SnapshotAssertion,
-    energyzero_client: EnergyZero,
+    graphql_energyzero_client: EnergyZero,
 ) -> None:
     """Test when there is no data for the current datetime."""
     aresponses.add(
@@ -88,7 +88,7 @@ async def test_graphql_electricity_none_date(
         ),
     )
     today = date(2025, 5, 31)
-    energy: EnergyPrices = await energyzero_client.get_electricity_prices(
+    energy: EnergyPrices = await graphql_energyzero_client.get_electricity_prices(
         start_date=today,
         end_date=today,
         price_type=PriceType.MARKET,
@@ -102,7 +102,7 @@ async def test_graphql_electricity_none_date(
 async def test_graphql_electricity_midnight_cest(
     aresponses: ResponsesMockServer,
     snapshot: SnapshotAssertion,
-    energyzero_client: EnergyZero,
+    graphql_energyzero_client: EnergyZero,
 ) -> None:
     """Test the electricity model between 00:00 and 01:00 with in CEST."""
     aresponses.add(
@@ -116,7 +116,7 @@ async def test_graphql_electricity_midnight_cest(
         ),
     )
     today = date(2025, 5, 31)
-    energy: EnergyPrices = await energyzero_client.get_electricity_prices(
+    energy: EnergyPrices = await graphql_energyzero_client.get_electricity_prices(
         start_date=today,
         end_date=today,
         price_type=PriceType.ALL_IN,
@@ -128,7 +128,7 @@ async def test_graphql_electricity_midnight_cest(
 
 
 async def test_graphql_no_electricity_data(
-    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
+    aresponses: ResponsesMockServer, graphql_energyzero_client: EnergyZero
 ) -> None:
     """Raise exception when there is no data."""
     aresponses.add(
@@ -143,14 +143,17 @@ async def test_graphql_no_electricity_data(
     )
     today = date(2025, 5, 31)
     with pytest.raises(EnergyZeroNoDataError):
-        await energyzero_client.get_electricity_prices(start_date=today, end_date=today)
+        await graphql_energyzero_client.get_electricity_prices(
+            start_date=today,
+            end_date=today,
+        )
 
 
 @pytest.mark.freeze_time("2025-05-31 15:00:00+01:00")
 async def test_graphql_gas_model(
     aresponses: ResponsesMockServer,
     snapshot: SnapshotAssertion,
-    energyzero_client: EnergyZero,
+    graphql_energyzero_client: EnergyZero,
 ) -> None:
     """Test the gas model at 15:00:00 CET."""
     aresponses.add(
@@ -164,7 +167,7 @@ async def test_graphql_gas_model(
         ),
     )
     today = date(2025, 5, 31)
-    gas: EnergyPrices = await energyzero_client.get_gas_prices(
+    gas: EnergyPrices = await graphql_energyzero_client.get_gas_prices(
         start_date=today, end_date=today, price_type=PriceType.ALL_IN
     )
 
@@ -184,7 +187,7 @@ async def test_graphql_gas_model(
 async def test_graphql_gas_morning_model(
     aresponses: ResponsesMockServer,
     snapshot: SnapshotAssertion,
-    energyzero_client: EnergyZero,
+    graphql_energyzero_client: EnergyZero,
 ) -> None:
     """Test the gas model in the morning at 04:00:00 CET."""
     aresponses.add(
@@ -198,7 +201,7 @@ async def test_graphql_gas_morning_model(
         ),
     )
     today = date(2025, 5, 31)
-    gas: EnergyPrices = await energyzero_client.get_gas_prices(
+    gas: EnergyPrices = await graphql_energyzero_client.get_gas_prices(
         start_date=today,
         end_date=today,
         price_type=PriceType.ALL_IN,
@@ -212,7 +215,7 @@ async def test_graphql_gas_morning_model(
 async def test_graphql_gas_none_date(
     aresponses: ResponsesMockServer,
     snapshot: SnapshotAssertion,
-    energyzero_client: EnergyZero,
+    graphql_energyzero_client: EnergyZero,
 ) -> None:
     """Test when there is no data for the current datetime."""
     aresponses.add(
@@ -226,7 +229,7 @@ async def test_graphql_gas_none_date(
         ),
     )
     today = date(2025, 5, 31)
-    gas: EnergyPrices = await energyzero_client.get_gas_prices(
+    gas: EnergyPrices = await graphql_energyzero_client.get_gas_prices(
         start_date=today,
         end_date=today,
         price_type=PriceType.ALL_IN,
@@ -237,7 +240,7 @@ async def test_graphql_gas_none_date(
 
 
 async def test_graphql_no_gas_data(
-    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
+    aresponses: ResponsesMockServer, graphql_energyzero_client: EnergyZero
 ) -> None:
     """Test if a response without any data throws the correct exception."""
     aresponses.add(
@@ -252,7 +255,60 @@ async def test_graphql_no_gas_data(
     )
     today = date(2025, 5, 31)
     with pytest.raises(EnergyZeroNoDataError):
-        await energyzero_client.get_gas_prices(start_date=today, end_date=today)
+        await graphql_energyzero_client.get_gas_prices(
+            start_date=today,
+            end_date=today,
+        )
+
+
+async def test_graphql_requires_end_date_for_electricity(
+    graphql_energyzero_client: EnergyZero,
+) -> None:
+    """GraphQL backend should require an end date for electricity."""
+    today = date(2025, 5, 31)
+    with pytest.raises(ValueError, match="end_date is required"):
+        await graphql_energyzero_client.get_electricity_prices(start_date=today)
+
+
+async def test_graphql_requires_end_date_for_gas(
+    graphql_energyzero_client: EnergyZero,
+) -> None:
+    """GraphQL backend should require an end date for gas."""
+    today = date(2025, 5, 31)
+    with pytest.raises(ValueError, match="end_date is required"):
+        await graphql_energyzero_client.get_gas_prices(start_date=today)
+
+
+def test_graphql_price_type_variants() -> None:
+    """Ensure new PriceType variants produce the expected values."""
+    data = {
+        "energyMarketPrices": {
+            "prices": [
+                {
+                    "from": "2025-01-01T00:00:00Z",
+                    "till": "2025-01-01T01:00:00Z",
+                    "energyPriceExcl": 0.10,
+                    "energyPriceIncl": 0.12,
+                    "additionalCosts": [
+                        {"priceExcl": 0.01, "priceIncl": 0.02},
+                    ],
+                    "vat": 0.06,
+                }
+            ]
+        }
+    }
+
+    market = EnergyPrices.from_dict(data, PriceType.MARKET)
+    assert market.average_price == pytest.approx(0.10)
+
+    market_vat = EnergyPrices.from_dict(data, PriceType.MARKET_WITH_VAT)
+    assert market_vat.average_price == pytest.approx(0.12)
+
+    all_in_excl_vat = EnergyPrices.from_dict(data, PriceType.ALL_IN_EXCL_VAT)
+    assert all_in_excl_vat.average_price == pytest.approx(0.11)
+
+    all_in = EnergyPrices.from_dict(data, PriceType.ALL_IN)
+    assert all_in.average_price == pytest.approx(0.14)
 
 
 async def test_timerange_astimezone() -> None:
@@ -285,7 +341,7 @@ async def test_timerange_str() -> None:
 async def test_graphql_electricity_no_prices(
     aresponses: ResponsesMockServer,
     snapshot: SnapshotAssertion,
-    energyzero_client: EnergyZero,
+    graphql_energyzero_client: EnergyZero,
 ) -> None:
     """Test when there is no data for the current datetime."""
     aresponses.add(
@@ -299,7 +355,7 @@ async def test_graphql_electricity_no_prices(
         ),
     )
     today = date(2025, 5, 31)
-    energy: EnergyPrices = await energyzero_client.get_electricity_prices(
+    energy: EnergyPrices = await graphql_energyzero_client.get_electricity_prices(
         start_date=today,
         end_date=today,
         price_type=PriceType.ALL_IN,
