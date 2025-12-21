@@ -96,6 +96,10 @@ You can retrieve both electricity and gas pricing data using this package. With 
 | `APIBackend.REST` | Public REST API providing hourly **and** quarter-hour electricity prices plus daily gas prices. Accepts a single date per call. | Recommended for most scenarios. | ✅ |
 | `APIBackend.GRAPHQL` | GraphQL endpoint with multi-day ranges and extended metadata (`TimeRange`, averages, etc.). | Needed when you rely on GraphQL-specific features or historical ranges. | Optional (`EnergyZero(backend=APIBackend.GRAPHQL)`) |
 
+> [!NOTE]
+> - REST requires a single day per request (if `end_date` is provided it must equal `start_date`).
+> - GraphQL requires `end_date` and always returns hourly electricity prices (the `interval` argument is ignored).
+
 ## ⚡ Electricity Prices
 
 Electricity prices change **every hour**. Prices for the next day are typically published between **14:00–15:00**.
@@ -125,7 +129,7 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 - `highest_price_time_range` / `lowest_price_time_range` — TimeRange with highest/lowest price
 - `pct_of_max_price`, `time_ranges_priced_equal_or_lower` — Not applicable for gas prices
 
-## Modern GraphQL Methods
+## Client Methods (REST + GraphQL)
 
 ### `get_electricity_prices()`
 
@@ -133,6 +137,7 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 |--------------|-------------|------------------------------------------------|
 | `start_date` | `date`      | Start of the period (local timezone).          |
 | `end_date`   | `date`      | End of the period (local timezone).            |
+| `interval`   | `Interval`  | REST only: `Interval.QUARTER` or `Interval.HOUR`. Ignored by GraphQL. |
 | `price_type` | `PriceType` | Type of price to return. See `PriceType` for options (default `ALL_IN`). |
 
 ---
@@ -155,8 +160,8 @@ Specifies the type of prices returned by both backends.
 |----------------------|----------------------------------------------------------------------------------------------------------------|
 | `MARKET`             | Wholesale market price excluding VAT and without additional surcharges (REST `base`, GraphQL `energyPriceExcl`) |
 | `MARKET_WITH_VAT`    | Market price including VAT but still without surcharges (REST `base_with_vat`, GraphQL `energyPriceIncl`)       |
-| `ALL_IN_EXCL_VAT`    | Market price plus surcharges excluding VAT (REST `all_in`, GraphQL `priceExcl` + `additionalCosts.priceExcl`)    |
-| `ALL_IN`             | Final consumer rate including VAT and surcharges (default).                                                     |
+| `ALL_IN_EXCL_VAT`    | Market price plus surcharges excluding VAT (REST `all_in`, GraphQL `energyPriceExcl` + `additionalCosts.priceExcl`) |
+| `ALL_IN`             | Final consumer rate including VAT and surcharges (REST `all_in_with_vat`, GraphQL `energyPriceIncl` + `additionalCosts.priceIncl`). |
 
 Used in: `get_electricity_prices`, `get_gas_prices`
 
