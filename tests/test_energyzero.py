@@ -1,45 +1,68 @@
-"""Basic tests for the EnergyZero API."""
+"""Basic tests for the EnergyZero API clients."""
 
 # pylint: disable=protected-access
 import asyncio
+from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING, cast
 from unittest.mock import patch
 
 import pytest
 from aiohttp import ClientError, ClientResponse, ClientSession
-from aiohttp.hdrs import METH_POST
 from aresponses import Response, ResponsesMockServer
 
 from energyzero import EnergyZero
+from energyzero.api.graphql import GraphQLClient
+from energyzero.api.rest import RESTClient
 from energyzero.exceptions import EnergyZeroConnectionError, EnergyZeroError
 
 from . import load_fixtures
 
+if TYPE_CHECKING:
+    from energyzero import APIBackend
 
-async def test_json_request(
-    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
+
+@pytest.fixture(name="rest_client")
+async def rest_client_fixture() -> AsyncIterator[RESTClient]:
+    """Provide a REST client with a managed session."""
+    async with ClientSession() as session:
+        client = RESTClient(session=session)
+        yield client
+        await client.close()
+
+
+@pytest.fixture(name="graphql_client")
+async def graphql_client_fixture() -> AsyncIterator[GraphQLClient]:
+    """Provide a GraphQL client with a managed session."""
+    async with ClientSession() as session:
+        client = GraphQLClient(session=session)
+        yield client
+        await client.close()
+
+
+async def test_rest_json_request(
+    aresponses: ResponsesMockServer, rest_client: RESTClient
 ) -> None:
-    """Test JSON response is handled correctly."""
+    """Test REST client handles JSON response."""
     aresponses.add(
-        "api.energyzero.nl",
-        "/v1/test",
+        "public.api.energyzero.nl",
+        "/public/v1/test",
         "GET",
         aresponses.Response(
             status=200,
             headers={"Content-Type": "application/json"},
-            text=load_fixtures("legacy/energy.json"),
+            text='{"ok": true}',
         ),
     )
-    await energyzero_client._request("test")
-    await energyzero_client.close()
+    await rest_client._request("public/v1/test")
 
 
-async def test_json_gql_request(
-    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
+async def test_graphql_json_request(
+    aresponses: ResponsesMockServer, graphql_client: GraphQLClient
 ) -> None:
-    """Test GraphQL JSON response is handled correctly."""
+    """Test GraphQL client handles JSON response."""
     aresponses.add(
         "api.energyzero.nl",
-        "/v1/test",
+        "/v1/gql",
         "POST",
         aresponses.Response(
             status=200,
@@ -47,31 +70,31 @@ async def test_json_gql_request(
             text=load_fixtures("graphql/energy.json"),
         ),
     )
-    await energyzero_client._request("test", method=METH_POST)
-    await energyzero_client.close()
+    await graphql_client._request("gql", json={"query": "{}"})
 
 
-async def test_internal_session(aresponses: ResponsesMockServer) -> None:
-    """Test internal session is handled correctly."""
+async def test_rest_internal_session(aresponses: ResponsesMockServer) -> None:
+    """Ensure REST client creates an internal session when needed."""
     aresponses.add(
-        "api.energyzero.nl",
-        "/v1/test",
+        "public.api.energyzero.nl",
+        "/public/v1/test",
         "GET",
         aresponses.Response(
             status=200,
             headers={"Content-Type": "application/json"},
-            text=load_fixtures("legacy/energy.json"),
+            text='{"ok": true}',
         ),
     )
-    async with EnergyZero() as client:
-        await client._request("test")
+    client = RESTClient()
+    await client._request("public/v1/test")
+    await client.close()
 
 
-async def test_gql_internal_session(aresponses: ResponsesMockServer) -> None:
-    """Test internal session is handled correctly."""
+async def test_graphql_internal_session(aresponses: ResponsesMockServer) -> None:
+    """Ensure GraphQL client creates an internal session when needed."""
     aresponses.add(
         "api.energyzero.nl",
-        "/v1/test",
+        "/v1/gql",
         "POST",
         aresponses.Response(
             status=200,
@@ -79,49 +102,53 @@ async def test_gql_internal_session(aresponses: ResponsesMockServer) -> None:
             text=load_fixtures("graphql/energy.json"),
         ),
     )
-    async with EnergyZero() as client:
-        await client._request("test", method=METH_POST)
+    client = GraphQLClient()
+    await client._request("gql", json={"query": "{}"})
+    await client.close()
 
 
-async def test_timeout(aresponses: ResponsesMockServer) -> None:
-    """Test request timeout is handled correctly."""
+async def test_rest_timeout(aresponses: ResponsesMockServer) -> None:
+    """Test REST client timeout handling."""
 
-    # Faking a timeout by sleeping
-    async def reponse_handler(_: ClientResponse) -> Response:
+    async def response_handler(_: ClientResponse) -> Response:
         await asyncio.sleep(0.2)
         return aresponses.Response(body="Goodmorning!")
 
-    aresponses.add("api.energyzero.nl", "/v1/test", "GET", reponse_handler)
-
-    async with ClientSession() as session:
-        client = EnergyZero(session=session, request_timeout=0.1)
-        with pytest.raises(EnergyZeroConnectionError):
-            assert await client._request("test")
-
-
-async def test_post_timeout(aresponses: ResponsesMockServer) -> None:
-    """Test request timeout is handled correctly."""
-
-    # Faking a timeout by sleeping
-    async def reponse_handler(_: ClientResponse) -> Response:
-        await asyncio.sleep(0.2)
-        return aresponses.Response(body="Goodmorning!")
-
-    aresponses.add("api.energyzero.nl", "/v1/test", "POST", reponse_handler)
-
-    async with ClientSession() as session:
-        client = EnergyZero(session=session, request_timeout=0.1)
-        with pytest.raises(EnergyZeroConnectionError):
-            assert await client._request("test", method=METH_POST)
-
-
-async def test_content_type(
-    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
-) -> None:
-    """Test request content type error is handled correctly."""
     aresponses.add(
-        "api.energyzero.nl",
-        "/v1/test",
+        "public.api.energyzero.nl",
+        "/public/v1/test",
+        "GET",
+        response_handler,
+    )
+
+    async with ClientSession() as session:
+        client = RESTClient(session=session, request_timeout=0.1)
+        with pytest.raises(EnergyZeroConnectionError):
+            await client._request("public/v1/test")
+
+
+async def test_graphql_timeout(aresponses: ResponsesMockServer) -> None:
+    """Test GraphQL client timeout handling."""
+
+    async def response_handler(_: ClientResponse) -> Response:
+        await asyncio.sleep(0.2)
+        return aresponses.Response(body="Goodmorning!")
+
+    aresponses.add("api.energyzero.nl", "/v1/gql", "POST", response_handler)
+
+    async with ClientSession() as session:
+        client = GraphQLClient(session=session, request_timeout=0.1)
+        with pytest.raises(EnergyZeroConnectionError):
+            await client._request("gql", json={"query": "{}"})
+
+
+async def test_rest_content_type(
+    aresponses: ResponsesMockServer, rest_client: RESTClient
+) -> None:
+    """Test REST client raises on invalid content type."""
+    aresponses.add(
+        "public.api.energyzero.nl",
+        "/public/v1/test",
         "GET",
         aresponses.Response(
             status=200,
@@ -129,16 +156,16 @@ async def test_content_type(
         ),
     )
     with pytest.raises(EnergyZeroError):
-        assert await energyzero_client._request("test")
+        await rest_client._request("public/v1/test")
 
 
-async def test_post_content_type(
-    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
+async def test_graphql_content_type(
+    aresponses: ResponsesMockServer, graphql_client: GraphQLClient
 ) -> None:
-    """Test request content type error is handled correctly."""
+    """Test GraphQL client raises on invalid content type."""
     aresponses.add(
         "api.energyzero.nl",
-        "/v1/test",
+        "/v1/gql",
         "POST",
         aresponses.Response(
             status=200,
@@ -146,43 +173,35 @@ async def test_post_content_type(
         ),
     )
     with pytest.raises(EnergyZeroError):
-        assert await energyzero_client._request("test", method=METH_POST)
+        await graphql_client._request("gql", json={"query": "{}"})
 
 
-async def test_client_error() -> None:
-    """Test request client error is handled correctly."""
+async def test_rest_client_error() -> None:
+    """Test REST client handles aiohttp ClientError."""
     async with ClientSession() as session:
-        client = EnergyZero(session=session)
+        client = RESTClient(session=session)
         with (
-            patch.object(
-                session,
-                "request",
-                side_effect=ClientError,
-            ),
+            patch.object(session, "request", side_effect=ClientError),
             pytest.raises(EnergyZeroConnectionError),
         ):
-            assert await client._request("test")
+            await client._request("public/v1/test")
 
 
-async def test_post_client_error() -> None:
-    """Test request client error is handled correctly."""
+async def test_graphql_client_error() -> None:
+    """Test GraphQL client handles aiohttp ClientError."""
     async with ClientSession() as session:
-        client = EnergyZero(session=session)
+        client = GraphQLClient(session=session)
         with (
-            patch.object(
-                session,
-                "request",
-                side_effect=ClientError,
-            ),
+            patch.object(session, "request", side_effect=ClientError),
             pytest.raises(EnergyZeroConnectionError),
         ):
-            assert await client._request("test", method=METH_POST)
+            await client._request("gql", json={"query": "{}"})
 
 
-async def test_post_server_error(
-    aresponses: ResponsesMockServer, energyzero_client: EnergyZero
+async def test_graphql_server_error(
+    aresponses: ResponsesMockServer, graphql_client: GraphQLClient
 ) -> None:
-    """Test request content type error is handled correctly."""
+    """Test GraphQL client raises on API error payload."""
     aresponses.add(
         "api.energyzero.nl",
         "/v1/gql",
@@ -194,4 +213,18 @@ async def test_post_server_error(
         ),
     )
     with pytest.raises(EnergyZeroError):
-        assert await energyzero_client._request("gql", method=METH_POST)
+        await graphql_client._request("gql", json={"query": "{}"})
+
+
+async def test_energyzero_sets_close_flag_when_no_session() -> None:
+    """EnergyZero should mark that it owns the session when none provided."""
+    client = EnergyZero()
+    assert client._close_session is True
+    await client.close()
+
+
+def test_energyzero_invalid_backend() -> None:
+    """EnergyZero should reject unknown backends."""
+    invalid_backend = cast("APIBackend", "invalid")
+    with pytest.raises(ValueError, match="Unknown backend"):
+        EnergyZero(backend=invalid_backend)

@@ -41,19 +41,40 @@ pip install energyzero
 
 ```python
 import asyncio
+from datetime import UTC, datetime, timedelta
 
-from datetime import date
-from energyzero import EnergyZero
+from energyzero import EnergyZero, Interval, PriceType
 
 
 async def main() -> None:
-    """Show example on fetching the energy prices from EnergyZero."""
+    """Fetch today/tomorrow energy prices using the REST backend (default)."""
     async with EnergyZero() as client:
-        start_date = date(2022, 12, 7)
-        end_date = date(2022, 12, 7)
+        today = datetime.now(UTC).astimezone().date()
+        tomorrow = today + timedelta(days=1)
 
-        energy = await client.get_electricity_prices(start_date, end_date)
-        gas = await client.get_gas_prices(start_date, end_date)
+        electricity_today = await client.get_electricity_prices(
+            start_date=today,
+            interval=Interval.QUARTER,
+            price_type=PriceType.ALL_IN,
+        )
+        gas_today = await client.get_gas_prices(
+            start_date=today,
+            price_type=PriceType.ALL_IN,
+        )
+
+        # Loop over additional days as needed
+        electricity_tomorrow = await client.get_electricity_prices(
+            start_date=tomorrow,
+            interval=Interval.HOUR,
+            price_type=PriceType.MARKET_WITH_VAT,
+        )
+        gas_tomorrow = await client.get_gas_prices(
+            start_date=tomorrow,
+            price_type=PriceType.MARKET,
+        )
+
+        print(electricity_today.average_price, gas_today.current_price)
+        print(electricity_tomorrow.average_price, gas_tomorrow.current_price)
 
 
 if __name__ == "__main__":
@@ -61,60 +82,48 @@ if __name__ == "__main__":
 ```
 
 More examples can be found in the [examples folder](./examples/).
+* `examples/graphql/*` targets the GraphQL backend (multi-day ranges).
+* `examples/rest/*` shows REST API usage (single-day requests, quarter-hour data).
 
 ## Data
 
 > **Note:** Currently tested primarily with day-ahead pricing (today/tomorrow).
 
-You can retrieve both electricity and gas pricing data using this package. Each data type supports a set of common fields, with some additional properties depending on whether you use the **GraphQL** or **legacy REST** endpoint.
+You can retrieve both electricity and gas pricing data using this package. With v5.0 we support two official backends:
+
+| Backend | Description | Use when | Default |
+|---------|-------------|----------|---------|
+| `APIBackend.REST` | Public REST API providing hourly **and** quarter-hour electricity prices plus daily gas prices. Accepts a single date per call. | Recommended for most scenarios. | ✅ |
+| `APIBackend.GRAPHQL` | GraphQL endpoint with multi-day ranges and extended metadata (`TimeRange`, averages, etc.). | Needed when you rely on GraphQL-specific features or historical ranges. | Optional (`EnergyZero(backend=APIBackend.GRAPHQL)`) |
 
 ## ⚡ Electricity Prices
 
 Electricity prices change **every hour**. Prices for the next day are typically published between **14:00–15:00**.
 
-### Common fields (`Electricity` and `EnergyPrices`)
+### Common fields (`EnergyPrices`)
 
-- `current_price` — Current electricity price for the current hour or time range
+- `current_price` — Current electricity price for the active hour/time range
 - `average_price` — Average price over the selected period
-- `extreme_prices` — Tuple of `(min_price, max_price)`
-- `pct_of_max_price` — Current price as a percentage of the maximum
-- `price_at_time(moment)` — Get price for a specific `datetime`
-- `timestamp_prices` — List of hourly price entries:
-  - REST: `{"timestamp": datetime, "price": float}`
-  - GraphQL: `{"timerange": TimeRange, "price": float}`
-
-### GraphQL-only (`get_electricity_prices()`)
-
-- `highest_price_time_range` — `TimeRange` where the price is highest
-- `lowest_price_time_range` — `TimeRange` where the price is lowest
-- `time_ranges_priced_equal_or_lower` — Count of hours where the price is less than or equal to the current
-
-### REST-only (`get_electricity_prices_legacy()`)
-
-- `highest_price_time` — Timestamp of the highest hourly price
-- `lowest_price_time` — Timestamp of the lowest hourly price
-- `hours_priced_equal_or_lower` — Count of hours with a price ≤ current price
+- `extreme_prices` — Tuple `(min_price, max_price)`
+- `pct_of_max_price` — Current price expressed as % of the maximum
+- `price_at_time(moment)` — Look up the price for a specific UTC timestamp
+- `timestamp_prices` — List of `{"timerange": TimeRange, "price": float}` entries
+- `highest_price_time_range` / `lowest_price_time_range` — TimeRange with highest/lowest price
+- `time_ranges_priced_equal_or_lower` — Number of ranges priced ≤ current price
 
 ## 🔥 Gas Prices
 
 Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at **06:00** each morning.
 
-### Common fields (`Gas` and `EnergyPrices`)
+### Common fields (`EnergyPrices`)
 
 - `current_price` — Current gas price for today
-- `average_price` — Average gas price over the selected period
-- `extreme_prices` — Tuple of `(min_price, max_price)`
-- `price_at_time(moment)` — Get price for a specific `datetime`
-- `timestamp_prices` — List of daily price entries:
-  - REST: `{"timestamp": datetime, "price": float}`
-  - GraphQL: `{"timerange": TimeRange, "price": float}`
-
-### GraphQL-only (`get_gas_prices()`)
-
-- `highest_price_time_range` — Time range with the highest daily price
-- `lowest_price_time_range` — Time range with the lowest daily price
-- `pct_of_max_price` — Current price as a percentage of the maximum
-- `time_ranges_priced_equal_or_lower` — Count of days with a price ≤ current price
+- `average_price` — Average price over the requested period
+- `extreme_prices` — Tuple `(min_price, max_price)`
+- `price_at_time(moment)` — Price lookup for a UTC timestamp
+- `timestamp_prices` — `{"timerange": TimeRange, "price": float}` entries
+- `highest_price_time_range` / `lowest_price_time_range` — TimeRange with highest/lowest price
+- `pct_of_max_price`, `time_ranges_priced_equal_or_lower` — Not applicable for gas prices
 
 ## Modern GraphQL Methods
 
@@ -124,7 +133,7 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 |--------------|-------------|------------------------------------------------|
 | `start_date` | `date`      | Start of the period (local timezone).          |
 | `end_date`   | `date`      | End of the period (local timezone).            |
-| `price_type` | `PriceType` | Type of price to return: `ALL_IN` or `MARKET`. |
+| `price_type` | `PriceType` | Type of price to return. See `PriceType` for options (default `ALL_IN`). |
 
 ---
 
@@ -134,56 +143,20 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 |--------------|-------------|------------------------------------------------|
 | `start_date` | `date`      | Start of the period (local timezone).          |
 | `end_date`   | `date`      | End of the period (local timezone).            |
-| `price_type` | `PriceType` | Type of price to return: `ALL_IN` or `MARKET`. |
-
----
-
-## Legacy REST Methods
-
-### `get_electricity_prices_legacy()`
-
-| Parameter    | Type                | Description                                          |
-|--------------|---------------------|------------------------------------------------------|
-| `start_date` | `date`              | Start of the period (local timezone).                |
-| `end_date`   | `date`              | End of the period (local timezone).                  |
-| `interval`   | `Interval`          | Data interval (see `Interval` enum values).           |
-| `vat`        | `VatOption \| None` | VAT inclusion (included by default). |
-
----
-
-### `get_gas_prices_legacy()`
-
-| Parameter    | Type                | Description                                          |
-|--------------|---------------------|------------------------------------------------------|
-| `start_date` | `date`              | Start of the period (local timezone).                |
-| `end_date`   | `date`              | End of the period (local timezone).                  |
-| `interval`   | `Interval`          | Data interval (see `Interval` enum values).           |
-| `vat`        | `VatOption \| None` | VAT inclusion (included by default). |
-
-## Enum Options
-
-### `VatOption`
-
-Defines whether prices returned by legacy methods should include VAT.
-
-| Value          | Description                     |
-|----------------|---------------------------------|
-| `INCLUDE`      | Return prices **including VAT** |
-| `EXCLUDE`      | Return prices **excluding VAT** |
-
-Used in: `get_electricity_prices_legacy`, `get_gas_prices_legacy`
-> 📝 Ignored in GraphQL methods (`get_electricity_prices`, `get_gas_prices`)
+| `price_type` | `PriceType` | Type of price to return. See `PriceType` for options (default `ALL_IN`). |
 
 ---
 
 ### `PriceType`
 
-Specifies the type of prices returned by GraphQL methods.
+Specifies the type of prices returned by both backends.
 
-| Value       | Description                                                          |
-|-------------|----------------------------------------------------------------------|
-| `MARKET`    | Raw wholesale market price (excludes tax, VAT, and purchasing costs) |
-| `ALL_IN`    | Final consumer price (includes energy tax, VAT, and purchase fees)   |
+| Value                | Description                                                                                                    |
+|----------------------|----------------------------------------------------------------------------------------------------------------|
+| `MARKET`             | Wholesale market price excluding VAT and without additional surcharges (REST `base`, GraphQL `energyPriceExcl`) |
+| `MARKET_WITH_VAT`    | Market price including VAT but still without surcharges (REST `base_with_vat`, GraphQL `energyPriceIncl`)       |
+| `ALL_IN_EXCL_VAT`    | Market price plus surcharges excluding VAT (REST `all_in`, GraphQL `priceExcl` + `additionalCosts.priceExcl`)    |
+| `ALL_IN`             | Final consumer rate including VAT and surcharges (default).                                                     |
 
 Used in: `get_electricity_prices`, `get_gas_prices`
 
@@ -191,16 +164,13 @@ Used in: `get_electricity_prices`, `get_gas_prices`
 
 ### `Interval`
 
-Specifies the interval for prices returned by the legacy methods.
+Specifies the interval for REST API requests:
 
-| Value        | Description    |
-|--------------|----------------|
-| `DAY = 4`    | Daily prices   |
-| `MONTH = 5`  | Monthly prices |
-| `YEAR = 6`   | Yearly prices  |
-| `WEEK = 9`   | Weekly prices  |
-
-Used in: `get_electricity_prices_legacy`, `get_gas_prices_legacy`
+| Value | Description |
+|-------|-------------|
+| `Interval.QUARTER` | 15-minute electricity prices |
+| `Interval.HOUR`    | Hourly electricity prices    |
+| `Interval.DAY`     | Daily gas prices             |
 
 ## Contributing
 
@@ -267,6 +237,10 @@ To update the [syrupy](https://github.com/tophat/syrupy) snapshot tests:
 ```bash
 poetry run pytest --snapshot-update
 ```
+
+## Migration
+
+Upgrading from v4.x? See [MIGRATION_V5.md](./MIGRATION_V5.md) for a summary of breaking changes and examples for REST and GraphQL.
 
 ## License
 
