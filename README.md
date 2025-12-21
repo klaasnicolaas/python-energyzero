@@ -86,19 +86,19 @@ More examples can be found in the [examples folder](./examples/).
 * `examples/rest/*` shows REST API usage (single-day requests, quarter-hour data).
 
 ## Data
-
-> **Note:** Currently tested primarily with day-ahead pricing (today/tomorrow).
+> [!NOTE]
+> Currently tested primarily with day-ahead pricing (today/tomorrow).
 
 You can retrieve both electricity and gas pricing data using this package. With v5.0 we support two official backends:
 
-| Backend | Description | Use when | Default |
-|---------|-------------|----------|---------|
-| `APIBackend.REST` | Public REST API providing hourly **and** quarter-hour electricity prices plus daily gas prices. Accepts a single date per call. | Recommended for most scenarios. | ✅ |
-| `APIBackend.GRAPHQL` | GraphQL endpoint with multi-day ranges and extended metadata (`TimeRange`, averages, etc.). | Needed when you rely on GraphQL-specific features or historical ranges. | Optional (`EnergyZero(backend=APIBackend.GRAPHQL)`) |
+**REST (default)**
+- `APIBackend.REST` — Public REST API.
+- Electricity: hourly + quarter-hour. Gas: daily.
+- Single date per call; `end_date` must equal `start_date` if provided.
 
-> [!NOTE]
-> - REST requires a single day per request (if `end_date` is provided it must equal `start_date`).
-> - GraphQL requires `end_date` and always returns hourly electricity prices (the `interval` argument is ignored).
+**GraphQL (optional)**
+- `APIBackend.GRAPHQL` — GraphQL endpoint with multi-day ranges and extended metadata (`TimeRange`, averages).
+- `end_date` is required; electricity is always hourly (`interval` is ignored).
 
 ## ⚡ Electricity Prices
 
