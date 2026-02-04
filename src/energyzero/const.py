@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from enum import Enum
+import enum
 
 
-class PriceType(str, Enum):
+class PriceType(enum.StrEnum):
     """Enum describing the price flavor returned by the APIs."""
 
     MARKET = "market"
@@ -14,7 +14,7 @@ class PriceType(str, Enum):
     ALL_IN_EXCL_VAT = "all_in_excl_vat"
 
 
-class Interval(str, Enum):
+class Interval(enum.StrEnum):
     """Interval constants for REST API."""
 
     QUARTER = "INTERVAL_QUARTER"
