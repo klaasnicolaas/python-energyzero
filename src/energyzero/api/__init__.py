@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from enum import Enum
+import enum
 
 from .base import EnergyZeroAPIProtocol
 
 
-class APIBackend(str, Enum):
+class APIBackend(enum.StrEnum):
     """Available API backends."""
 
     REST = "rest"
