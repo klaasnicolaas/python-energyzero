@@ -183,6 +183,7 @@ Specifies the interval for REST API requests:
 |-------|-------------|
 | `Interval.QUARTER` | 15-minute electricity prices |
 | `Interval.HOUR`    | Hourly electricity prices    |
+| `Interval.DAY`     | Daily gas prices             |
 
 Note: `Interval` is used by `get_electricity_prices()`. Gas prices are retrieved
 through `get_gas_prices()` and use daily intervals internally on the REST API.
