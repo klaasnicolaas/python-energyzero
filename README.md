@@ -65,7 +65,7 @@ async def main() -> None:
         # Loop over additional days as needed
         electricity_tomorrow = await client.get_electricity_prices(
             start_date=tomorrow,
-            interval=Interval.HOUR,
+            interval=Interval.QUARTER,
             price_type=PriceType.MARKET_WITH_VAT,
         )
         gas_tomorrow = await client.get_gas_prices(
@@ -83,7 +83,9 @@ if __name__ == "__main__":
 
 More examples can be found in the [examples folder](./examples/).
 * `examples/graphql/*` targets the GraphQL backend (multi-day ranges).
-* `examples/rest/*` shows REST API usage (single-day requests, quarter-hour data).
+* `examples/rest/electricity.py` shows quarter-hour electricity data.
+* `examples/rest/electricity_hourly.py` shows hourly electricity data.
+* `examples/rest/gas.py` and `examples/rest/prices_list.py` show gas and combined list usage.
 
 ## Data
 > [!NOTE]
@@ -103,6 +105,7 @@ You can retrieve both electricity and gas pricing data using this package. With 
 ## ⚡ Electricity Prices
 
 Electricity prices change **every hour**. Prices for the next day are typically published between **14:00–15:00**.
+Returned electricity prices are expressed in **EUR/kWh**.
 
 ### Common fields (`EnergyPrices`)
 
@@ -118,6 +121,7 @@ Electricity prices change **every hour**. Prices for the next day are typically 
 ## 🔥 Gas Prices
 
 Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at **06:00** each morning.
+Returned gas prices are expressed in **EUR/m³**.
 
 ### Common fields (`EnergyPrices`)
 
@@ -133,6 +137,8 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 
 ### `get_electricity_prices()`
 
+Returns electricity prices in **EUR/kWh**.
+
 | Parameter    | Type        | Description                                    |
 |--------------|-------------|------------------------------------------------|
 | `start_date` | `date`      | Start of the period (local timezone).          |
@@ -143,6 +149,8 @@ Gas prices are **fixed for 24 hours**, and a new daily rate applies starting at 
 ---
 
 ### `get_gas_prices()`
+
+Returns gas prices in **EUR/m³**.
 
 | Parameter    | Type        | Description                                    |
 |--------------|-------------|------------------------------------------------|
@@ -175,7 +183,9 @@ Specifies the interval for REST API requests:
 |-------|-------------|
 | `Interval.QUARTER` | 15-minute electricity prices |
 | `Interval.HOUR`    | Hourly electricity prices    |
-| `Interval.DAY`     | Daily gas prices             |
+
+Note: `Interval` is used by `get_electricity_prices()`. Gas prices are retrieved
+through `get_gas_prices()` and use daily intervals internally on the REST API.
 
 ## Contributing
 
