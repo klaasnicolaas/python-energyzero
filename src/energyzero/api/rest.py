@@ -130,6 +130,8 @@ class RESTClient:
     ) -> EnergyPrices:
         """Get electricity prices using REST API.
 
+        All returned price values are in EUR/kWh.
+
         Args:
         ----
             start_date: Start date (local timezone).
@@ -187,6 +189,8 @@ class RESTClient:
         price_type: PriceType = PriceType.ALL_IN,
     ) -> EnergyPrices:
         """Get gas prices using REST API.
+
+        All returned price values are in EUR/m³.
 
         Args:
         ----

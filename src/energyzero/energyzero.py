@@ -57,6 +57,8 @@ class EnergyZero:
     ) -> EnergyPrices:
         """Get electricity prices for a given period.
 
+        All returned price values are in EUR/kWh.
+
         Args:
         ----
             start_date: Start date of the period (local timezone).
@@ -85,6 +87,8 @@ class EnergyZero:
         price_type: PriceType = PriceType.ALL_IN,
     ) -> EnergyPrices:
         """Get gas prices for a given period.
+
+        All returned price values are in EUR/m³.
 
         Args:
         ----

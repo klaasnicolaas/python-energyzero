@@ -1,4 +1,4 @@
-"""Asynchronous example: electricity prices via REST API."""
+"""Asynchronous example: hourly electricity prices via REST API."""
 
 import asyncio
 from datetime import UTC, date, datetime, timedelta
@@ -16,14 +16,14 @@ from energyzero import (  # pyright: ignore[reportMissingImports]
 def _price_to_string(price: float | None) -> str:
     if price is None:
         return "Unknown"
-    return f"€{price:0.3f}"
+    return f"EUR {price:0.3f}/kWh"
 
 
 async def _fetch_day(client: EnergyZero, target_date: date) -> EnergyPrices | None:
     try:
         return await client.get_electricity_prices(
             start_date=target_date,
-            interval=Interval.QUARTER,
+            interval=Interval.HOUR,
             price_type=PriceType.ALL_IN,
         )
     except (EnergyZeroConnectionError, EnergyZeroNoDataError) as err:
@@ -49,16 +49,16 @@ def _print_summary(label: str, data: EnergyPrices) -> None:
         print(f"Current price: {_price_to_string(current)}")
         print(f"Percent of max: {data.pct_of_max_price}%")
 
-    next_quarter = data.price_at_time(data.utcnow() + timedelta(minutes=15))
-    if next_quarter is not None:
-        print(f"Next quarter-hour price: {_price_to_string(next_quarter)}")
+    next_hour = data.price_at_time(data.utcnow() + timedelta(hours=1))
+    if next_hour is not None:
+        print(f"Next hour price: {_price_to_string(next_hour)}")
 
     print(f"Blocks <= current price: {data.time_ranges_priced_equal_or_lower}")
     print()
 
 
 async def main() -> None:
-    """Fetch 15-minute electricity prices for today and tomorrow via REST."""
+    """Fetch hourly electricity prices for today and tomorrow via REST."""
     async with EnergyZero() as client:
         today = datetime.now(UTC).astimezone().date()
         tomorrow = today + timedelta(days=1)
@@ -66,9 +66,12 @@ async def main() -> None:
         prices_tomorrow = await _fetch_day(client, tomorrow)
 
     if prices_today:
-        _print_summary(f"ELECTRICITY {today.isoformat()} (REST)", prices_today)
+        _print_summary(f"ELECTRICITY {today.isoformat()} (REST, hourly)", prices_today)
     if prices_tomorrow:
-        _print_summary(f"ELECTRICITY {tomorrow.isoformat()} (REST)", prices_tomorrow)
+        _print_summary(
+            f"ELECTRICITY {tomorrow.isoformat()} (REST, hourly)",
+            prices_tomorrow,
+        )
 
 
 if __name__ == "__main__":
