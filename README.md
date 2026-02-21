@@ -254,10 +254,6 @@ To update the [syrupy](https://github.com/tophat/syrupy) snapshot tests:
 poetry run pytest --snapshot-update
 ```
 
-## Migration
-
-Upgrading from v4.x? See [MIGRATION_V5.md](./MIGRATION_V5.md) for a summary of breaking changes and examples for REST and GraphQL.
-
 ## License
 
 MIT License
