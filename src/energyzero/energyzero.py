@@ -11,7 +11,7 @@ from energyzero.api.rest import RESTClient
 from energyzero.const import Interval, PriceType
 
 if TYPE_CHECKING:
-    from datetime import date
+    from datetime import date, tzinfo
 
     from aiohttp.client import ClientSession
 
@@ -48,12 +48,14 @@ class EnergyZero:
         if self.session is None:
             self._close_session = True
 
-    async def get_electricity_prices(
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
         end_date: date | None = None,
         interval: Interval | str = Interval.QUARTER,
         price_type: PriceType = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
     ) -> EnergyPrices:
         """Get electricity prices for a given period.
 
@@ -69,6 +71,7 @@ class EnergyZero:
                 - "INTERVAL_HOUR": Hourly prices
             price_type: Desired price flavor. See ``PriceType`` for the available
                 market/all-in options with or without VAT (default: ``ALL_IN``).
+            local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------
@@ -77,14 +80,20 @@ class EnergyZero:
         """
         interval_value = interval.value if isinstance(interval, Interval) else interval
         return await self._client.get_electricity_prices(
-            start_date, end_date, interval_value, price_type
+            start_date,
+            end_date,
+            interval_value,
+            price_type,
+            local_tz=local_tz,
         )
 
-    async def get_gas_prices(
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
         end_date: date | None = None,
         price_type: PriceType = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
     ) -> EnergyPrices:
         """Get gas prices for a given period.
 
@@ -97,13 +106,19 @@ class EnergyZero:
                 single-day request and ignores this value).
             price_type: Desired price flavor. See ``PriceType`` for the available
                 market/all-in options with or without VAT (default: ``ALL_IN``).
+            local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------
             An EnergyPrices object with the requested prices.
 
         """
-        return await self._client.get_gas_prices(start_date, end_date, price_type)
+        return await self._client.get_gas_prices(
+            start_date,
+            end_date,
+            price_type,
+            local_tz=local_tz,
+        )
 
     async def close(self) -> None:
         """Close open client session."""

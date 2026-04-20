@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import socket
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta, tzinfo
 from importlib import metadata
 from typing import Any
 
@@ -34,7 +34,9 @@ class GraphQLClient:
     _close_session: bool = False
 
     def to_datetime_string(
-        self, base_date: date, delta: timedelta = timedelta(0)
+        self,
+        base_date: date,
+        delta: timedelta = timedelta(0),
     ) -> str:
         """Convert a local timezone date to a UTC datetime string.
 
@@ -48,13 +50,13 @@ class GraphQLClient:
             A string representing the date in ISO 8601 format with UTC timezone.
 
         """
-        local_tz = datetime.now(UTC).astimezone().tzinfo
+        timezone_to_use = datetime.now(UTC).astimezone().tzinfo
         date_utc = (
             datetime(
                 base_date.year,
                 base_date.month,
                 base_date.day,
-                tzinfo=local_tz,
+                tzinfo=timezone_to_use,
             ).astimezone(UTC)
             + delta
         )
@@ -130,12 +132,14 @@ class GraphQLClient:
 
         return data
 
-    async def get_electricity_prices(
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
         end_date: date | None = None,
         interval: str = "INTERVAL_QUARTER",
         price_type: PriceType = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
     ) -> EnergyPrices:
         """Get electricity prices using GraphQL API.
 
@@ -145,6 +149,7 @@ class GraphQLClient:
             end_date: Optional end date (GraphQL requires this value).
             interval: Interval type (ignored, GraphQL only supports hourly).
             price_type: Desired price flavor. See ``PriceType`` for options.
+            local_tz: Unused for GraphQL. Present for API compatibility.
 
         Returns:
         -------
@@ -183,6 +188,7 @@ class GraphQLClient:
             }
             """
 
+        _ = local_tz
         from_str = self.to_datetime_string(start_date)
         till_str = self.to_datetime_string(end_date, timedelta(days=1))
 
@@ -208,11 +214,13 @@ class GraphQLClient:
 
         return EnergyPrices.from_dict(data["data"], price_type)
 
-    async def get_gas_prices(
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
         end_date: date | None = None,
         price_type: PriceType = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
     ) -> EnergyPrices:
         """Get gas prices using GraphQL API.
 
@@ -221,6 +229,7 @@ class GraphQLClient:
             start_date: Start date (local timezone).
             end_date: Optional end date (GraphQL requires this value).
             price_type: ALL_IN or MARKET prices.
+            local_tz: Unused for GraphQL. Present for API compatibility.
 
         Returns:
         -------
@@ -259,6 +268,7 @@ class GraphQLClient:
             """
 
         # Gas prices are valid from 06:00 to 06:00 the next day
+        _ = local_tz
         from_str = self.to_datetime_string(start_date, timedelta(hours=6, days=-1))
         till_str = self.to_datetime_string(end_date, timedelta(hours=6, days=1))
 

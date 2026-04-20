@@ -1,7 +1,8 @@
 """Asynchronous example: gas prices via REST API."""
 
 import asyncio
-from datetime import UTC, datetime
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from energyzero import (  # pyright: ignore[reportMissingImports]
     EnergyPrices,
@@ -37,10 +38,12 @@ def _print_summary(data: EnergyPrices) -> None:
 async def main() -> None:
     """Fetch current gas price via REST API."""
     async with EnergyZero() as client:
-        today = datetime.now(UTC).astimezone().date()
+        local_tz = ZoneInfo("Europe/Amsterdam")
+        today = datetime.now(local_tz).date()
         prices = await client.get_gas_prices(
             start_date=today,
             price_type=PriceType.ALL_IN,
+            local_tz=local_tz,
         )
 
     print(f"--- GAS {today.isoformat()} (REST) ---")

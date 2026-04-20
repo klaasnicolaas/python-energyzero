@@ -1,7 +1,8 @@
 """Asynchronous example: electricity prices via REST API."""
 
 import asyncio
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from energyzero import (  # pyright: ignore[reportMissingImports]
     EnergyPrices,
@@ -19,12 +20,17 @@ def _price_to_string(price: float | None) -> str:
     return f"€{price:0.3f}"
 
 
-async def _fetch_day(client: EnergyZero, target_date: date) -> EnergyPrices | None:
+async def _fetch_day(
+    client: EnergyZero,
+    target_date: date,
+    local_tz: ZoneInfo,
+) -> EnergyPrices | None:
     try:
         return await client.get_electricity_prices(
             start_date=target_date,
             interval=Interval.QUARTER,
             price_type=PriceType.ALL_IN,
+            local_tz=local_tz,
         )
     except (EnergyZeroConnectionError, EnergyZeroNoDataError) as err:
         print(f"No data available for {target_date.isoformat()}: {err}")
@@ -60,10 +66,11 @@ def _print_summary(label: str, data: EnergyPrices) -> None:
 async def main() -> None:
     """Fetch 15-minute electricity prices for today and tomorrow via REST."""
     async with EnergyZero() as client:
-        today = datetime.now(UTC).astimezone().date()
+        local_tz = ZoneInfo("Europe/Amsterdam")
+        today = datetime.now(local_tz).date()
         tomorrow = today + timedelta(days=1)
-        prices_today = await _fetch_day(client, today)
-        prices_tomorrow = await _fetch_day(client, tomorrow)
+        prices_today = await _fetch_day(client, today, local_tz)
+        prices_tomorrow = await _fetch_day(client, tomorrow, local_tz)
 
     if prices_today:
         _print_summary(f"ELECTRICITY {today.isoformat()} (REST)", prices_today)
