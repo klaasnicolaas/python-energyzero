@@ -2,8 +2,7 @@
 
 import asyncio
 from datetime import datetime, timedelta, tzinfo
-
-import pytz
+from zoneinfo import ZoneInfo
 
 from energyzero import (  # pyright: ignore[reportMissingImports]
     APIBackend,
@@ -48,7 +47,7 @@ def _print_summary(label: str, data: EnergyPrices, tz: tzinfo) -> None:
 async def main() -> None:
     """Fetch daily gas prices for today and tomorrow via GraphQL."""
     async with EnergyZero(backend=APIBackend.GRAPHQL) as client:
-        local_tz = pytz.timezone("Europe/Amsterdam")
+        local_tz = ZoneInfo("Europe/Amsterdam")
         today = datetime.now(local_tz).date()
         tomorrow = today + timedelta(days=1)
 

@@ -37,7 +37,7 @@ async def test_rest_electricity_prices_quarter_hour(
 
     assert result is not None
     assert result.average_price is not None
-    assert len(result.prices) > 0
+    assert len(result.prices) == 96
 
     await energyzero_client.close()
 
@@ -66,7 +66,7 @@ async def test_rest_electricity_prices_hourly(
 
     assert result is not None
     assert result.average_price is not None
-    assert len(result.prices) > 0
+    assert len(result.prices) == 24
 
     await energyzero_client.close()
 
@@ -94,7 +94,7 @@ async def test_rest_electricity_prices_market(
 
     assert result is not None
     assert result.average_price is not None
-    assert len(result.prices) > 0
+    assert len(result.prices) == 24
 
     # Verify market prices are lower than all-in prices
     # (since they don't include energy tax)
@@ -124,7 +124,7 @@ async def test_rest_gas_prices(
 
     assert result is not None
     assert result.average_price is not None
-    assert len(result.prices) > 0
+    assert len(result.prices) == 1
 
     await energyzero_client.close()
 

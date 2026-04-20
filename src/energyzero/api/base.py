@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Protocol
 from energyzero.const import PriceType
 
 if TYPE_CHECKING:
-    from datetime import date
+    from datetime import date, tzinfo
 
     from energyzero.models import EnergyPrices
 
@@ -15,12 +15,14 @@ if TYPE_CHECKING:
 class EnergyZeroAPIProtocol(Protocol):
     """Protocol defining the interface for EnergyZero API clients."""
 
-    async def get_electricity_prices(
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
         end_date: date | None = None,
         interval: str = "INTERVAL_QUARTER",
         price_type: PriceType = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
     ) -> EnergyPrices:
         """Get electricity prices for a given period.
 
@@ -31,6 +33,7 @@ class EnergyZeroAPIProtocol(Protocol):
                 ignores it and only supports single-day requests).
             interval: Interval type (INTERVAL_QUARTER, INTERVAL_HOUR).
             price_type: Type of price (ALL_IN or MARKET).
+            local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------
@@ -39,11 +42,13 @@ class EnergyZeroAPIProtocol(Protocol):
         """
         raise NotImplementedError
 
-    async def get_gas_prices(
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
         end_date: date | None = None,
         price_type: PriceType = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
     ) -> EnergyPrices:
         """Get gas prices for a given period.
 
@@ -53,6 +58,7 @@ class EnergyZeroAPIProtocol(Protocol):
             end_date: Optional end date (GraphQL requires this parameter; REST
                 ignores it and only supports single-day requests).
             price_type: Type of price (ALL_IN or MARKET).
+            local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------

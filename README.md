@@ -41,7 +41,8 @@ pip install energyzero
 
 ```python
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from energyzero import EnergyZero, Interval, PriceType
 
@@ -49,17 +50,20 @@ from energyzero import EnergyZero, Interval, PriceType
 async def main() -> None:
     """Fetch today/tomorrow energy prices using the REST backend (default)."""
     async with EnergyZero() as client:
-        today = datetime.now(UTC).astimezone().date()
+        local_tz = ZoneInfo("Europe/Amsterdam")
+        today = datetime.now(local_tz).date()
         tomorrow = today + timedelta(days=1)
 
         electricity_today = await client.get_electricity_prices(
             start_date=today,
             interval=Interval.QUARTER,
             price_type=PriceType.ALL_IN,
+            local_tz=local_tz,
         )
         gas_today = await client.get_gas_prices(
             start_date=today,
             price_type=PriceType.ALL_IN,
+            local_tz=local_tz,
         )
 
         # Loop over additional days as needed
@@ -67,10 +71,12 @@ async def main() -> None:
             start_date=tomorrow,
             interval=Interval.QUARTER,
             price_type=PriceType.MARKET_WITH_VAT,
+            local_tz=local_tz,
         )
         gas_tomorrow = await client.get_gas_prices(
             start_date=tomorrow,
             price_type=PriceType.MARKET,
+            local_tz=local_tz,
         )
 
         print(electricity_today.average_price, gas_today.current_price)
@@ -97,6 +103,7 @@ You can retrieve both electricity and gas pricing data using this package. With 
 - `APIBackend.REST` — Public REST API.
 - Electricity: hourly + quarter-hour. Gas: daily.
 - Single date per call; `end_date` must equal `start_date` if provided.
+- The API may return a wider window, but the client now filters it to the requested local day.
 
 **GraphQL (optional)**
 - `APIBackend.GRAPHQL` — GraphQL endpoint with multi-day ranges and extended metadata (`TimeRange`, averages).
@@ -145,6 +152,7 @@ Returns electricity prices in **EUR/kWh**.
 | `end_date`   | `date`      | End of the period (local timezone).            |
 | `interval`   | `Interval`  | REST only: `Interval.QUARTER` or `Interval.HOUR`. Ignored by GraphQL. |
 | `price_type` | `PriceType` | Type of price to return. See `PriceType` for options (default `ALL_IN`). |
+| `local_tz`   | `tzinfo`    | Optional explicit timezone used to interpret the requested local date range on REST. |
 
 ---
 
@@ -157,6 +165,7 @@ Returns gas prices in **EUR/m³**.
 | `start_date` | `date`      | Start of the period (local timezone).          |
 | `end_date`   | `date`      | End of the period (local timezone).            |
 | `price_type` | `PriceType` | Type of price to return. See `PriceType` for options (default `ALL_IN`). |
+| `local_tz`   | `tzinfo`    | Optional explicit timezone used to interpret the requested local date range on REST. |
 
 ---
 

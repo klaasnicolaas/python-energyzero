@@ -6,8 +6,9 @@ import asyncio
 import json
 import socket
 from dataclasses import dataclass
+from datetime import UTC, date, datetime, tzinfo
 from importlib import metadata
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET
@@ -19,10 +20,7 @@ from energyzero.exceptions import (
     EnergyZeroError,
     EnergyZeroNoDataError,
 )
-from energyzero.models import EnergyPrices
-
-if TYPE_CHECKING:
-    from datetime import date
+from energyzero.models import REST_PRICE_STREAMS, EnergyPrices, _parse_datetime_str
 
 VERSION = metadata.version("energyzero")
 
@@ -121,12 +119,41 @@ class RESTClient:
 
         return json.loads(text)
 
-    async def get_electricity_prices(
+    def _get_local_timezone(self) -> tzinfo:
+        """Get the local timezone.
+
+        Returns
+        -------
+            The local timezone.
+
+        """
+        return datetime.now(UTC).astimezone().tzinfo or UTC
+
+    def _filter_data_for_local_date(
+        self,
+        data: dict[str, Any],
+        price_type: PriceType,
+        filter_date: date,
+        local_tz: tzinfo,
+    ) -> dict[str, Any]:
+        """Return a copy of the payload limited to the requested local date."""
+        stream = REST_PRICE_STREAMS[price_type]
+        filtered_stream = [
+            item
+            for item in data[stream]
+            if _parse_datetime_str(item["start"]).astimezone(local_tz).date()
+            == filter_date
+        ]
+        return {**data, stream: filtered_stream}
+
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
         end_date: date | None = None,
         interval: Interval | str = Interval.QUARTER,
         price_type: PriceType = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
     ) -> EnergyPrices:
         """Get electricity prices using REST API.
 
@@ -139,6 +166,7 @@ class RESTClient:
                 only; when provided it must match ``start_date``.
             interval: INTERVAL_QUARTER (15 min) or INTERVAL_HOUR.
             price_type: ALL_IN or MARKET prices.
+            local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------
@@ -170,11 +198,15 @@ class RESTClient:
             msg = "No electricity prices found for this period."
             raise EnergyZeroNoDataError(message=msg)
 
-        prices = EnergyPrices.from_rest_dict(
+        local_tz = local_tz or self._get_local_timezone()
+        filtered_data = self._filter_data_for_local_date(
             data,
             price_type,
-            filter_date=start_date,
+            start_date,
+            local_tz,
         )
+
+        prices = EnergyPrices.from_rest_dict(filtered_data, price_type)
 
         if len(prices.prices) == 0:
             msg = f"No electricity prices found for {start_date}"
@@ -182,11 +214,13 @@ class RESTClient:
 
         return prices
 
-    async def get_gas_prices(
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
         end_date: date | None = None,
         price_type: PriceType = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
     ) -> EnergyPrices:
         """Get gas prices using REST API.
 
@@ -198,6 +232,7 @@ class RESTClient:
             end_date: Optional end date. REST API supports single-day requests
                 only; when provided it must match ``start_date``.
             price_type: ALL_IN or MARKET prices.
+            local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------
@@ -227,11 +262,15 @@ class RESTClient:
             msg = "No gas prices found for this period."
             raise EnergyZeroNoDataError(message=msg)
 
-        prices = EnergyPrices.from_rest_dict(
+        local_tz = local_tz or self._get_local_timezone()
+        filtered_data = self._filter_data_for_local_date(
             data,
             price_type,
-            filter_date=start_date,
+            start_date,
+            local_tz,
         )
+
+        prices = EnergyPrices.from_rest_dict(filtered_data, price_type)
 
         if len(prices.prices) == 0:
             msg = f"No gas prices found for {start_date}"

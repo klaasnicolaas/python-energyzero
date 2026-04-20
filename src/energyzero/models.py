@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, date, datetime, tzinfo
+from datetime import UTC, datetime, tzinfo
 from typing import Any
 
 from .const import PriceType
@@ -45,7 +45,7 @@ def _generate_timestamp_range_list(
 
     Args:
     ----
-        prices: A dictionary with the hourprices.
+        prices: A dictionary with the hour prices.
 
     Returns:
     -------
@@ -361,7 +361,6 @@ class EnergyPrices:
         cls: type[EnergyPrices],
         data: dict[str, Any],
         price_type: PriceType = PriceType.ALL_IN,
-        filter_date: date | None = None,
     ) -> EnergyPrices:
         """Create an EnergyPrices object from a REST API response.
 
@@ -370,8 +369,6 @@ class EnergyPrices:
             data: A dictionary with the data from the REST API.
             price_type: Desired price flavor. Refer to ``PriceType`` for the available
                 market/all-in options with or without VAT.
-            filter_date: Optional local date that should be retained. Entries
-                outside of this local date are discarded.
 
         Returns:
         -------
@@ -382,21 +379,12 @@ class EnergyPrices:
 
         source_prices = data[REST_PRICE_STREAMS[price_type]]
 
-        local_tz = None
-        if filter_date:
-            local_tz = datetime.now().astimezone().tzinfo or UTC
-
         for item in source_prices:
             start_time = _parse_datetime_str(item["start"])
             end_time = _parse_datetime_str(item["end"])
             price = float(item["price"]["value"])
 
             key = TimeRange(start_time, end_time)
-            if filter_date and local_tz:
-                start_local_date = key.start_including.astimezone(local_tz).date()
-                if start_local_date != filter_date:
-                    continue
-
             prices[key] = price
 
         average_price = None
