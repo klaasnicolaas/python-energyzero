@@ -57,22 +57,17 @@ jobs:
           verbose: true
           print-hash: true
 
-  twitter:
-    name: 🐦 Tweet the release
-    needs: release
+  bluesky:
+    name: 🦋 Post to Bluesky
     runs-on: ubuntu-latest
+    environment: release
+    needs: release
     steps:
-      - uses: Eomm/why-don-t-you-tweet@d9ec12835f4d494dda920f95f885df3dba380493 # v2.0.0
+      - uses: myConsciousness/bluesky-post@96827d0a9604cb228b11b3095f6961196efba4a0 # v5.0.0
         with:
-          # GitHub event payload
-          # https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#release
-          tweet-message: |
-            ⬆️ ${{ github.event.release.tag_name }} of ${{ github.event.repository.name }} just released 🎉 #update @klaasnicolaas #python #package #energyzero #prices #release #bot #assistant
+          text: |
+            ⬆️ ${{ github.event.release.tag_name }} of ${{ github.event.repository.name }} just released 🎉 #update @klaasnicolaas.nl #python #package #energyzero #prices #release
 
             Check out the release notes here: ${{ github.event.release.html_url }}
-        env:
-          # Get your tokens from https://developer.twitter.com/apps
-          TWITTER_CONSUMER_API_KEY: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
-          TWITTER_CONSUMER_API_SECRET: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
-          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+          identifier: ${{ secrets.BLUESKY_IDENTIFIER }}
+          password: ${{ secrets.BLUESKY_PASSWORD }}
