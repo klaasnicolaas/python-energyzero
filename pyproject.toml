@@ -53,7 +53,7 @@ pytest-cov = "7.1.0"
 pytest-freezer = "0.4.9"
 ruff = "0.15.15"
 syrupy = "5.3.1"
-ty = "0.0.40"
+ty = "0.0.42"
 yamllint = "1.38.0"
 zizmor = "1.25.2"
 
