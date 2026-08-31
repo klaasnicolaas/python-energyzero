@@ -92,6 +92,7 @@ asyncio_mode = "auto"
 
 [tool.ruff]
 target-version = "py312"
+lint.extend-ignore = ["CPY001"] # Project files do not use copyright headers
 lint.select = ["ALL"]
 lint.ignore = [
   "ANN401",  # Opinionated warning on disallowing dynamically typed expressions
