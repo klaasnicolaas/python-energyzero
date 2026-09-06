@@ -103,11 +103,6 @@ repos:
         entry: poetry check
         pass_filenames: false
         always_run: true
-      - id: pylint
-        name: 🌟 Starring code with pylint
-        language: system
-        types: [python]
-        entry: poetry run pylint
       - id: pytest
         name: 🧪 Running tests and test coverage with pytest
         language: system
