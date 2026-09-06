@@ -5,6 +5,7 @@ description = "Asynchronous Python client providing energy/gas prices from Energ
 authors = [{ name="Klaas Schoute", email="<hello@student-techlife.com>"}]
 maintainers = [{name="Klaas Schoute", email="<hello@student-techlife.com>"}]
 license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12,<4.0"
 readme = "README.md"
 keywords = ["energy", "energyzero", "gas", "prices", "api", "async", "client"]
@@ -12,7 +13,6 @@ classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Framework :: AsyncIO",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Natural Language :: English",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -46,7 +46,6 @@ covdefaults = "2.3.0"
 coverage = {version = "7.16.0", extras = ["toml"]}
 pre-commit-hooks = "6.0.0"
 prek = "0.5.2"
-pylint = "4.0.8"
 pytest = "9.1.1"
 pytest-asyncio = "1.4.0"
 pytest-cov = "7.1.0"
@@ -67,24 +66,6 @@ fail_under = 95
 
 [tool.ty.environment]
 python-version = "3.12"
-
-[tool.pylint.MASTER]
-ignore = ["tests"]
-
-[tool.pylint.BASIC]
-good-names = ["_", "ex", "fp", "i", "id", "j", "k", "on", "Run", "T", "wv"]
-
-[tool.pylint."MESSAGES CONTROL"]
-disable = ["too-few-public-methods", "duplicate-code", "format", "unsubscriptable-object"]
-
-[tool.pylint.SIMILARITIES]
-ignore-imports = true
-
-[tool.pylint.FORMAT]
-max-line-length = 88
-
-[tool.pylint.DESIGN]
-max-attributes = 20
 
 [tool.pytest.ini_options]
 addopts = "--cov"
@@ -117,5 +98,5 @@ known-first-party = ["energyzero"]
 max-complexity = 25
 
 [build-system]
-requires = ["poetry-core>=2.0"]
+requires = ["poetry-core>=2.2.0"]
 build-backend = "poetry.core.masonry.api"
