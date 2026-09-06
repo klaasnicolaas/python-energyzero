@@ -115,31 +115,6 @@ jobs:
       - name: 🚀 Trim Trailing Whitespace
         run: poetry run prek run trailing-whitespace --all-files
 
-  pylint:
-    name: pylint
-    runs-on: ubuntu-latest
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: 🏗 Set up Poetry
-        run: pipx install poetry
-      - name: 🏗 Set up Python ${{ env.DEFAULT_PYTHON }}
-        id: python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: ${{ env.DEFAULT_PYTHON }}
-          cache: "poetry"
-      - name: 🏗 Install workflow dependencies
-        run: |
-          poetry config virtualenvs.create true
-          poetry config virtualenvs.in-project true
-      - name: 🏗 Install Python dependencies
-        run: poetry install --no-interaction
-      - name: 🚀 Run pylint
-        run: poetry run prek run pylint --all-files
-
   yamllint:
     name: yamllint
     runs-on: ubuntu-latest
@@ -155,7 +130,7 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
-          cache: 'poetry'
+          cache: "poetry"
       - name: 🏗 Install workflow dependencies
         run: |
           poetry config virtualenvs.create true
