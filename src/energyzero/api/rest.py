@@ -14,6 +14,7 @@ from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET
 from yarl import URL
 
+from energyzero.api.base import _normalize_price_types
 from energyzero.const import Interval, PriceType
 from energyzero.exceptions import (
     EnergyZeroConnectionError,
@@ -197,7 +198,8 @@ class RESTClient:
 
         Iterable input always returns a mapping, even for one type. Duplicates
         appear once, in first-requested order. Empty iterables raise ValueError
-        before any request. All requested types use one backend request.
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----
@@ -217,14 +219,7 @@ class RESTClient:
             EnergyZeroNoDataError: No data found.
 
         """
-        requested_types = (
-            (price_type,)
-            if isinstance(price_type, PriceType)
-            else tuple(dict.fromkeys(price_type))
-        )
-        if not requested_types:
-            msg = "At least one price type is required."
-            raise ValueError(msg)
+        requested_types = _normalize_price_types(price_type)
 
         if end_date and end_date != start_date:
             msg = "REST API supports single-day requests. Use identical dates."
@@ -311,7 +306,8 @@ class RESTClient:
 
         Iterable input always returns a mapping, even for one type. Duplicates
         appear once, in first-requested order. Empty iterables raise ValueError
-        before any request. All requested types use one backend request.
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----
@@ -330,14 +326,7 @@ class RESTClient:
             EnergyZeroNoDataError: No data found.
 
         """
-        requested_types = (
-            (price_type,)
-            if isinstance(price_type, PriceType)
-            else tuple(dict.fromkeys(price_type))
-        )
-        if not requested_types:
-            msg = "At least one price type is required."
-            raise ValueError(msg)
+        requested_types = _normalize_price_types(price_type)
 
         if end_date and end_date != start_date:
             msg = "REST API supports single-day requests. Use identical dates."

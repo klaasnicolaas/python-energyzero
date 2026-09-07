@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Protocol, overload
 
 from energyzero.const import PriceType
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
     from datetime import date, tzinfo
 
     from energyzero.models import EnergyPrices
@@ -62,7 +62,8 @@ class EnergyZeroAPIProtocol(Protocol):
 
         Iterable input always returns a mapping, even for one type. Duplicates
         appear once, in first-requested order. Empty iterables raise ValueError
-        before any request. All requested types use one backend request.
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----
@@ -122,7 +123,8 @@ class EnergyZeroAPIProtocol(Protocol):
 
         Iterable input always returns a mapping, even for one type. Duplicates
         appear once, in first-requested order. Empty iterables raise ValueError
-        before any request. All requested types use one backend request.
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----
@@ -142,3 +144,26 @@ class EnergyZeroAPIProtocol(Protocol):
     async def close(self) -> None:
         """Close the API client and cleanup resources."""
         raise NotImplementedError
+
+
+def _normalize_price_types(
+    price_type: PriceType | Iterable[PriceType],
+) -> tuple[PriceType, ...]:
+    """Validate requested price types and deduplicate in first-requested order."""
+    if isinstance(price_type, PriceType):
+        return (price_type,)
+
+    if isinstance(price_type, (str, bytes)) or not isinstance(price_type, Iterable):
+        msg = "price_type must be a PriceType or an iterable of PriceType values."
+        raise TypeError(msg)
+
+    requested_types = tuple(price_type)
+    if not requested_types:
+        msg = "At least one price type is required."
+        raise ValueError(msg)
+
+    if any(not isinstance(item, PriceType) for item in requested_types):
+        msg = "Every item in price_type must be a PriceType value."
+        raise TypeError(msg)
+
+    return tuple(dict.fromkeys(requested_types))

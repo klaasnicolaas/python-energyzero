@@ -13,6 +13,7 @@ from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_POST
 from yarl import URL
 
+from energyzero.api.base import _normalize_price_types
 from energyzero.const import PriceType
 from energyzero.exceptions import (
     EnergyZeroConnectionError,
@@ -181,7 +182,8 @@ class GraphQLClient:
 
         Iterable input always returns a mapping, even for one type. Duplicates
         appear once, in first-requested order. Empty iterables raise ValueError
-        before any request. All requested types use one backend request.
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----
@@ -200,14 +202,7 @@ class GraphQLClient:
             EnergyZeroNoDataError: No data found.
 
         """
-        requested_types = (
-            (price_type,)
-            if isinstance(price_type, PriceType)
-            else tuple(dict.fromkeys(price_type))
-        )
-        if not requested_types:
-            msg = "At least one price type is required."
-            raise ValueError(msg)
+        requested_types = _normalize_price_types(price_type)
 
         _ = interval  # GraphQL backend always returns hourly intervals.
         if end_date is None:
@@ -309,7 +304,8 @@ class GraphQLClient:
 
         Iterable input always returns a mapping, even for one type. Duplicates
         appear once, in first-requested order. Empty iterables raise ValueError
-        before any request. All requested types use one backend request.
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----
@@ -327,14 +323,7 @@ class GraphQLClient:
             EnergyZeroNoDataError: No data found.
 
         """
-        requested_types = (
-            (price_type,)
-            if isinstance(price_type, PriceType)
-            else tuple(dict.fromkeys(price_type))
-        )
-        if not requested_types:
-            msg = "At least one price type is required."
-            raise ValueError(msg)
+        requested_types = _normalize_price_types(price_type)
 
         if end_date is None:
             msg = "end_date is required when using the GraphQL backend."

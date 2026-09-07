@@ -97,7 +97,8 @@ class EnergyZero:
 
         Iterable input always returns a mapping, even for one type. Duplicates
         appear once, in first-requested order. Empty iterables raise ValueError
-        before any request. All requested types use one backend request.
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----
@@ -168,7 +169,8 @@ class EnergyZero:
 
         Iterable input always returns a mapping, even for one type. Duplicates
         appear once, in first-requested order. Empty iterables raise ValueError
-        before any request. All requested types use one backend request.
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----

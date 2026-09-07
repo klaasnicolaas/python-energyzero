@@ -196,7 +196,8 @@ gas_prices = await client.get_gas_prices(
 ```
 
 Duplicate types appear once, in first-requested order. An empty iterable raises
-`ValueError` without making a request. REST filters each requested stream to the
+`ValueError` without making a request. Values must be `PriceType` members; raw
+strings and other invalid values raise `TypeError` before making a request. REST filters each requested stream to the
 local date and raises `EnergyZeroNoDataError` if a requested stream has no prices
 for that date; no partial mapping is returned. GraphQL requires `end_date` and
 retains its existing date-range behavior. Omitting `price_type` still returns

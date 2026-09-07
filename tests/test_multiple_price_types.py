@@ -2,7 +2,7 @@
 
 import json
 from datetime import UTC, date, datetime, timedelta
-from typing import assert_type
+from typing import assert_type, cast
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
@@ -338,3 +338,58 @@ async def test_return_type_overloads(backend: APIBackend) -> None:
                 await client.get_gas_prices(day, day, [PriceType.ALL_IN]),
                 dict[PriceType, EnergyPrices],
             )
+
+
+@pytest.mark.parametrize("backend", list(APIBackend))
+@pytest.mark.parametrize("kind", ["electricity", "gas"])
+@pytest.mark.parametrize(
+    "invalid",
+    [
+        pytest.param("all_in", id="bare-string"),
+        pytest.param("", id="empty-string"),
+        pytest.param(b"all_in", id="bytes"),
+        pytest.param(42, id="non-iterable"),
+        pytest.param(["all_in"], id="string-item"),
+        pytest.param([42], id="integer-item"),
+        pytest.param([[]], id="unhashable-item"),
+        pytest.param([PriceType.ALL_IN, "all_in"], id="equal-string-after-enum"),
+        pytest.param(["all_in", PriceType.ALL_IN], id="equal-string-before-enum"),
+    ],
+)
+async def test_invalid_price_types(
+    backend: APIBackend, kind: str, invalid: object
+) -> None:
+    """Reject invalid input before requesting or deduplicating enum-like strings."""
+    async with EnergyZero(backend=backend) as client:
+        method = (
+            client.get_electricity_prices
+            if kind == "electricity"
+            else client.get_gas_prices
+        )
+        with (
+            patch.object(client._client, "_request") as request,
+            pytest.raises(TypeError, match="PriceType"),
+        ):
+            await method(
+                date(2025, 12, 17),
+                date(2025, 12, 17),
+                price_type=cast("PriceType", invalid),
+            )
+        request.assert_not_called()
+
+
+@pytest.mark.parametrize("backend", list(APIBackend))
+@pytest.mark.parametrize("kind", ["electricity", "gas"])
+async def test_invalid_generator(backend: APIBackend, kind: str) -> None:
+    """Validate all generator items before making a backend request."""
+    async with EnergyZero(backend=backend) as client:
+        with (
+            patch.object(client._client, "_request") as request,
+            pytest.raises(TypeError, match="Every item"),
+        ):
+            await getattr(client, f"get_{kind}_prices")(
+                date(2025, 12, 17),
+                date(2025, 12, 17),
+                price_type=iter([PriceType.ALL_IN, "market"]),
+            )
+        request.assert_not_called()
