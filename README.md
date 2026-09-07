@@ -151,7 +151,7 @@ Returns electricity prices in **EUR/kWh**.
 | `start_date` | `date`      | Start of the period (local timezone).          |
 | `end_date`   | `date`      | End of the period (local timezone).            |
 | `interval`   | `Interval`  | REST only: `Interval.QUARTER` or `Interval.HOUR`. Ignored by GraphQL. |
-| `price_type` | `PriceType` | Type of price to return. See `PriceType` for options (default `ALL_IN`). |
+| `price_type` | `PriceType` or `Iterable[PriceType]` | One or more price types to return (default `ALL_IN`). |
 | `local_tz`   | `tzinfo`    | Optional explicit timezone used to interpret the requested local date range on REST. |
 
 ---
@@ -164,8 +164,44 @@ Returns gas prices in **EUR/m³**.
 |--------------|-------------|------------------------------------------------|
 | `start_date` | `date`      | Start of the period (local timezone).          |
 | `end_date`   | `date`      | End of the period (local timezone).            |
-| `price_type` | `PriceType` | Type of price to return. See `PriceType` for options (default `ALL_IN`). |
+| `price_type` | `PriceType` or `Iterable[PriceType]` | One or more price types to return (default `ALL_IN`). |
 | `local_tz`   | `tzinfo`    | Optional explicit timezone used to interpret the requested local date range on REST. |
+
+---
+
+### Retrieving multiple price types
+
+Retrieve multiple price types with **one HTTP request per method call**, on either
+backend. Pass an iterable of `PriceType` values to the existing `price_type` parameter
+of `get_electricity_prices()` or `get_gas_prices()`. This returns
+`dict[PriceType, EnergyPrices]`, even when the iterable contains only one type.
+Passing a single `PriceType` still returns one `EnergyPrices` object. Type
+overloads infer the return type from the input.
+
+```python
+prices = await client.get_electricity_prices(
+    start_date=today,
+    interval=Interval.QUARTER,
+    price_type=(PriceType.MARKET_WITH_VAT, PriceType.ALL_IN),
+    local_tz=local_tz,
+)
+market_prices = prices[PriceType.MARKET_WITH_VAT]
+all_in_prices = prices[PriceType.ALL_IN]
+
+gas_prices = await client.get_gas_prices(
+    start_date=today,
+    price_type=(PriceType.MARKET_WITH_VAT, PriceType.ALL_IN),
+    local_tz=local_tz,
+)
+```
+
+Duplicate types appear once, in first-requested order. An empty iterable raises
+`ValueError` without making a request. Values must be `PriceType` members; raw
+strings and other invalid values raise `TypeError` before making a request. REST filters each requested stream to the
+local date and raises `EnergyZeroNoDataError` if a requested stream has no prices
+for that date; no partial mapping is returned. GraphQL requires `end_date` and
+retains its existing date-range behavior. Omitting `price_type` still returns
+one `EnergyPrices` object using `PriceType.ALL_IN`.
 
 ---
 

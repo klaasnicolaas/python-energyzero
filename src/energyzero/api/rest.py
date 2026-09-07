@@ -8,12 +8,13 @@ import socket
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, tzinfo
 from importlib import metadata
-from typing import Any
+from typing import TYPE_CHECKING, Any, overload
 
 from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_GET
 from yarl import URL
 
+from energyzero.api.base import _normalize_price_types
 from energyzero.const import Interval, PriceType
 from energyzero.exceptions import (
     EnergyZeroConnectionError,
@@ -21,6 +22,9 @@ from energyzero.exceptions import (
     EnergyZeroNoDataError,
 )
 from energyzero.models import REST_PRICE_STREAMS, EnergyPrices, _parse_datetime_str
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 VERSION = metadata.version("energyzero")
 
@@ -140,12 +144,13 @@ class RESTClient:
         stream = REST_PRICE_STREAMS[price_type]
         filtered_stream = [
             item
-            for item in data[stream]
+            for item in data.get(stream, [])
             if _parse_datetime_str(item["start"]).astimezone(local_tz).date()
             == filter_date
         ]
         return {**data, stream: filtered_stream}
 
+    @overload
     async def get_electricity_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
@@ -154,10 +159,47 @@ class RESTClient:
         price_type: PriceType = PriceType.ALL_IN,
         *,
         local_tz: tzinfo | None = None,
-    ) -> EnergyPrices:
+    ) -> EnergyPrices: ...
+
+    @overload
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None,
+        interval: Interval | str,
+        price_type: Iterable[PriceType],
+        *,
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]: ...
+
+    @overload
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        interval: Interval | str = Interval.QUARTER,
+        *,
+        price_type: Iterable[PriceType],
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]: ...
+
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        interval: Interval | str = Interval.QUARTER,
+        price_type: PriceType | Iterable[PriceType] = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
+    ) -> EnergyPrices | dict[PriceType, EnergyPrices]:
         """Get electricity prices using REST API.
 
         All returned price values are in EUR/kWh.
+
+        Iterable input always returns a mapping, even for one type. Duplicates
+        appear once, in first-requested order. Empty iterables raise ValueError
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----
@@ -165,18 +207,20 @@ class RESTClient:
             end_date: Optional end date. REST API supports single-day requests
                 only; when provided it must match ``start_date``.
             interval: INTERVAL_QUARTER (15 min) or INTERVAL_HOUR.
-            price_type: ALL_IN or MARKET prices.
+            price_type: One PriceType or an iterable of types (default: ALL_IN).
             local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------
-            An EnergyPrices object.
+            One EnergyPrices for a single PriceType; a mapping for an iterable.
 
         Raises:
         ------
             EnergyZeroNoDataError: No data found.
 
         """
+        requested_types = _normalize_price_types(price_type)
+
         if end_date and end_date != start_date:
             msg = "REST API supports single-day requests. Use identical dates."
             raise ValueError(msg)
@@ -199,21 +243,26 @@ class RESTClient:
             raise EnergyZeroNoDataError(message=msg)
 
         local_tz = local_tz or self._get_local_timezone()
-        filtered_data = self._filter_data_for_local_date(
-            data,
-            price_type,
-            start_date,
-            local_tz,
-        )
+        results: dict[PriceType, EnergyPrices] = {}
+        for requested_type in requested_types:
+            filtered_data = self._filter_data_for_local_date(
+                data,
+                requested_type,
+                start_date,
+                local_tz,
+            )
 
-        prices = EnergyPrices.from_rest_dict(filtered_data, price_type)
+            prices = EnergyPrices.from_rest_dict(filtered_data, requested_type)
 
-        if len(prices.prices) == 0:
-            msg = f"No electricity prices found for {start_date}"
-            raise EnergyZeroNoDataError(message=msg)
+            if len(prices.prices) == 0:
+                msg = f"No electricity prices found for {start_date}"
+                raise EnergyZeroNoDataError(message=msg)
 
-        return prices
+            results[requested_type] = prices
 
+        return results[price_type] if isinstance(price_type, PriceType) else results
+
+    @overload
     async def get_gas_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
@@ -221,28 +270,64 @@ class RESTClient:
         price_type: PriceType = PriceType.ALL_IN,
         *,
         local_tz: tzinfo | None = None,
-    ) -> EnergyPrices:
+    ) -> EnergyPrices: ...
+
+    @overload
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None,
+        price_type: Iterable[PriceType],
+        *,
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]: ...
+
+    @overload
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        *,
+        price_type: Iterable[PriceType],
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]: ...
+
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        price_type: PriceType | Iterable[PriceType] = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
+    ) -> EnergyPrices | dict[PriceType, EnergyPrices]:
         """Get gas prices using REST API.
 
         All returned price values are in EUR/m³.
+
+        Iterable input always returns a mapping, even for one type. Duplicates
+        appear once, in first-requested order. Empty iterables raise ValueError
+        before any request. Invalid values raise TypeError before any request.
+        All requested types use one backend request.
 
         Args:
         ----
             start_date: Start date (local timezone).
             end_date: Optional end date. REST API supports single-day requests
                 only; when provided it must match ``start_date``.
-            price_type: ALL_IN or MARKET prices.
+            price_type: One PriceType or an iterable of types (default: ALL_IN).
             local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------
-            An EnergyPrices object.
+            One EnergyPrices for a single PriceType; a mapping for an iterable.
 
         Raises:
         ------
             EnergyZeroNoDataError: No data found.
 
         """
+        requested_types = _normalize_price_types(price_type)
+
         if end_date and end_date != start_date:
             msg = "REST API supports single-day requests. Use identical dates."
             raise ValueError(msg)
@@ -263,20 +348,24 @@ class RESTClient:
             raise EnergyZeroNoDataError(message=msg)
 
         local_tz = local_tz or self._get_local_timezone()
-        filtered_data = self._filter_data_for_local_date(
-            data,
-            price_type,
-            start_date,
-            local_tz,
-        )
+        results: dict[PriceType, EnergyPrices] = {}
+        for requested_type in requested_types:
+            filtered_data = self._filter_data_for_local_date(
+                data,
+                requested_type,
+                start_date,
+                local_tz,
+            )
 
-        prices = EnergyPrices.from_rest_dict(filtered_data, price_type)
+            prices = EnergyPrices.from_rest_dict(filtered_data, requested_type)
 
-        if len(prices.prices) == 0:
-            msg = f"No gas prices found for {start_date}"
-            raise EnergyZeroNoDataError(message=msg)
+            if len(prices.prices) == 0:
+                msg = f"No gas prices found for {start_date}"
+                raise EnergyZeroNoDataError(message=msg)
 
-        return prices
+            results[requested_type] = prices
+
+        return results[price_type] if isinstance(price_type, PriceType) else results
 
     async def close(self) -> None:
         """Close the client session."""
