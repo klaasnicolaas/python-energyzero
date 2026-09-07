@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, overload
 
 from energyzero.const import PriceType
 
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 class EnergyZeroAPIProtocol(Protocol):
     """Protocol defining the interface for EnergyZero API clients."""
 
+    @overload
     async def get_electricity_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
@@ -24,8 +25,44 @@ class EnergyZeroAPIProtocol(Protocol):
         price_type: PriceType = PriceType.ALL_IN,
         *,
         local_tz: tzinfo | None = None,
-    ) -> EnergyPrices:
+    ) -> EnergyPrices: ...
+
+    @overload
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None,
+        interval: str,
+        price_type: Iterable[PriceType],
+        *,
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]: ...
+
+    @overload
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        interval: str = "INTERVAL_QUARTER",
+        *,
+        price_type: Iterable[PriceType],
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]: ...
+
+    async def get_electricity_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        interval: str = "INTERVAL_QUARTER",
+        price_type: PriceType | Iterable[PriceType] = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
+    ) -> EnergyPrices | dict[PriceType, EnergyPrices]:
         """Get electricity prices for a given period.
+
+        Iterable input always returns a mapping, even for one type. Duplicates
+        appear once, in first-requested order. Empty iterables raise ValueError
+        before any request. All requested types use one backend request.
 
         Args:
         ----
@@ -33,35 +70,17 @@ class EnergyZeroAPIProtocol(Protocol):
             end_date: Optional end date (GraphQL requires this parameter; REST
                 requires an identical date and only supports single-day requests).
             interval: Interval type (INTERVAL_QUARTER, INTERVAL_HOUR).
-            price_type: Type of price (ALL_IN or MARKET).
+            price_type: One PriceType or an iterable of types (default: ALL_IN).
             local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------
-            An EnergyPrices object.
+            One EnergyPrices for a single PriceType; a mapping for an iterable.
 
         """
         raise NotImplementedError
 
-    async def get_electricity_prices_by_type(  # pylint: disable=too-many-arguments
-        self,
-        start_date: date,
-        end_date: date | None = None,
-        interval: str = "INTERVAL_QUARTER",
-        *,
-        price_types: Iterable[PriceType],
-        local_tz: tzinfo | None = None,
-    ) -> dict[PriceType, EnergyPrices]:
-        """Get multiple electricity price types with one backend request.
-
-        Uses the same date, timezone and interval semantics as
-        ``get_electricity_prices``. Values are in EUR/kWh.
-        ``price_types`` accepts an iterable; duplicates are returned once,
-        in first-requested order. An empty iterable raises ``ValueError``
-        before making a request. Returns a mapping of types to EnergyPrices.
-        """
-        raise NotImplementedError
-
+    @overload
     async def get_gas_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
@@ -69,39 +88,54 @@ class EnergyZeroAPIProtocol(Protocol):
         price_type: PriceType = PriceType.ALL_IN,
         *,
         local_tz: tzinfo | None = None,
-    ) -> EnergyPrices:
+    ) -> EnergyPrices: ...
+
+    @overload
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None,
+        price_type: Iterable[PriceType],
+        *,
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]: ...
+
+    @overload
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        *,
+        price_type: Iterable[PriceType],
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]: ...
+
+    async def get_gas_prices(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        price_type: PriceType | Iterable[PriceType] = PriceType.ALL_IN,
+        *,
+        local_tz: tzinfo | None = None,
+    ) -> EnergyPrices | dict[PriceType, EnergyPrices]:
         """Get gas prices for a given period.
+
+        Iterable input always returns a mapping, even for one type. Duplicates
+        appear once, in first-requested order. Empty iterables raise ValueError
+        before any request. All requested types use one backend request.
 
         Args:
         ----
             start_date: Start date of the period (local timezone).
             end_date: Optional end date (GraphQL requires this parameter; REST
                 requires an identical date and only supports single-day requests).
-            price_type: Type of price (ALL_IN or MARKET).
+            price_type: One PriceType or an iterable of types (default: ALL_IN).
             local_tz: Timezone used to interpret the requested local date range.
 
         Returns:
         -------
-            An EnergyPrices object.
+            One EnergyPrices for a single PriceType; a mapping for an iterable.
 
-        """
-        raise NotImplementedError
-
-    async def get_gas_prices_by_type(  # pylint: disable=too-many-arguments
-        self,
-        start_date: date,
-        end_date: date | None = None,
-        *,
-        price_types: Iterable[PriceType],
-        local_tz: tzinfo | None = None,
-    ) -> dict[PriceType, EnergyPrices]:
-        """Get multiple gas price types with one backend request.
-
-        Uses the same date, timezone and interval semantics as
-        ``get_gas_prices``. Values are in EUR/m³.
-        ``price_types`` accepts an iterable; duplicates are returned once,
-        in first-requested order. An empty iterable raises ``ValueError``
-        before making a request. Returns a mapping of types to EnergyPrices.
         """
         raise NotImplementedError
 

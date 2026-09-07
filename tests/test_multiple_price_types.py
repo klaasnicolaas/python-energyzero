@@ -2,13 +2,14 @@
 
 import json
 from datetime import UTC, date, datetime, timedelta
+from typing import assert_type
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 import pytest
 from aresponses import ResponsesMockServer
 
-from energyzero import APIBackend, EnergyZero, Interval, PriceType
+from energyzero import APIBackend, EnergyPrices, EnergyZero, Interval, PriceType
 from energyzero.exceptions import EnergyZeroNoDataError
 
 from . import load_fixtures
@@ -43,10 +44,10 @@ async def test_rest_multiple_types(
     )
     local_tz = ZoneInfo("Europe/Amsterdam")
     requested_date = date(2025, 12, 17)
-    method = getattr(energyzero_client, f"get_{kind}_prices_by_type")
+    method = getattr(energyzero_client, f"get_{kind}_prices")
     result = await method(
         requested_date,
-        price_types=iter([*PriceType, PriceType.ALL_IN]),
+        price_type=iter([*PriceType, PriceType.ALL_IN]),
         local_tz=local_tz,
         **({"interval": interval} if kind == "electricity" else {}),
     )
@@ -85,8 +86,8 @@ async def test_empty_types(backend: APIBackend, kind: str) -> None:
             patch.object(client._client, "_request") as request,
             pytest.raises(ValueError, match="At least one price type"),
         ):
-            await getattr(client, f"get_{kind}_prices_by_type")(
-                date(2025, 12, 17), price_types=iter(())
+            await getattr(client, f"get_{kind}_prices")(
+                date(2025, 12, 17), price_type=iter(())
             )
         request.assert_not_called()
 
@@ -100,10 +101,10 @@ async def test_invalid_dates(backend: APIBackend, kind: str) -> None:
             patch.object(client._client, "_request") as request,
             pytest.raises(ValueError, match=r"single-day|end_date is required"),
         ):
-            await getattr(client, f"get_{kind}_prices_by_type")(
+            await getattr(client, f"get_{kind}_prices")(
                 date(2025, 12, 17),
                 date(2025, 12, 18) if backend == APIBackend.REST else None,
-                price_types=(PriceType.MARKET_WITH_VAT, PriceType.ALL_IN),
+                price_type=(PriceType.MARKET_WITH_VAT, PriceType.ALL_IN),
             )
         request.assert_not_called()
 
@@ -129,9 +130,9 @@ async def test_missing_requested_day(
         ) as request,
         pytest.raises(EnergyZeroNoDataError, match="2025-12-17"),
     ):
-        await getattr(energyzero_client, f"get_{kind}_prices_by_type")(
+        await getattr(energyzero_client, f"get_{kind}_prices")(
             date(2025, 12, 17),
-            price_types=(PriceType.MARKET_WITH_VAT, PriceType.ALL_IN),
+            price_type=(PriceType.MARKET_WITH_VAT, PriceType.ALL_IN),
             local_tz=ZoneInfo("Europe/Amsterdam"),
         )
     request.assert_awaited_once()
@@ -154,8 +155,8 @@ async def test_graphql_multiple_types(
             text=json.dumps(payload), headers={"Content-Type": "application/json"}
         ),
     )
-    result = await getattr(graphql_energyzero_client, f"get_{kind}_prices_by_type")(
-        date(2025, 5, 31), date(2025, 6, 1), price_types=iter(PriceType)
+    result = await getattr(graphql_energyzero_client, f"get_{kind}_prices")(
+        date(2025, 5, 31), date(2025, 6, 1), price_type=iter(PriceType)
     )
     assert list(result) == list(PriceType)
     items = payload["data"]["energyMarketPrices"]["prices"]
@@ -211,8 +212,8 @@ async def test_multiple_types_dst(
     with patch.object(
         energyzero_client._client, "_request", return_value=payload
     ) as request:
-        result = await energyzero_client.get_electricity_prices_by_type(
-            day, interval=Interval.HOUR, price_types=PriceType, local_tz=local_tz
+        result = await energyzero_client.get_electricity_prices(
+            day, interval=Interval.HOUR, price_type=PriceType, local_tz=local_tz
         )
     request.assert_awaited_once()
     for prices in result.values():
@@ -238,11 +239,11 @@ async def test_subset_and_single_price_compatibility(
     payload = json.loads(load_fixtures(f"{backend.value}/{fixture}.json"))
     async with EnergyZero(backend=backend) as client:
         with patch.object(client._client, "_request", return_value=payload) as request:
-            method = getattr(client, f"get_{kind}_prices_by_type")
+            method = getattr(client, f"get_{kind}_prices")
             result = await method(
                 date(2025, 12, 17),
                 date(2025, 12, 17),
-                price_types=iter(
+                price_type=iter(
                     (PriceType.ALL_IN, PriceType.MARKET_WITH_VAT, PriceType.ALL_IN)
                 ),
                 local_tz=ZoneInfo("Europe/Amsterdam"),
@@ -255,3 +256,85 @@ async def test_subset_and_single_price_compatibility(
                 local_tz=ZoneInfo("Europe/Amsterdam"),
             )
             assert single == result[PriceType.ALL_IN]
+
+
+@pytest.mark.parametrize("backend", list(APIBackend))
+@pytest.mark.parametrize("kind", ["electricity", "gas"])
+@pytest.mark.parametrize("container", [tuple, list, set, iter])
+async def test_singleton_iterable(
+    backend: APIBackend, kind: str, container: type
+) -> None:
+    """An iterable with one type returns a mapping, including positional calls."""
+    if backend == APIBackend.REST:
+        fixture = (
+            "electricity_hour_response" if kind == "electricity" else "gas_day_response"
+        )
+    else:
+        fixture = "energy" if kind == "electricity" else "gas"
+    payload = json.loads(load_fixtures(f"{backend.value}/{fixture}.json"))
+    day = date(2025, 12, 17)
+    async with EnergyZero(backend=backend) as client:
+        with patch.object(client._client, "_request", return_value=payload) as request:
+            selected = container([PriceType.MARKET_WITH_VAT])
+            if kind == "electricity":
+                result = await client.get_electricity_prices(
+                    day, day, Interval.HOUR, selected
+                )
+            else:
+                result = await client.get_gas_prices(day, day, selected)
+            request.assert_awaited_once()
+            assert isinstance(result, dict)
+            assert list(result) == [PriceType.MARKET_WITH_VAT]
+            assert isinstance(result[PriceType.MARKET_WITH_VAT], EnergyPrices)
+
+
+@pytest.mark.parametrize("backend", list(APIBackend))
+async def test_return_type_overloads(backend: APIBackend) -> None:
+    """Check type inference alongside actual return values for both methods."""
+    payload = json.loads(
+        load_fixtures(
+            "rest/electricity_hour_response.json"
+            if backend == APIBackend.REST
+            else "graphql/energy.json"
+        )
+    )
+    day = date(2025, 12, 17)
+    async with EnergyZero(backend=backend) as client:
+        with patch.object(client._client, "_request", return_value=payload):
+            electricity = assert_type(
+                await client.get_electricity_prices(day, day), EnergyPrices
+            )
+            gas = assert_type(await client.get_gas_prices(day, day), EnergyPrices)
+            assert isinstance(electricity, EnergyPrices)
+            assert isinstance(gas, EnergyPrices)
+            assert_type(
+                await client.get_electricity_prices(
+                    day, day, Interval.HOUR, PriceType.ALL_IN
+                ),
+                EnergyPrices,
+            )
+            assert_type(
+                await client.get_gas_prices(day, day, PriceType.ALL_IN), EnergyPrices
+            )
+            electricity_types = assert_type(
+                await client.get_electricity_prices(
+                    day, day, price_type=(PriceType.ALL_IN,)
+                ),
+                dict[PriceType, EnergyPrices],
+            )
+            gas_types = assert_type(
+                await client.get_gas_prices(day, day, price_type=(PriceType.ALL_IN,)),
+                dict[PriceType, EnergyPrices],
+            )
+            assert electricity_types == {PriceType.ALL_IN: electricity}
+            assert gas_types == {PriceType.ALL_IN: gas}
+            assert_type(
+                await client.get_electricity_prices(
+                    day, day, Interval.HOUR, iter(PriceType)
+                ),
+                dict[PriceType, EnergyPrices],
+            )
+            assert_type(
+                await client.get_gas_prices(day, day, [PriceType.ALL_IN]),
+                dict[PriceType, EnergyPrices],
+            )
