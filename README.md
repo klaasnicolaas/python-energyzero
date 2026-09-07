@@ -169,6 +169,39 @@ Returns gas prices in **EUR/m³**.
 
 ---
 
+### `get_electricity_prices_by_type()` / `get_gas_prices_by_type()`
+
+Retrieve multiple price types with **one HTTP request per method call**, on either
+backend. Both methods return `dict[PriceType, EnergyPrices]` and accept the same
+parameters as their single-price counterparts, replacing `price_type` with the
+required keyword argument `price_types` (an iterable of `PriceType` values).
+
+```python
+prices = await client.get_electricity_prices_by_type(
+    start_date=today,
+    interval=Interval.QUARTER,
+    price_types=(PriceType.MARKET_WITH_VAT, PriceType.ALL_IN),
+    local_tz=local_tz,
+)
+market_prices = prices[PriceType.MARKET_WITH_VAT]
+all_in_prices = prices[PriceType.ALL_IN]
+
+gas_prices = await client.get_gas_prices_by_type(
+    start_date=today,
+    price_types=(PriceType.MARKET_WITH_VAT, PriceType.ALL_IN),
+    local_tz=local_tz,
+)
+```
+
+Duplicate types appear once, in first-requested order. An empty iterable raises
+`ValueError` without making a request. REST filters each requested stream to the
+local date and raises `EnergyZeroNoDataError` if a requested stream has no prices
+for that date; no partial mapping is returned. GraphQL requires `end_date` and
+retains its existing date-range behavior. The single-price methods still return
+one `EnergyPrices` object and default to `PriceType.ALL_IN`.
+
+---
+
 ### `PriceType`
 
 Specifies the type of prices returned by both backends.

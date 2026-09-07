@@ -11,6 +11,7 @@ from energyzero.api.rest import RESTClient
 from energyzero.const import Interval, PriceType
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from datetime import date, tzinfo
 
     from aiohttp.client import ClientSession
@@ -65,7 +66,7 @@ class EnergyZero:
         ----
             start_date: Start date of the period (local timezone).
             end_date: Optional end date (mandatory for GraphQL; REST uses a
-                single-day request and ignores this value).
+                single-day request and requires an identical date if provided).
             interval: Interval type:
                 - "INTERVAL_QUARTER": Quarter-hour prices (15 min) - default
                 - "INTERVAL_HOUR": Hourly prices
@@ -87,6 +88,32 @@ class EnergyZero:
             local_tz=local_tz,
         )
 
+    async def get_electricity_prices_by_type(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        interval: Interval | str = Interval.QUARTER,
+        *,
+        price_types: Iterable[PriceType],
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]:
+        """Get multiple electricity price types with one backend request.
+
+        Uses the same date, timezone and interval semantics as
+        ``get_electricity_prices``. Values are in EUR/kWh.
+        ``price_types`` accepts an iterable; duplicates are returned once,
+        in first-requested order. An empty iterable raises ``ValueError``
+        before making a request. Returns a mapping of types to EnergyPrices.
+        """
+        interval_value = interval.value if isinstance(interval, Interval) else interval
+        return await self._client.get_electricity_prices_by_type(
+            start_date,
+            end_date,
+            interval_value,
+            price_types=price_types,
+            local_tz=local_tz,
+        )
+
     async def get_gas_prices(  # pylint: disable=too-many-arguments
         self,
         start_date: date,
@@ -103,7 +130,7 @@ class EnergyZero:
         ----
             start_date: Start date of the period (local timezone).
             end_date: Optional end date (mandatory for GraphQL; REST uses a
-                single-day request and ignores this value).
+                single-day request and requires an identical date if provided).
             price_type: Desired price flavor. See ``PriceType`` for the available
                 market/all-in options with or without VAT (default: ``ALL_IN``).
             local_tz: Timezone used to interpret the requested local date range.
@@ -117,6 +144,29 @@ class EnergyZero:
             start_date,
             end_date,
             price_type,
+            local_tz=local_tz,
+        )
+
+    async def get_gas_prices_by_type(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        *,
+        price_types: Iterable[PriceType],
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]:
+        """Get multiple gas price types with one backend request.
+
+        Uses the same date, timezone and interval semantics as
+        ``get_gas_prices``. Values are in EUR/m³.
+        ``price_types`` accepts an iterable; duplicates are returned once,
+        in first-requested order. An empty iterable raises ``ValueError``
+        before making a request. Returns a mapping of types to EnergyPrices.
+        """
+        return await self._client.get_gas_prices_by_type(
+            start_date,
+            end_date,
+            price_types=price_types,
             local_tz=local_tz,
         )
 

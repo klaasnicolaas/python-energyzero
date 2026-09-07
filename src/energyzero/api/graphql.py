@@ -7,7 +7,7 @@ import socket
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta, tzinfo
 from importlib import metadata
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aiohttp.client import ClientError, ClientSession
 from aiohttp.hdrs import METH_POST
@@ -20,6 +20,9 @@ from energyzero.exceptions import (
     EnergyZeroNoDataError,
 )
 from energyzero.models import EnergyPrices
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 VERSION = metadata.version("energyzero")
 
@@ -160,6 +163,37 @@ class GraphQLClient:
             EnergyZeroNoDataError: No data found.
 
         """
+        prices = await self.get_electricity_prices_by_type(
+            start_date,
+            end_date,
+            interval,
+            price_types=(price_type,),
+            local_tz=local_tz,
+        )
+        return prices[price_type]
+
+    async def get_electricity_prices_by_type(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        interval: str = "INTERVAL_QUARTER",
+        *,
+        price_types: Iterable[PriceType],
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]:
+        """Get multiple electricity price types with one backend request.
+
+        Uses the same date, timezone and interval semantics as
+        ``get_electricity_prices``. Values are in EUR/kWh.
+        ``price_types`` accepts an iterable; duplicates are returned once,
+        in first-requested order. An empty iterable raises ``ValueError``
+        before making a request. Returns a mapping of types to EnergyPrices.
+        """
+        requested_types = tuple(dict.fromkeys(price_types))
+        if not requested_types:
+            msg = "At least one price type is required."
+            raise ValueError(msg)
+
         _ = interval  # GraphQL backend always returns hourly intervals.
         if end_date is None:
             msg = "end_date is required when using the GraphQL backend."
@@ -212,7 +246,10 @@ class GraphQLClient:
             msg = "No energy prices found for this period."
             raise EnergyZeroNoDataError(message=msg)
 
-        return EnergyPrices.from_dict(data["data"], price_type)
+        return {
+            price_type: EnergyPrices.from_dict(data["data"], price_type)
+            for price_type in requested_types
+        }
 
     async def get_gas_prices(  # pylint: disable=too-many-arguments
         self,
@@ -240,6 +277,35 @@ class GraphQLClient:
             EnergyZeroNoDataError: No data found.
 
         """
+        prices = await self.get_gas_prices_by_type(
+            start_date,
+            end_date,
+            price_types=(price_type,),
+            local_tz=local_tz,
+        )
+        return prices[price_type]
+
+    async def get_gas_prices_by_type(  # pylint: disable=too-many-arguments
+        self,
+        start_date: date,
+        end_date: date | None = None,
+        *,
+        price_types: Iterable[PriceType],
+        local_tz: tzinfo | None = None,
+    ) -> dict[PriceType, EnergyPrices]:
+        """Get multiple gas price types with one backend request.
+
+        Uses the same date, timezone and interval semantics as
+        ``get_gas_prices``. Values are in EUR/m³.
+        ``price_types`` accepts an iterable; duplicates are returned once,
+        in first-requested order. An empty iterable raises ``ValueError``
+        before making a request. Returns a mapping of types to EnergyPrices.
+        """
+        requested_types = tuple(dict.fromkeys(price_types))
+        if not requested_types:
+            msg = "At least one price type is required."
+            raise ValueError(msg)
+
         if end_date is None:
             msg = "end_date is required when using the GraphQL backend."
             raise ValueError(msg)
@@ -292,7 +358,10 @@ class GraphQLClient:
             msg = "No gas prices found for this period."
             raise EnergyZeroNoDataError(message=msg)
 
-        return EnergyPrices.from_dict(data["data"], price_type)
+        return {
+            price_type: EnergyPrices.from_dict(data["data"], price_type)
+            for price_type in requested_types
+        }
 
     async def close(self) -> None:
         """Close the client session."""
