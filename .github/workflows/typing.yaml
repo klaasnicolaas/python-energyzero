@@ -27,6 +27,8 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: 🐍 Install Python
+        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Run ty

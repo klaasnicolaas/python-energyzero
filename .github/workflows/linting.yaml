@@ -27,6 +27,8 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: 🐍 Install Python
+        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Check code for common misspellings
@@ -45,6 +47,8 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: 🐍 Install Python
+        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Run Ruff linter
@@ -65,6 +69,8 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: 🐍 Install Python
+        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Check Python AST
@@ -107,6 +113,8 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: 🐍 Install Python
+        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Run yamllint
@@ -125,6 +133,8 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: 🐍 Install Python
+        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Run zizmor

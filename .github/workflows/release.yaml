@@ -32,6 +32,8 @@ jobs:
         with:
           enable-cache: false
           python-version: ${{ env.DEFAULT_PYTHON }}
+      - name: 🐍 Install Python
+        run: uv python install
       - name: 🏗 Set package version
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
