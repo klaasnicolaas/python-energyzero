@@ -27,20 +27,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: 🏗 Set up Poetry
-        run: pipx install poetry
-      - name: 🏗 Set up Python ${{ env.DEFAULT_PYTHON }}
-        id: python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - name: 🏗 Set up uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
+          enable-cache: false
           python-version: ${{ env.DEFAULT_PYTHON }}
-          cache: "poetry" # zizmor: ignore[cache-poisoning] - Low risk: release-only trigger, pinned actions, PyPI verification
-      - name: 🏗 Install workflow dependencies
-        run: |
-          poetry config virtualenvs.create true
-          poetry config virtualenvs.in-project true
-      - name: 🏗 Install dependencies
-        run: poetry install --no-interaction
       - name: 🏗 Set package version
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
@@ -48,9 +39,9 @@ jobs:
           version="${RELEASE_TAG}"
           version="${version,,}"
           version="${version#v}"
-          poetry version --no-interaction "${version}"
+          uv version --frozen "${version}"
       - name: 🏗 Build package
-        run: poetry build --no-interaction
+        run: uv build --no-sources
       - name: 🚀 Publish package to PyPi
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:

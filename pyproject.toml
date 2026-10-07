@@ -2,8 +2,8 @@
 name = "energyzero"
 version = "0.0.0"
 description = "Asynchronous Python client providing energy/gas prices from EnergyZero"
-authors = [{ name="Klaas Schoute", email="<hello@student-techlife.com>"}]
-maintainers = [{name="Klaas Schoute", email="<hello@student-techlife.com>"}]
+authors = [{ name="Klaas Schoute", email="hello@student-techlife.com"}]
+maintainers = [{name="Klaas Schoute", email="hello@student-techlife.com"}]
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12,<4.0"
@@ -20,7 +20,6 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dynamic = ["dependencies"]
 packages = [
   { include = "energyzero", from = "src"},
 ]
@@ -29,9 +28,6 @@ dependencies = [
   "yarl (>=1.23.0,<2.0.0)",
 ]
 
-[tool.poetry]
-requires-poetry = '>=2.0'
-
 [project.urls]
 homepage = "https://github.com/klaasnicolaas/python-energyzero"
 repository = "https://github.com/klaasnicolaas/python-energyzero"
@@ -39,22 +35,24 @@ documentation = "https://github.com/klaasnicolaas/python-energyzero"
 "Bug Tracker" = "https://github.com/klaasnicolaas/python-energyzero/issues"
 Changelog = "https://github.com/klaasnicolaas/python-energyzero/releases"
 
-[tool.poetry.group.dev.dependencies]
-aresponses = "3.0.0"
-codespell = "2.4.3"
-covdefaults = "2.3.0"
-coverage = {version = "7.16.2", extras = ["toml"]}
-pre-commit-hooks = "6.0.0"
-prek = "0.5.5"
-pytest = "9.1.1"
-pytest-asyncio = "1.4.0"
-pytest-cov = "7.1.0"
-pytest-freezer = "0.4.9"
-ruff = "0.16.10"
-syrupy = "6.1.1"
-ty = "0.0.85"
-yamllint = "1.38.0"
-zizmor = "1.30.1"
+[dependency-groups]
+dev = [
+  "aresponses==3.0.0",
+  "codespell==2.4.3",
+  "covdefaults==2.3.0",
+  "coverage[toml]==7.16.2",
+  "pre-commit-hooks==6.0.0",
+  "prek==0.5.5",
+  "pytest==9.1.1",
+  "pytest-asyncio==1.4.0",
+  "pytest-cov==7.1.0",
+  "pytest-freezer==0.4.9",
+  "ruff==0.16.10",
+  "syrupy==6.1.1",
+  "ty==0.0.85",
+  "yamllint==1.38.0",
+  "zizmor==1.30.1",
+]
 
 [tool.coverage.run]
 plugins = ["covdefaults"]
@@ -98,5 +96,5 @@ known-first-party = ["energyzero"]
 max-complexity = 25
 
 [build-system]
-requires = ["poetry-core>=2.2.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.12.13,<0.13"]
+build-backend = "uv_build"
