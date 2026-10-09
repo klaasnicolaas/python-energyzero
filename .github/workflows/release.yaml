@@ -56,7 +56,7 @@ jobs:
     environment: release
     needs: release
     steps:
-      - uses: myConsciousness/bluesky-post@96827d0a9604cb228b11b3095f6961196efba4a0 # v5
+      - uses: myConsciousness/bluesky-post@2d132869a6a51dea18183a26984a09f67744417e # v6
         with:
           text: |
             ⬆️ ${{ github.event.release.tag_name }} of ${{ github.event.repository.name }} just released 🎉 #update @klaasnicolaas.nl #python #package #energyzero #prices #release
