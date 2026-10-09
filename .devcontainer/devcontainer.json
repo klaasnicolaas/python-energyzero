@@ -10,8 +10,7 @@
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installOhMyZsh": true
     },
-    "ghcr.io/devcontainers-extra/features/poetry:2": {},
-    "ghcr.io/devcontainers-extra/features/pre-commit:2": {},
+    "ghcr.io/devcontainers-extra/features/uv:1": {},
     "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
       "plugins": "git zsh-autosuggestions zsh-syntax-highlighting zsh-completions",
       "omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions.git https://github.com/zsh-users/zsh-syntax-highlighting.git https://github.com/zsh-users/zsh-completions.git"
@@ -61,7 +60,7 @@
       }
     }
   },
-  "postCreateCommand": "poetry config virtualenvs.in-project true && poetry install",
+  "postCreateCommand": "uv sync --locked",
   "onCreateCommand": "",
   "remoteUser": "vscode"
 }
