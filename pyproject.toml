@@ -49,7 +49,7 @@ dev = [
   "pytest-freezer==0.4.9",
   "ruff==0.17.1",
   "syrupy==6.1.1",
-  "ty==0.0.87",
+  "ty==0.0.88",
   "yamllint==1.38.0",
   "zizmor==1.30.1",
 ]
