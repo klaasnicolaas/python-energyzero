@@ -103,7 +103,10 @@ You can retrieve both electricity and gas pricing data using this package. With 
 - `APIBackend.REST` — Public REST API.
 - Electricity: hourly + quarter-hour. Gas: daily.
 - Single date per call; `end_date` must equal `start_date` if provided.
-- The API may return a wider window, but the client now filters it to the requested local day.
+- The API may return a wider window. The client retains complete price blocks
+  overlapping the requested local calendar day, preserving their validity ranges.
+  A gas request can therefore include both the previous gas day's price (valid
+  until 06:00 in Europe/Amsterdam) and the price starting that morning.
 
 **GraphQL (optional)**
 - `APIBackend.GRAPHQL` — GraphQL endpoint with multi-day ranges and extended metadata (`TimeRange`, averages).

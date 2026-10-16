@@ -6,7 +6,7 @@ import asyncio
 import json
 import socket
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, tzinfo
+from datetime import UTC, date, datetime, time, timedelta, tzinfo
 from importlib import metadata
 from typing import TYPE_CHECKING, Any, overload
 
@@ -140,13 +140,17 @@ class RESTClient:
         filter_date: date,
         local_tz: tzinfo,
     ) -> dict[str, Any]:
-        """Return a copy of the payload limited to the requested local date."""
+        """Keep complete price blocks overlapping the requested local date."""
         stream = REST_PRICE_STREAMS[price_type]
+        day_start = datetime.combine(filter_date, time.min, local_tz).astimezone(UTC)
+        day_end = datetime.combine(
+            filter_date + timedelta(days=1), time.min, local_tz
+        ).astimezone(UTC)
         filtered_stream = [
             item
             for item in data.get(stream, [])
-            if _parse_datetime_str(item["start"]).astimezone(local_tz).date()
-            == filter_date
+            if _parse_datetime_str(item["start"]) < day_end
+            and _parse_datetime_str(item["end"]) > day_start
         ]
         return {**data, stream: filtered_stream}
 
