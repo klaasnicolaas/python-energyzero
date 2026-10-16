@@ -52,7 +52,9 @@ async def test_rest_multiple_types(
         **({"interval": interval} if kind == "electricity" else {}),
     )
     assert list(result) == list(PriceType)
-    count = {Interval.HOUR: 24, Interval.QUARTER: 96, Interval.DAY: 1}[interval]
+    count = {Interval.HOUR: 24, Interval.QUARTER: 96, Interval.DAY: 2}[interval]
+    day_start = datetime(2025, 12, 17, tzinfo=local_tz)
+    day_end = day_start + timedelta(days=1)
     for price_type, stream in (
         (PriceType.MARKET, "base"),
         (PriceType.MARKET_WITH_VAT, "base_with_vat"),
@@ -62,15 +64,16 @@ async def test_rest_multiple_types(
         expected = [
             float(item["price"]["value"])
             for item in payload[stream]
-            if datetime.fromisoformat(item["start"]).astimezone(local_tz).date()
-            == requested_date
+            if datetime.fromisoformat(item["start"]) < day_end
+            and datetime.fromisoformat(item["end"]) > day_start
         ]
         prices = result[price_type]
         assert len(prices.prices) == count
         assert list(prices.prices.values()) == expected
         assert prices.average_price == pytest.approx(sum(expected) / count)
         assert all(
-            time_range.start_including.astimezone(local_tz).date() == requested_date
+            time_range.start_including < day_end
+            and time_range.end_excluding > day_start
             for time_range in prices.prices
         )
     assert len(aresponses.history) == 1
@@ -120,7 +123,7 @@ async def test_missing_requested_day(
     )
     payload = json.loads(load_fixtures(f"rest/{fixture}.json"))
     payload["all_in_with_vat"] = (
-        [] if stream_state == "empty" else [payload["all_in_with_vat"][0]]
+        [] if stream_state == "empty" else [payload["all_in_with_vat"][-1]]
     )
     if stream_state == "absent":
         del payload["all_in_with_vat"]

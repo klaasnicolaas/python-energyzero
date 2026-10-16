@@ -124,7 +124,7 @@ async def test_rest_gas_prices(
 
     assert result is not None
     assert result.average_price is not None
-    assert len(result.prices) == 1
+    assert len(result.prices) == 2
 
     await energyzero_client.close()
 
