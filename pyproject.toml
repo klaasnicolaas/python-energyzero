@@ -51,7 +51,7 @@ dev = [
   "syrupy==6.1.1",
   "ty==0.0.88",
   "yamllint==1.38.0",
-  "zizmor==1.30.1",
+  "zizmor==1.31.1",
 ]
 
 [tool.coverage.run]
